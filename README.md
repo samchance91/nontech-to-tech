@@ -19,7 +19,7 @@ it, and it runs.
   task, a **quiz** with instant feedback, and an **end-of-module mini-project**.
 - **A final capstone** — write a real PRD for your own product — unlocked once every
   module quiz is cleared.
-- A **reference** section: the "bullshit detector" and the standing principles.
+- A **reference** section: the "nonsense detector" and the standing principles.
 - **Profiles** — each learner creates a profile with a name and email; progress is
   saved per profile, and several profiles can coexist on one device.
 - **A community Showcase** — post your projects, findings, and experiments (with an
