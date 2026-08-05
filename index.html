@@ -212,6 +212,8 @@
     .iconbtn:hover { background: var(--color-surface-subtle); color: var(--color-text-primary); }
     [data-theme="dark"] .iconbtn:hover { background: var(--color-surface-elevated); }
     .iconbtn svg { width: 20px; height: 20px; }
+    .iconbtn.is-on { background: var(--brand-yellow); color: var(--brand-black); }
+    .iconbtn.is-on:hover { background: var(--brand-yellow); color: var(--brand-black); }
 
     /* =========================================================
        Layout primitives
@@ -470,6 +472,95 @@
     .footer__row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; }
     .footer__promise { font-family: var(--font-heading); font-weight: 600; color: var(--color-text-primary); }
 
+    /* Profile chip + avatar */
+    .profilechip {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      height: 44px; padding: 0 var(--space-2) 0 6px; border-radius: var(--radius-pill);
+      background: transparent; border: 1px solid var(--color-border); color: var(--color-text-primary);
+      cursor: pointer; font-family: var(--font-body); font-weight: 600; font-size: 14px;
+      transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+    }
+    .profilechip:hover { background: var(--color-surface-subtle); border-color: var(--color-border-strong); }
+    [data-theme="dark"] .profilechip:hover { background: var(--color-surface-elevated); }
+    .profilechip .avatar { margin: 0; }
+    .profilechip__name { display: none; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (min-width: 560px) { .profilechip__name { display: inline; } }
+    .profilechip svg { width: 18px; height: 18px; }
+    .avatar {
+      width: 30px; height: 30px; flex: none; border-radius: 50%;
+      background: var(--brand-yellow); color: var(--brand-black);
+      display: grid; place-items: center; font-family: var(--font-heading); font-weight: 700; font-size: 13px;
+    }
+    .avatar--lg { width: 48px; height: 48px; font-size: 18px; }
+    .avatar--sm { width: 26px; height: 26px; font-size: 12px; }
+
+    /* Forms */
+    .field { display: block; margin-bottom: var(--space-4); }
+    .field__label { display: block; font-size: 14px; font-weight: 600; margin-bottom: var(--space-2); }
+    .field__help { display: block; font-size: 13px; color: var(--color-text-secondary); margin-top: var(--space-2); }
+    .input, .textarea, .select {
+      width: 100%; min-height: 48px; padding: var(--space-3) var(--space-4);
+      font-family: var(--font-body); font-size: 16px; color: var(--color-text-primary);
+      background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md);
+      transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+    }
+    .input.mono { font-family: var(--font-mono); letter-spacing: 0.15em; }
+    .textarea { min-height: 120px; padding: var(--space-3) var(--space-4); resize: vertical; line-height: 1.5; }
+    .input:focus, .textarea:focus, .select:focus { outline: none; border-color: var(--color-text-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-yellow) 45%, transparent); }
+    [data-theme="dark"] .input:focus, [data-theme="dark"] .textarea:focus, [data-theme="dark"] .select:focus { border-color: var(--brand-yellow); }
+    .select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--color-text-secondary) 50%), linear-gradient(135deg, var(--color-text-secondary) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: var(--space-8); }
+
+    /* Admin mode banner */
+    .adminbar {
+      background: var(--brand-black); color: var(--brand-white);
+      border-bottom: 2px solid var(--brand-yellow);
+    }
+    [data-theme="dark"] .adminbar { background: var(--color-surface-elevated); }
+    .adminbar__inner { max-width: var(--content-max); margin: 0 auto; padding: var(--space-2) var(--space-4); display: flex; align-items: center; gap: var(--space-3); font-size: 13px; flex-wrap: wrap; }
+    .adminbar svg { width: 16px; height: 16px; color: var(--brand-yellow); flex: none; }
+    .adminbar b { color: var(--brand-white); }
+    [data-theme="dark"] .adminbar b { color: var(--color-text-primary); }
+    .adminbar .adminbar__off { margin-left: auto; background: transparent; border: 1px solid rgba(255,255,255,0.4); color: var(--brand-white); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    [data-theme="dark"] .adminbar .adminbar__off { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+    .adminbar .adminbar__off:hover { background: rgba(255,255,255,0.12); }
+
+    /* Showcase */
+    .composer { display: grid; gap: var(--space-3); }
+    .composer .row2 { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .composer .row2 { grid-template-columns: 1fr 200px; } }
+    .posts { display: grid; gap: var(--space-4); }
+    .postcard { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); }
+    .postcard__head { display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-3); }
+    .postcard__who { min-width: 0; }
+    .postcard__name { font-weight: 600; font-size: 14px; }
+    .postcard__meta { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); }
+    .postcard__title { font-family: var(--font-heading); font-weight: 600; font-size: 18px; margin: 0 0 var(--space-2); }
+    .postcard__body { color: var(--color-text-primary); white-space: pre-wrap; word-break: break-word; margin: 0 0 var(--space-3); }
+    .postcard__link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--color-text-primary); text-decoration: none; border-bottom: 2px solid var(--brand-yellow); padding-bottom: 1px; word-break: break-all; }
+    .postcard__del { margin-left: auto; }
+    .kind { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 9px; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-on-accent); }
+    .kind--finding { background: var(--color-surface-subtle); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+    .kind--other { background: var(--color-surface-subtle); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+    [data-theme="dark"] .kind--finding, [data-theme="dark"] .kind--other { background: var(--color-surface-elevated); }
+
+    /* Admin dashboard */
+    .admin-stats { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); margin-bottom: var(--space-6); }
+    @media (min-width: 720px) { .admin-stats { grid-template-columns: repeat(4, 1fr); } }
+    .astat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+    .astat__n { font-family: var(--font-heading); font-weight: 700; font-size: 28px; line-height: 1; }
+    .astat__l { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
+    .atable { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+    .atable th, .atable td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+    .atable th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); font-weight: 600; position: sticky; top: 0; background: var(--color-surface); }
+    .atable tbody tr:last-child td { border-bottom: 0; }
+    .atable .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .atable .who { display: flex; align-items: center; gap: var(--space-2); }
+    .mini-bar { width: 80px; height: 8px; border-radius: var(--radius-pill); background: var(--color-border); overflow: hidden; display: inline-block; vertical-align: middle; }
+    .mini-bar > i { display: block; height: 100%; background: var(--brand-yellow); }
+    .empty { text-align: center; padding: var(--space-8) var(--space-5); color: var(--color-text-secondary); }
+    .empty svg { width: 36px; height: 36px; margin-bottom: var(--space-3); }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
@@ -485,10 +576,12 @@
         <span class="brand__word">Propelr</span>
       </a>
       <a class="nav__link" href="#/map" data-nav="map">Journey</a>
+      <a class="nav__link" href="#/showcase" data-nav="showcase">Showcase</a>
       <a class="nav__link" href="#/reference" data-nav="reference">Reference</a>
       <span class="nav__spacer"></span>
+      <button class="iconbtn" id="adminBtn" type="button" aria-label="Admin mode" title="Admin"></button>
       <button class="iconbtn" id="themeToggle" type="button" aria-label="Switch theme"></button>
-      <button class="iconbtn" id="resetBtn" type="button" aria-label="Reset progress" title="Reset progress"></button>
+      <button class="profilechip" id="profileBtn" type="button" aria-label="Your profile"></button>
     </div>
   </header>
 
@@ -497,17 +590,66 @@
   <footer class="footer">
     <div class="container footer__row">
       <span class="footer__promise">Inspiring Better Careers</span>
-      <span>Your progress is saved on this device. Nothing is uploaded.</span>
+      <span id="footerNote">Your progress is saved on this device.</span>
     </div>
   </footer>
 
   <dialog id="resetDialog">
     <h3>Reset your progress?</h3>
-    <p class="muted">This clears every quiz score, project, and your place on the map from this device. It cannot be undone.</p>
+    <p class="muted">This clears every quiz score, project, and your place on the map for this profile. It cannot be undone.</p>
     <div class="dialog__actions">
       <button class="btn btn--secondary btn--sm" id="resetCancel" type="button">Keep my progress</button>
       <button class="btn btn--danger btn--sm" id="resetConfirm" type="button">Reset everything</button>
     </div>
+  </dialog>
+
+  <dialog id="profileDialog">
+    <h3 id="profileDialogTitle">Create your profile</h3>
+    <p class="muted" style="margin-bottom:var(--space-4)">Your progress and posts are saved under your email on this device. <span id="profileCloudNote">Cloud sync across devices isn’t connected yet.</span></p>
+    <form id="profileForm">
+      <label class="field"><span class="field__label">Your name</span>
+        <input class="input" id="pfName" type="text" autocomplete="name" placeholder="e.g. Priya Nair" required />
+      </label>
+      <label class="field"><span class="field__label">Email</span>
+        <input class="input" id="pfEmail" type="email" autocomplete="email" placeholder="you@example.com" required />
+        <span class="field__help" id="pfEmailHelp">Used to identify your progress. It stays on this device.</span>
+      </label>
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--secondary btn--sm" id="profileCancel">Cancel</button>
+        <button type="submit" class="btn btn--sm" id="profileSubmit">Create profile</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="profileMenu">
+    <div style="display:flex;gap:var(--space-3);align-items:center;margin-bottom:var(--space-4)">
+      <span class="avatar avatar--lg" id="pmAvatar" aria-hidden="true"></span>
+      <div style="min-width:0">
+        <div id="pmName" style="font-weight:600"></div>
+        <div id="pmEmail" class="muted mono" style="font-size:13px;word-break:break-all"></div>
+        <div id="pmAdmin" class="badge badge--accent" style="margin-top:6px;display:none">Admin</div>
+      </div>
+    </div>
+    <div class="stack" style="gap:var(--space-2)">
+      <button class="btn btn--secondary" id="pmSwitch" type="button">Switch or add a profile</button>
+      <button class="btn btn--danger" id="pmReset" type="button">Reset my progress</button>
+      <button class="btn btn--ghost" id="pmClose" type="button" style="justify-content:center">Close</button>
+    </div>
+  </dialog>
+
+  <dialog id="adminDialog">
+    <h3>Enter admin mode</h3>
+    <p class="muted" style="margin-bottom:var(--space-4)">Admin mode unlocks every module and the dashboard of all profiles on this device.</p>
+    <form id="adminForm">
+      <label class="field"><span class="field__label">Admin code</span>
+        <input class="input mono" id="adminCode" type="password" inputmode="numeric" autocomplete="off" placeholder="••••••••••" required />
+        <span class="field__help" id="adminErr" style="display:none;color:var(--color-error)">That code isn’t right. Try again.</span>
+      </label>
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--secondary btn--sm" id="adminCancel">Cancel</button>
+        <button type="submit" class="btn btn--sm" id="adminSubmit">Unlock admin</button>
+      </div>
+    </form>
   </dialog>
 
   <script>
@@ -540,7 +682,17 @@
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>',
     map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/>',
     trophy: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
-    spark: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'
+    spark: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M6 21a6 6 0 0 1 12 0"/>',
+    userPlus: '<path d="M14 19a5 5 0 0 0-10 0"/><circle cx="9" cy="8" r="4"/><path d="M19 8v6M22 11h-6"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+    mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
+    post: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+    send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>'
   };
   function icon(name, cls) {
     return '<svg class="'+(cls||'')+'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[name]||'')+'</svg>';
@@ -1020,27 +1172,53 @@
   };
 
   /* ============================================================
-     STATE  (persisted on-device)
+     STORAGE LAYER
+     ------------------------------------------------------------
+     All persistence goes through DB. Today it is backed by this
+     browser's localStorage (per-device). To make profiles, progress,
+     the admin dashboard, and the Showcase truly multi-user across
+     devices, swap this one object for a cloud-backed implementation
+     (e.g. Supabase) exposing the same method names — nothing else in
+     the app needs to change.
      ============================================================ */
-  const STORE_KEY = "propelr_tnt_progress_v1";
+  const ADMIN_CODE = "2718281828";
   const N_MODULES = COURSE.modules.length;      // 10
   const N_STOPS = N_MODULES + 1;                 // + capstone
+  const CLOUD = false;                            // flip true once a cloud DB is connected
 
+  const DB = {
+    PROFILES: "propelr_tnt_profiles",
+    POSTS: "propelr_tnt_posts",
+    SESSION: "propelr_tnt_session",
+    THEME: "propelr_tnt_theme",
+    LEGACY: "propelr_tnt_progress_v1",
+    progKey: function (email) { return "propelr_tnt_progress::" + email; },
+    _get: function (k, fb) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v; } catch (e) { return fb; } },
+    _set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    listProfiles: function () { return this._get(this.PROFILES, []); },
+    upsertProfile: function (p) { const a = this.listProfiles(); const i = a.findIndex(function (x) { return x.email === p.email; }); if (i >= 0) a[i] = p; else a.push(p); this._set(this.PROFILES, a); },
+    getProgress: function (email) { return this._get(this.progKey(email), null); },
+    saveProgress: function (email, st) { this._set(this.progKey(email), st); },
+    listPosts: function () { return this._get(this.POSTS, []); },
+    savePosts: function (arr) { this._set(this.POSTS, arr); },
+    getSession: function () { return this._get(this.SESSION, {}); },
+    saveSession: function (s) { this._set(this.SESSION, s); },
+    getTheme: function () { try { return localStorage.getItem(this.THEME); } catch (e) { return null; } },
+    saveTheme: function (t) { try { localStorage.setItem(this.THEME, t); } catch (e) {} }
+  };
+
+  /* ---- progress shape ---- */
   function blankState() {
     const m = {};
     COURSE.modules.forEach(function (mod) {
       m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false) };
     });
-    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), theme: null, started: false };
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false };
   }
-  function loadState() {
-    let s;
-    try { s = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { s = null; }
+  function mergeState(s) {
     const base = blankState();
     if (!s || typeof s !== "object") return base;
-    // merge defensively so content changes never crash old saves
     base.started = !!s.started;
-    base.theme = s.theme || null;
     if (Array.isArray(s.capstone)) base.capstone.forEach(function (_, i) { base.capstone[i] = !!s.capstone[i]; });
     if (s.modules) COURSE.modules.forEach(function (mod) {
       const sm = s.modules[mod.id]; const bm = base.modules[mod.id];
@@ -1052,33 +1230,61 @@
     });
     return base;
   }
-  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-  let state = loadState();
+  function loadProgress(email) { return mergeState(DB.getProgress(email)); }
 
-  /* derived helpers */
-  function quizzesPassed() { return COURSE.modules.filter(function (m) { return state.modules[m.id].quizPassed; }).length; }
-  function projectDone(id) { const p = state.modules[id].project; return p.length > 0 && p.every(Boolean); }
-  function projectsDone() { return COURSE.modules.filter(function (m) { return projectDone(m.id); }).length; }
-  function capstoneUnlocked() { return quizzesPassed() === N_MODULES; }
-  function capstoneDone() { return state.capstone.length > 0 && state.capstone.every(Boolean); }
-  // Avatar sits at the first module whose quiz isn't passed; once all pass, it's at the capstone stop.
-  function currentStop() {
-    for (let i = 0; i < N_MODULES; i++) { if (!state.modules[COURSE.modules[i].id].quizPassed) return i; }
+  /* ---- session + current profile ---- */
+  let session = DB.getSession();               // { email, admin }
+  let state = blankState();                     // progress of the signed-in profile
+
+  function currentProfile() {
+    if (!session.email) return null;
+    return DB.listProfiles().find(function (p) { return p.email === session.email; }) || null;
+  }
+  function isSignedIn() { return !!currentProfile(); }
+  function normEmail(e) { return String(e || "").trim().toLowerCase(); }
+
+  function signIn(name, email) {
+    email = normEmail(email);
+    const existing = DB.listProfiles().find(function (p) { return p.email === email; });
+    if (existing) {
+      if (name && name.trim()) { existing.name = name.trim(); DB.upsertProfile(existing); }
+    } else {
+      DB.upsertProfile({ email: email, name: (name || "").trim() || email.split("@")[0], createdAt: Date.now() });
+      // one-time carry-over of any pre-profiles progress saved on this device
+      if (!DB.getProgress(email)) { const legacy = DB._get(DB.LEGACY, null); if (legacy) DB.saveProgress(email, legacy); }
+    }
+    session.email = email; DB.saveSession(session);
+    state = loadProgress(email);
+  }
+  function signOut() { session = { email: null, admin: session.admin }; DB.saveSession(session); state = blankState(); }
+  function save() { if (session.email) DB.saveProgress(session.email, state); }
+
+  /* ---- derived helpers (default to signed-in state, or accept another) ---- */
+  function quizzesPassed(st) { st = st || state; return COURSE.modules.filter(function (m) { return st.modules[m.id].quizPassed; }).length; }
+  function projectDone(id, st) { st = st || state; const p = st.modules[id].project; return p.length > 0 && p.every(Boolean); }
+  function projectsDone(st) { st = st || state; return COURSE.modules.filter(function (m) { return projectDone(m.id, st); }).length; }
+  function capstoneDone(st) { st = st || state; return st.capstone.length > 0 && st.capstone.every(Boolean); }
+  function capstoneUnlocked() { return isAdmin() || quizzesPassed() === N_MODULES; }
+  function currentStop(st) {
+    st = st || state;
+    for (let i = 0; i < N_MODULES; i++) { if (!st.modules[COURSE.modules[i].id].quizPassed) return i; }
     return N_MODULES;
   }
-  function overallPercent() {
-    const total = N_MODULES + N_MODULES + 1; // quizzes + projects + capstone
-    const done = quizzesPassed() + projectsDone() + (capstoneDone() ? 1 : 0);
+  function overallPercent(st) {
+    st = st || state;
+    const total = N_MODULES + N_MODULES + 1;
+    const done = quizzesPassed(st) + projectsDone(st) + (capstoneDone(st) ? 1 : 0);
     return Math.round((done / total) * 100);
   }
+  function isAdmin() { return !!session.admin; }
 
   const reduceMotion = function () { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; };
 
   /* ============================================================
-     THEME
+     THEME  (global, not per-profile)
      ============================================================ */
   function initTheme() {
-    let t = state.theme;
+    let t = DB.getTheme();
     if (!t) t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     setTheme(t, false);
   }
@@ -1087,14 +1293,31 @@
     const btn = document.getElementById("themeToggle");
     btn.innerHTML = icon(t === "dark" ? "sun" : "moon");
     btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
-    if (persist) { state.theme = t; save(); }
+    if (persist) DB.saveTheme(t);
   }
 
   /* ============================================================
      RENDER HELPERS
      ============================================================ */
   const main = document.getElementById("main");
-  function esc(s) { return String(s); }
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function initials(name, email) {
+    const n = (name || "").trim();
+    if (n) { const parts = n.split(/\s+/); return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase(); }
+    return (email || "?").slice(0, 1).toUpperCase();
+  }
+  function timeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return "just now";
+    const m = Math.floor(s / 60); if (m < 60) return m + "m ago";
+    const h = Math.floor(m / 60); if (h < 24) return h + "h ago";
+    const d = Math.floor(h / 24); if (d < 7) return d + "d ago";
+    return new Date(ts).toLocaleDateString();
+  }
   function moduleById(id) { return COURSE.modules.find(function (m) { return m.id === id; }); }
 
   function videoCard(v) {
@@ -1142,7 +1365,7 @@
       { i: "map", h: "A journey map", p: "Watch yourself move stop by stop across a map of the whole course." },
       { i: "quiz", h: "Quizzes with feedback", p: "A short check after every module, with the reasoning on every answer." },
       { i: "project", h: "A mini-project each module", p: "Apply each idea to your own product — that’s where it sticks." },
-      { i: "trophy", h: "A capstone", p: "Finish by writing a real PRD, grounded in everything you’ve learned." }
+      { i: "post", h: "A community Showcase", p: "Post the projects and findings from your own product, and see what others share." }
     ];
     let feat = '<div class="feature-grid">';
     features.forEach(function (f) {
@@ -1157,9 +1380,11 @@
           '<p class="eyebrow">A Propelr course</p>' +
           '<h1 class="hero__title">' + COURSE.title + '</h1>' +
           '<p class="hero__lede">' + COURSE.lede + '</p>' +
+          (isSignedIn() ? '<p class="muted" style="margin-top:calc(-1 * var(--space-2))">Signed in as <b style="color:var(--color-text-primary)">' + esc(currentProfile().name) + '</b>.</p>' : '') +
           '<div class="hero__cta">' +
-            '<a class="btn btn--lg" href="#/map">' + (resuming ? 'Resume the journey' : 'Start the journey') + icon("arrowR", "btn__icon") + '</a>' +
-            '<a class="btn btn--secondary btn--lg" href="#/reference">See the reference</a>' +
+            '<a class="btn btn--lg" href="#/map">' + (resuming ? 'Resume the journey' : (isSignedIn() ? 'Start the journey' : 'Create a profile & start')) + icon("arrowR", "btn__icon") + '</a>' +
+            '<a class="btn btn--secondary btn--lg" href="#/showcase">Visit the Showcase</a>' +
+            '<a class="btn btn--ghost btn--lg" href="#/reference">See the reference</a>' +
           '</div>' +
         '</div>' +
         feat +
@@ -1174,7 +1399,7 @@
         '<div class="section"><h2>Suggested pace</h2><div class="card" style="padding:var(--space-2) var(--space-4)">' + pace + '</div>' +
           '<p class="muted" style="font-size:14px;margin-top:var(--space-3)">Modules 8 and 9 are reference — read them when they come up.</p>' +
         '</div>' +
-        '<div class="note" style="margin-top:var(--space-6)">' + icon("info") + '<span>Your progress — quiz scores, projects, and your place on the map — is saved only in this browser, on this device. Nothing is uploaded, and clearing your browser data will clear it.</span></div>' +
+        '<div class="note" style="margin-top:var(--space-6)">' + icon("info") + '<span>You’ll create a profile with your name and email so your progress is saved and your Showcase posts are attributed to you. ' + (CLOUD ? 'Your progress syncs to your account across devices.' : 'For now everything is stored on this device only — connect the shared database to sync across devices and let the admin see everyone.') + '</span></div>' +
       '</div></section>';
     setNav(null);
   }
@@ -1663,6 +1888,218 @@
   }
 
   /* ============================================================
+     DATA ACCESS  (async-ready seam — swap the bodies for cloud calls)
+     ============================================================ */
+  async function dataAllProfiles() {
+    return DB.listProfiles().map(function (p) { return Object.assign({}, p, { progress: loadProgress(p.email) }); });
+  }
+  async function dataListPosts() { return DB.listPosts().slice().sort(function (a, b) { return b.ts - a.ts; }); }
+  async function dataAddPost(post) { const a = DB.listPosts(); a.push(post); DB.savePosts(a); }
+  async function dataDeletePost(id) { DB.savePosts(DB.listPosts().filter(function (p) { return p.id !== id; })); }
+
+  /* ============================================================
+     CHROME  (nav profile chip, admin button, admin bar)
+     ============================================================ */
+  function updateChrome() {
+    const btn = document.getElementById("profileBtn");
+    const prof = currentProfile();
+    if (prof) {
+      btn.innerHTML = '<span class="avatar avatar--sm" aria-hidden="true">' + esc(initials(prof.name, prof.email)) + '</span>' +
+        '<span class="profilechip__name">' + esc(prof.name) + '</span>';
+      btn.setAttribute("aria-label", "Your profile: " + prof.name);
+    } else {
+      btn.innerHTML = icon("userPlus") + '<span class="profilechip__name">Create profile</span>';
+      btn.setAttribute("aria-label", "Create your profile");
+    }
+    const ab = document.getElementById("adminBtn");
+    ab.innerHTML = icon("shield");
+    ab.classList.toggle("is-on", isAdmin());
+    ab.setAttribute("title", isAdmin() ? "Admin dashboard" : "Admin mode");
+    const fn = document.getElementById("footerNote");
+    if (fn) fn.textContent = CLOUD ? "Signed in — your progress syncs to your account." : "Progress is saved on this device, per profile.";
+    renderAdminBar();
+  }
+  function renderAdminBar() {
+    let bar = document.getElementById("adminBar");
+    if (isAdmin()) {
+      if (!bar) { bar = document.createElement("div"); bar.id = "adminBar"; bar.className = "adminbar"; document.querySelector(".nav").insertAdjacentElement("afterend", bar); }
+      bar.innerHTML = '<div class="adminbar__inner">' + icon("shield") +
+        '<span><b>Admin mode is on.</b> Every module is unlocked and you can see all profiles.</span>' +
+        '<a href="#/admin" style="color:var(--brand-yellow);font-weight:600;text-decoration:none">Open dashboard</a>' +
+        '<button class="adminbar__off" id="adminOff" type="button">Turn off</button></div>';
+      document.getElementById("adminOff").addEventListener("click", function () {
+        session.admin = false; DB.saveSession(session); updateChrome(); router();
+      });
+    } else if (bar) { bar.remove(); }
+  }
+
+  /* ---- profile dialogs ---- */
+  function openProfileDialog(afterHash) {
+    const d = document.getElementById("profileDialog");
+    document.getElementById("profileDialogTitle").textContent = isSignedIn() ? "Switch or add a profile" : "Create your profile";
+    document.getElementById("pfName").value = "";
+    document.getElementById("pfEmail").value = "";
+    d._after = afterHash || null;
+    if (d.showModal) d.showModal();
+    setTimeout(function () { document.getElementById("pfName").focus(); }, 30);
+  }
+  function openProfileMenu() {
+    const prof = currentProfile(); if (!prof) return;
+    document.getElementById("pmAvatar").textContent = initials(prof.name, prof.email);
+    document.getElementById("pmName").textContent = prof.name;
+    document.getElementById("pmEmail").textContent = prof.email;
+    document.getElementById("pmAdmin").style.display = isAdmin() ? "inline-flex" : "none";
+    const d = document.getElementById("profileMenu"); if (d.showModal) d.showModal();
+  }
+  function openAdminGate() {
+    if (isAdmin()) { go("#/admin"); return; }
+    const d = document.getElementById("adminDialog");
+    document.getElementById("adminCode").value = "";
+    document.getElementById("adminErr").style.display = "none";
+    if (d.showModal) d.showModal();
+    setTimeout(function () { document.getElementById("adminCode").focus(); }, 30);
+  }
+
+  /* ============================================================
+     VIEW: SHOWCASE  (post projects & findings)
+     ============================================================ */
+  async function renderShowcase() {
+    setNav("showcase");
+    const prof = currentProfile();
+    const posts = await dataListPosts();
+
+    let composer;
+    if (prof) {
+      composer = '<div class="card"><h2 style="font-size:1.25rem">Share something you built or learned</h2>' +
+        '<form id="postForm" class="composer">' +
+          '<div class="row2">' +
+            '<label class="field" style="margin:0"><span class="field__label">Title</span><input class="input" id="poTitle" maxlength="120" placeholder="e.g. My product’s data model, redrawn" required /></label>' +
+            '<label class="field" style="margin:0"><span class="field__label">Type</span><select class="select" id="poKind"><option value="project">Project</option><option value="finding">Finding</option><option value="other">Other</option></select></label>' +
+          '</div>' +
+          '<label class="field" style="margin:0"><span class="field__label">Details</span><textarea class="textarea" id="poBody" maxlength="4000" placeholder="What did you make or discover? What surprised you?" required></textarea></label>' +
+          '<label class="field" style="margin:0"><span class="field__label">Link <span class="muted" style="font-weight:400">(optional)</span></span><input class="input" id="poLink" type="text" inputmode="url" placeholder="a repo, doc, or screenshot — https:// added for you" /></label>' +
+          '<div style="display:flex;justify-content:flex-end"><button class="btn" type="submit">' + icon("send", "btn__icon") + ' Post to the Showcase</button></div>' +
+        '</form></div>';
+    } else {
+      composer = '<div class="card" style="text-align:center">' + icon("userPlus", "") + '<h2 style="font-size:1.25rem;margin-top:var(--space-3)">Create a profile to post</h2>' +
+        '<p class="muted">Your posts are saved under your email so others can see who shared what.</p>' +
+        '<button class="btn" id="scCreate" type="button">Create my profile</button></div>';
+    }
+
+    let feed;
+    if (!posts.length) {
+      feed = '<div class="card empty">' + icon("post") + '<h3>No posts yet</h3><p>Be the first to share a mini-project or a finding from your own product.</p></div>';
+    } else {
+      feed = '<div class="posts">' + posts.map(function (p) { return postCard(p, prof); }).join("") + '</div>';
+    }
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Community</p>' +
+      '<h1 style="margin-bottom:var(--space-2)">Showcase</h1>' +
+      '<p class="muted reading">Post the mini-projects, findings, and experiments you run on your own product. Learn in the open — the best way to make it stick.</p>' +
+      (CLOUD ? '' : '<div class="note" style="margin:var(--space-4) 0">' + icon("info") + '<span>Right now posts are stored on this device only, so you’ll see your own. Once the shared database is connected, everyone’s posts appear here for all learners and the admin.</span></div>') +
+      '<div style="margin-top:var(--space-5)">' + composer + '</div>' +
+      '<div class="section">' + feed + '</div>' +
+      '</div></section>';
+
+    if (prof) {
+      document.getElementById("postForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        let link = document.getElementById("poLink").value.trim();
+        if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+        const post = {
+          id: "p_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+          email: prof.email, name: prof.name,
+          kind: document.getElementById("poKind").value,
+          title: document.getElementById("poTitle").value.trim(),
+          body: document.getElementById("poBody").value.trim(),
+          link: link, ts: Date.now()
+        };
+        if (!post.title || !post.body) return;
+        dataAddPost(post).then(function () { renderShowcase(); });
+      });
+    } else {
+      document.getElementById("scCreate").addEventListener("click", function () { openProfileDialog("#/showcase"); });
+    }
+    main.querySelectorAll("[data-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!confirm("Delete this post?")) return;
+        dataDeletePost(b.getAttribute("data-del")).then(function () { renderShowcase(); });
+      });
+    });
+    window.scrollTo(0, 0);
+  }
+  function postCard(p, prof) {
+    const canDelete = prof && (prof.email === p.email || isAdmin());
+    const kindLabel = { project: "Project", finding: "Finding", other: "Other" }[p.kind] || "Post";
+    return '<article class="postcard">' +
+      '<div class="postcard__head">' +
+        '<span class="avatar" aria-hidden="true">' + esc(initials(p.name, p.email)) + '</span>' +
+        '<div class="postcard__who"><div class="postcard__name">' + esc(p.name) + '</div>' +
+          '<div class="postcard__meta">' + esc(timeAgo(p.ts)) + (isAdmin() ? ' · ' + esc(p.email) : '') + '</div></div>' +
+        '<span class="kind kind--' + esc(p.kind) + '" style="margin-left:auto">' + kindLabel + '</span>' +
+      '</div>' +
+      '<h3 class="postcard__title">' + esc(p.title) + '</h3>' +
+      '<p class="postcard__body">' + esc(p.body) + '</p>' +
+      (p.link ? '<a class="postcard__link" href="' + esc(p.link) + '" target="_blank" rel="noopener noreferrer">' + icon("link") + esc(p.link) + '</a>' : '') +
+      (canDelete ? '<div style="margin-top:var(--space-3)"><button class="btn btn--ghost btn--sm postcard__del" data-del="' + esc(p.id) + '" type="button">' + icon("trash", "btn__icon") + ' Delete</button></div>' : '') +
+    '</article>';
+  }
+
+  /* ============================================================
+     VIEW: ADMIN DASHBOARD
+     ============================================================ */
+  async function renderAdmin() {
+    setNav(null);
+    const profs = await dataAllProfiles();
+    const posts = await dataListPosts();
+    const learners = profs.length;
+    const avg = learners ? Math.round(profs.reduce(function (s, p) { return s + overallPercent(p.progress); }, 0) / learners) : 0;
+    const grads = profs.filter(function (p) { return capstoneDone(p.progress); }).length;
+
+    const rows = profs.slice().sort(function (a, b) { return overallPercent(b.progress) - overallPercent(a.progress); }).map(function (p) {
+      const pct = overallPercent(p.progress);
+      return '<tr>' +
+        '<td><div class="who"><span class="avatar avatar--sm" aria-hidden="true">' + esc(initials(p.name, p.email)) + '</span><div><div style="font-weight:600">' + esc(p.name) + '</div><div class="mono" style="font-size:12px;color:var(--color-text-secondary)">' + esc(p.email) + '</div></div></div></td>' +
+        '<td class="num">' + quizzesPassed(p.progress) + ' / ' + N_MODULES + '</td>' +
+        '<td class="num">' + projectsDone(p.progress) + ' / ' + N_MODULES + '</td>' +
+        '<td>' + (capstoneDone(p.progress) ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Done</span>' : '<span class="muted">—</span>') + '</td>' +
+        '<td><span class="mini-bar"><i style="width:' + pct + '%"></i></span> <span class="mono">' + pct + '%</span></td>' +
+      '</tr>';
+    }).join("");
+
+    const table = learners
+      ? '<div class="table-wrap"><table class="atable"><thead><tr><th>Learner</th><th class="num">Modules</th><th class="num">Projects</th><th>Capstone</th><th>Overall</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      : '<div class="card empty">' + icon("users") + '<h3>No profiles yet</h3><p>' + (CLOUD ? "When people create profiles they’ll appear here." : "Profiles created on this device will appear here. Connect the shared database to see everyone across all devices.") + '</p></div>';
+
+    let postList;
+    if (!posts.length) postList = '<div class="card empty">' + icon("post") + '<h3>No posts yet</h3></div>';
+    else postList = '<div class="posts">' + posts.map(function (p) { return postCard(p, currentProfile()); }).join("") + '</div>';
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<div class="mod-badges" style="margin-bottom:var(--space-3)"><span class="badge badge--accent">' + icon("shield", "badge__i") + ' Admin</span></div>' +
+      '<h1 style="margin-bottom:var(--space-2)">Everyone’s progress</h1>' +
+      '<p class="muted reading">A live view of every profile and every post.' + (CLOUD ? '' : ' On-device for now — connect the shared database to see all learners across devices.') + '</p>' +
+      '<div class="admin-stats" style="margin-top:var(--space-6)">' +
+        '<div class="astat"><div class="astat__n">' + learners + '</div><div class="astat__l">Profiles</div></div>' +
+        '<div class="astat"><div class="astat__n">' + avg + '%</div><div class="astat__l">Average progress</div></div>' +
+        '<div class="astat"><div class="astat__n">' + grads + '</div><div class="astat__l">Capstones done</div></div>' +
+        '<div class="astat"><div class="astat__n">' + posts.length + '</div><div class="astat__l">Showcase posts</div></div>' +
+      '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("users") + '</span>Learners</h2>' + table + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("post") + '</span>Showcase posts</h2><p class="muted">You can remove any post here.</p>' + postList + '</div>' +
+      '</div></section>';
+
+    main.querySelectorAll("[data-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!confirm("Delete this post?")) return;
+        dataDeletePost(b.getAttribute("data-del")).then(function () { renderAdmin(); });
+      });
+    });
+    window.scrollTo(0, 0);
+  }
+
+  /* ============================================================
      ROUTER + CHROME
      ============================================================ */
   function setNav(active) {
@@ -1672,17 +2109,34 @@
     });
   }
 
+  function go(hash) { if ((location.hash || "#/") === hash) router(); else location.hash = hash; }
+  function requireProfile(after) {
+    if (isSignedIn()) return true;
+    renderWelcome();
+    openProfileDialog(after);
+    return false;
+  }
+
   function router() {
+    updateChrome();
     const h = location.hash || "#/";
     if (h.indexOf("#/module/") === 0) {
+      if (!requireProfile(h)) return;
       state.started = true; save();
       renderModule(h.slice("#/module/".length));
     } else if (h === "#/map") {
+      if (!requireProfile(h)) return;
       state.started = true; save();
       renderMap();
     } else if (h === "#/capstone") {
+      if (!requireProfile(h)) return;
       state.started = true; save();
       renderCapstone();
+    } else if (h === "#/showcase") {
+      renderShowcase();
+    } else if (h === "#/admin") {
+      if (!isAdmin()) { renderWelcome(); openAdminGate(); return; }
+      renderAdmin();
     } else if (h === "#/reference") {
       renderReference();
     } else {
@@ -1690,31 +2144,74 @@
     }
   }
 
-  // theme toggle
-  document.getElementById("themeToggle").addEventListener("click", function () {
-    const cur = document.documentElement.getAttribute("data-theme");
-    setTheme(cur === "dark" ? "light" : "dark", true);
-    // repaint map ring/paths colours by re-rendering current view if on map
-    if ((location.hash || "#/") === "#/map") { lastRenderedStop = currentStop(); renderMap(); }
-  });
-
-  // reset flow
+  /* ---- reset (per profile) ---- */
   const dlg = document.getElementById("resetDialog");
-  document.getElementById("resetBtn").innerHTML = icon("reset");
-  document.getElementById("resetBtn").addEventListener("click", function () {
-    if (typeof dlg.showModal === "function") dlg.showModal(); else if (confirm("Reset all progress?")) doReset();
-  });
+  function openReset() { if (typeof dlg.showModal === "function") dlg.showModal(); else if (confirm("Reset all progress for this profile?")) doReset(); }
   document.getElementById("resetCancel").addEventListener("click", function () { dlg.close(); });
   document.getElementById("resetConfirm").addEventListener("click", function () { dlg.close(); doReset(); });
   function doReset() {
-    const theme = document.documentElement.getAttribute("data-theme");
-    state = blankState(); state.theme = theme; save();
+    state = blankState(); save();
     lastRenderedStop = null; justPassed = null;
-    location.hash = "#/"; router();
+    go("#/map");
   }
 
-  window.addEventListener("hashchange", router);
+  /* ---- wire chrome + dialogs ---- */
+  function initChrome() {
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      const cur = document.documentElement.getAttribute("data-theme");
+      setTheme(cur === "dark" ? "light" : "dark", true);
+      if ((location.hash || "#/") === "#/map") { lastRenderedStop = currentStop(); renderMap(); }
+    });
+
+    document.getElementById("profileBtn").addEventListener("click", function () {
+      if (isSignedIn()) openProfileMenu(); else openProfileDialog("#/map");
+    });
+    document.getElementById("adminBtn").addEventListener("click", function () { openAdminGate(); });
+
+    document.getElementById("profileForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("pfName").value;
+      const email = document.getElementById("pfEmail").value;
+      if (!normEmail(email)) return;
+      const d = document.getElementById("profileDialog"); const after = d._after;
+      signIn(name, email);
+      d.close();
+      lastRenderedStop = null;
+      updateChrome();
+      go(after || "#/map");
+    });
+    document.getElementById("profileCancel").addEventListener("click", function () { document.getElementById("profileDialog").close(); });
+
+    document.getElementById("pmSwitch").addEventListener("click", function () { document.getElementById("profileMenu").close(); openProfileDialog("#/map"); });
+    document.getElementById("pmReset").addEventListener("click", function () { document.getElementById("profileMenu").close(); openReset(); });
+    document.getElementById("pmClose").addEventListener("click", function () { document.getElementById("profileMenu").close(); });
+
+    document.getElementById("adminForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const code = document.getElementById("adminCode").value.trim();
+      if (code === ADMIN_CODE) {
+        session.admin = true; DB.saveSession(session);
+        document.getElementById("adminDialog").close();
+        updateChrome(); go("#/admin");
+      } else {
+        document.getElementById("adminErr").style.display = "block";
+      }
+    });
+    document.getElementById("adminCancel").addEventListener("click", function () { document.getElementById("adminDialog").close(); });
+
+    ["resetDialog", "profileDialog", "profileMenu", "adminDialog"].forEach(function (id) {
+      const d = document.getElementById(id);
+      d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
+    });
+  }
+
+  /* ---- boot ---- */
+  if (session.email && currentProfile()) { state = loadProgress(session.email); }
+  else { session.email = null; }
+  initChrome();
   initTheme();
+  updateChrome();
+  window.addEventListener("hashchange", router);
   router();
   </script>
 </body>

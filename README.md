@@ -20,8 +20,45 @@ it, and it runs.
 - **A final capstone** — write a real PRD for your own product — unlocked once every
   module quiz is cleared.
 - A **reference** section: the "bullshit detector" and the standing principles.
+- **Profiles** — each learner creates a profile with a name and email; progress is
+  saved per profile, and several profiles can coexist on one device.
+- **A community Showcase** — post your projects, findings, and experiments (with an
+  optional link); everyone's posts appear in one feed.
+- **Admin mode** — an admin button in the top bar, unlocked with a code, that opens
+  every module and a dashboard of every profile's progress and every post.
 - **Light and dark themes**, full mobile support (works down to 320px wide), keyboard
   navigation, and reduced-motion support.
+
+## Accounts, admin, and the Showcase
+
+Two ways to run these features:
+
+1. **On-device (default, no setup).** Profiles, progress, and posts live in the
+   browser's `localStorage`. Great for a single person or a demo, but data does not
+   sync between people or devices, and the admin only sees profiles created in that
+   same browser.
+2. **Cloud multi-user (Supabase).** Connect a free Supabase project and the same
+   screens become truly shared: progress syncs across devices, the Showcase shows
+   everyone's posts, and the admin sees every learner. See
+   [`supabase/schema.sql`](./supabase/schema.sql) and the setup steps below.
+
+The **admin code** (`ADMIN_CODE` near the top of the `<script>` in `index.html`)
+only *reveals* the admin dashboard. In the cloud setup, what the dashboard can
+actually load is enforced by database Row Level Security — an admin is an email
+listed in the `admins` table, so guessing the code never exposes other people's
+data.
+
+### Connecting Supabase
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the dashboard, open **SQL Editor**, paste all of
+   [`supabase/schema.sql`](./supabase/schema.sql), and **Run**.
+3. Add yourself as admin: `insert into public.admins (email) values ('you@example.com');`
+4. Under **Project Settings → API**, copy the **Project URL** and the **anon public**
+   key (the anon key is safe to ship in a static site — RLS is what protects data).
+5. Share those two values and the rest is wired in: passwordless email sign-in,
+   per-user progress sync, the shared Showcase, and the admin dashboard over real
+   data.
 
 ## Running it
 
@@ -45,8 +82,12 @@ as-is.
 - A module is **cleared** when you pass its quiz (70%+). Clearing a module advances
   your traveller on the map.
 - Mini-projects and the capstone are tracked separately via their checklists.
-- All of it is stored under a single `localStorage` key (`propelr_tnt_progress_v1`)
-  and merges forward safely if the course content changes.
+- On-device, each profile's progress is stored under its own key
+  (`propelr_tnt_progress::<email>`), with profiles, posts, session, and theme in
+  their own keys. All of it merges forward safely if the course content changes.
+- Every read and write goes through one `DB` object near the top of the `<script>`.
+  Swapping that object for a Supabase-backed one (same method names) is all it takes
+  to move from on-device to cloud — nothing else in the app changes.
 
 ## Brand & design
 
