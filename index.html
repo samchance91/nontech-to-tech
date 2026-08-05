@@ -605,18 +605,25 @@
 
   <dialog id="profileDialog">
     <h3 id="profileDialogTitle">Create your profile</h3>
-    <p class="muted" style="margin-bottom:var(--space-4)">Your progress and posts are saved under your email on this device. <span id="profileCloudNote">Cloud sync across devices isn’t connected yet.</span></p>
-    <form id="profileForm">
-      <label class="field"><span class="field__label">Your name</span>
-        <input class="input" id="pfName" type="text" autocomplete="name" placeholder="e.g. Priya Nair" required />
+    <p class="muted" style="margin-bottom:var(--space-4)" id="profileCloudNote">Your progress and posts are saved under your email on this device.</p>
+    <form id="profileForm" novalidate>
+      <label class="field" id="pfNameField"><span class="field__label">Your name</span>
+        <input class="input" id="pfName" type="text" autocomplete="name" placeholder="e.g. Priya Nair" />
       </label>
       <label class="field"><span class="field__label">Email</span>
-        <input class="input" id="pfEmail" type="email" autocomplete="email" placeholder="you@example.com" required />
+        <input class="input" id="pfEmail" type="email" autocomplete="email" placeholder="you@example.com" />
         <span class="field__help" id="pfEmailHelp">Used to identify your progress. It stays on this device.</span>
       </label>
-      <div class="dialog__actions">
-        <button type="button" class="btn btn--secondary btn--sm" id="profileCancel">Cancel</button>
-        <button type="submit" class="btn btn--sm" id="profileSubmit">Create profile</button>
+      <label class="field" id="pfPasswordField" style="display:none"><span class="field__label">Password</span>
+        <input class="input" id="pfPassword" type="password" autocomplete="current-password" placeholder="at least 6 characters" />
+      </label>
+      <div class="field__help" id="pfErr" style="display:none;color:var(--color-error);margin-bottom:var(--space-3)"></div>
+      <div class="dialog__actions" style="justify-content:space-between;flex-wrap:wrap;gap:var(--space-2)">
+        <button type="button" class="btn btn--ghost btn--sm" id="pfToggle" style="display:none">I already have a profile</button>
+        <span style="display:flex;gap:var(--space-2);margin-left:auto">
+          <button type="button" class="btn btn--secondary btn--sm" id="profileCancel">Cancel</button>
+          <button type="submit" class="btn btn--sm" id="profileSubmit">Create profile</button>
+        </span>
       </div>
     </form>
   </dialog>
@@ -652,6 +659,8 @@
     </form>
   </dialog>
 
+  <!-- Supabase client (loads on the hosted site; if it can't load, the app runs in on-device mode) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
   /* ============================================================
      ICONS (Lucide-style outline, inline so nothing loads remotely)
@@ -1184,7 +1193,15 @@
   const ADMIN_CODE = "2718281828";
   const N_MODULES = COURSE.modules.length;      // 10
   const N_STOPS = N_MODULES + 1;                 // + capstone
-  const CLOUD = false;                            // flip true once a cloud DB is connected
+
+  // ---- Supabase (cloud) configuration ----
+  const SUPABASE_URL = "https://kxrlsvbgzjhmncodnyzp.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cmxzdmJnempobW5jb2RueXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MTU2MDEsImV4cCI6MjEwMTQ5MTYwMX0.lruqycQV-EdxjOyL4ILncV_kWX55pVWIxikNEOcXYHw";
+  const sb = (window.supabase && window.supabase.createClient && SUPABASE_URL && SUPABASE_KEY)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true } })
+    : null;
+  const CLOUD = !!sb;                             // true when the Supabase library loaded and config is set
+  let cloudUserId = null;                          // the signed-in Supabase user's id (cloud mode only)
 
   const DB = {
     PROFILES: "propelr_tnt_profiles",
@@ -1257,7 +1274,32 @@
     state = loadProgress(email);
   }
   function signOut() { session = { email: null, admin: session.admin }; DB.saveSession(session); state = blankState(); }
-  function save() { if (session.email) DB.saveProgress(session.email, state); }
+
+  let _saveTimer = null;
+  function save() {
+    if (session.email) DB.saveProgress(session.email, state);   // local cache (instant, offline-safe)
+    if (CLOUD && cloudUserId) { clearTimeout(_saveTimer); _saveTimer = setTimeout(cloudPushProgress, 700); } // mirror to cloud, debounced
+  }
+  async function cloudPushProgress() {
+    if (!CLOUD || !cloudUserId) return;
+    try { await sb.from("progress").upsert({ user_id: cloudUserId, data: state, updated_at: new Date().toISOString() }); }
+    catch (e) { /* local copy kept; retries on next save */ }
+  }
+  // Bring a signed-in Supabase user into the app: mirror them as the local profile, pull cloud progress.
+  async function applyCloudUser(user) {
+    cloudUserId = user.id;
+    const email = normEmail(user.email);
+    const name = (user.user_metadata && user.user_metadata.name) || (email.split("@")[0] || "Learner");
+    DB.upsertProfile({ email: email, name: name, createdAt: Date.now() });
+    session.email = email; DB.saveSession(session);
+    try { await sb.from("profiles").upsert({ id: user.id, email: email, name: name }); } catch (e) {}
+    try {
+      const res = await sb.from("progress").select("data").eq("user_id", user.id).maybeSingle();
+      state = mergeState(res && res.data ? res.data.data : null);
+      DB.saveProgress(email, state);
+    } catch (e) { state = loadProgress(email); }
+  }
+  async function cloudSignOut() { try { await sb.auth.signOut(); } catch (e) {} cloudUserId = null; }
 
   /* ---- derived helpers (default to signed-in state, or accept another) ---- */
   function quizzesPassed(st) { st = st || state; return COURSE.modules.filter(function (m) { return st.modules[m.id].quizPassed; }).length; }
@@ -1891,11 +1933,44 @@
      DATA ACCESS  (async-ready seam — swap the bodies for cloud calls)
      ============================================================ */
   async function dataAllProfiles() {
+    if (CLOUD) {
+      try {
+        const pr = await sb.from("profiles").select("*");
+        const pg = await sb.from("progress").select("*");
+        const progs = pg.data || [];
+        return (pr.data || []).map(function (p) {
+          const row = progs.find(function (g) { return g.user_id === p.id; });
+          return { email: p.email, name: p.name, createdAt: p.created_at ? Date.parse(p.created_at) : 0, progress: mergeState(row ? row.data : null) };
+        });
+      } catch (e) { return []; }
+    }
     return DB.listProfiles().map(function (p) { return Object.assign({}, p, { progress: loadProgress(p.email) }); });
   }
-  async function dataListPosts() { return DB.listPosts().slice().sort(function (a, b) { return b.ts - a.ts; }); }
-  async function dataAddPost(post) { const a = DB.listPosts(); a.push(post); DB.savePosts(a); }
-  async function dataDeletePost(id) { DB.savePosts(DB.listPosts().filter(function (p) { return p.id !== id; })); }
+  async function dataListPosts() {
+    if (CLOUD) {
+      try {
+        const res = await sb.from("posts").select("*").order("created_at", { ascending: false });
+        return (res.data || []).map(function (r) {
+          return { id: r.id, name: r.name, email: null, kind: r.kind, title: r.title, body: r.body, link: r.link, ts: r.created_at ? Date.parse(r.created_at) : Date.now(), mine: r.user_id === cloudUserId };
+        });
+      } catch (e) { return []; }
+    }
+    const prof = currentProfile();
+    return DB.listPosts().slice().sort(function (a, b) { return b.ts - a.ts; })
+      .map(function (p) { return Object.assign({}, p, { mine: !!(prof && prof.email === p.email) }); });
+  }
+  async function dataAddPost(post) {
+    if (CLOUD) {
+      try { await sb.from("posts").insert({ user_id: cloudUserId, name: post.name, kind: post.kind, title: post.title, body: post.body, link: post.link || null }); }
+      catch (e) { alert("Could not post right now. Please check your connection and try again."); }
+      return;
+    }
+    const a = DB.listPosts(); a.push(post); DB.savePosts(a);
+  }
+  async function dataDeletePost(id) {
+    if (CLOUD) { try { await sb.from("posts").delete().eq("id", id); } catch (e) {} return; }
+    DB.savePosts(DB.listPosts().filter(function (p) { return p.id !== id; }));
+  }
 
   /* ============================================================
      CHROME  (nav profile chip, admin button, admin bar)
@@ -1934,14 +2009,37 @@
   }
 
   /* ---- profile dialogs ---- */
+  let pfMode = "signup";                 // "signup" | "signin" (cloud mode only)
+  function setProfileMode(mode) {
+    pfMode = mode;
+    const signin = mode === "signin";
+    document.getElementById("pfPasswordField").style.display = CLOUD ? "block" : "none";
+    document.getElementById("pfToggle").style.display = CLOUD ? "inline-flex" : "none";
+    document.getElementById("pfNameField").style.display = signin ? "none" : "block";
+    document.getElementById("profileDialogTitle").textContent = signin ? "Sign in" : (isSignedIn() ? "Add or switch profile" : "Create your profile");
+    document.getElementById("profileSubmit").textContent = signin ? "Sign in" : "Create profile";
+    document.getElementById("pfToggle").textContent = signin ? "New here? Create a profile" : "I already have a profile";
+    document.getElementById("pfErr").style.display = "none";
+  }
+  function showPfErr(msg) { const e = document.getElementById("pfErr"); e.textContent = msg; e.style.display = "block"; }
+  function finishProfile(d, after) { d.close(); lastRenderedStop = null; updateChrome(); go(after || "#/map"); }
+  function friendlyAuthError(error, mode) {
+    const m = ((error && error.message) || "").toLowerCase();
+    if (m.indexOf("already registered") >= 0 || m.indexOf("already been registered") >= 0) return "That email already has a profile. Choose “I already have a profile” to sign in.";
+    if (m.indexOf("invalid login") >= 0) return "Email or password is incorrect. If you’re new, choose “Create a profile”.";
+    if (m.indexOf("email not confirmed") >= 0) return "Your email isn’t confirmed yet. Check your inbox, or ask your admin to turn off email confirmation in Supabase.";
+    if (m.indexOf("password") >= 0) return (error && error.message) || "Please check your password.";
+    return (error && error.message) || "Couldn’t sign you in. Please try again.";
+  }
   function openProfileDialog(afterHash) {
     const d = document.getElementById("profileDialog");
-    document.getElementById("profileDialogTitle").textContent = isSignedIn() ? "Switch or add a profile" : "Create your profile";
     document.getElementById("pfName").value = "";
     document.getElementById("pfEmail").value = "";
+    document.getElementById("pfPassword").value = "";
+    setProfileMode("signup");
     d._after = afterHash || null;
     if (d.showModal) d.showModal();
-    setTimeout(function () { document.getElementById("pfName").focus(); }, 30);
+    setTimeout(function () { document.getElementById((CLOUD ? "pfEmail" : "pfName")).focus(); }, 30);
   }
   function openProfileMenu() {
     const prof = currentProfile(); if (!prof) return;
@@ -1990,7 +2088,7 @@
     if (!posts.length) {
       feed = '<div class="card empty">' + icon("post") + '<h3>No posts yet</h3><p>Be the first to share a mini-project or a finding from your own product.</p></div>';
     } else {
-      feed = '<div class="posts">' + posts.map(function (p) { return postCard(p, prof); }).join("") + '</div>';
+      feed = '<div class="posts">' + posts.map(function (p) { return postCard(p); }).join("") + '</div>';
     }
 
     main.innerHTML = '<section class="view"><div class="container">' +
@@ -2029,8 +2127,8 @@
     });
     window.scrollTo(0, 0);
   }
-  function postCard(p, prof) {
-    const canDelete = prof && (prof.email === p.email || isAdmin());
+  function postCard(p) {
+    const canDelete = p.mine || isAdmin();
     const kindLabel = { project: "Project", finding: "Finding", other: "Other" }[p.kind] || "Post";
     return '<article class="postcard">' +
       '<div class="postcard__head">' +
@@ -2074,7 +2172,7 @@
 
     let postList;
     if (!posts.length) postList = '<div class="card empty">' + icon("post") + '<h3>No posts yet</h3></div>';
-    else postList = '<div class="posts">' + posts.map(function (p) { return postCard(p, currentProfile()); }).join("") + '</div>';
+    else postList = '<div class="posts">' + posts.map(function (p) { return postCard(p); }).join("") + '</div>';
 
     main.innerHTML = '<section class="view"><div class="container">' +
       '<div class="mod-badges" style="margin-bottom:var(--space-3)"><span class="badge badge--accent">' + icon("shield", "badge__i") + ' Admin</span></div>' +
@@ -2168,21 +2266,42 @@
     });
     document.getElementById("adminBtn").addEventListener("click", function () { openAdminGate(); });
 
-    document.getElementById("profileForm").addEventListener("submit", function (e) {
+    document.getElementById("profileForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const name = document.getElementById("pfName").value;
-      const email = document.getElementById("pfEmail").value;
-      if (!normEmail(email)) return;
+      const name = document.getElementById("pfName").value.trim();
+      const email = normEmail(document.getElementById("pfEmail").value);
+      const pw = document.getElementById("pfPassword").value;
       const d = document.getElementById("profileDialog"); const after = d._after;
-      signIn(name, email);
-      d.close();
-      lastRenderedStop = null;
-      updateChrome();
-      go(after || "#/map");
+      if (!email || email.indexOf("@") < 0) { showPfErr("Please enter a valid email address."); return; }
+
+      if (!CLOUD) { signIn(name, email); finishProfile(d, after); return; }
+
+      if (pfMode === "signup" && pw.length < 6) { showPfErr("Choose a password of at least 6 characters."); return; }
+      if (pfMode === "signin" && !pw) { showPfErr("Please enter your password."); return; }
+      const btn = document.getElementById("profileSubmit"); const label = btn.textContent;
+      btn.disabled = true; btn.textContent = "Please wait…";
+      try {
+        let res;
+        if (pfMode === "signup") res = await sb.auth.signUp({ email: email, password: pw, options: { data: { name: name || email.split("@")[0] } } });
+        else res = await sb.auth.signInWithPassword({ email: email, password: pw });
+        if (res.error) { showPfErr(friendlyAuthError(res.error, pfMode)); return; }
+        const sess = res.data && res.data.session;
+        const user = res.data && res.data.user;
+        if (!sess || !user) { showPfErr("Almost there — check your email to confirm your account, then choose “I already have a profile” to sign in. (Or ask your admin to turn off email confirmation in Supabase.)"); return; }
+        await applyCloudUser(user);
+        finishProfile(d, after);
+      } catch (ex) {
+        showPfErr("Couldn’t reach the database. Check your connection and try again.");
+      } finally { btn.disabled = false; btn.textContent = label; }
     });
     document.getElementById("profileCancel").addEventListener("click", function () { document.getElementById("profileDialog").close(); });
+    document.getElementById("pfToggle").addEventListener("click", function () { setProfileMode(pfMode === "signin" ? "signup" : "signin"); });
 
-    document.getElementById("pmSwitch").addEventListener("click", function () { document.getElementById("profileMenu").close(); openProfileDialog("#/map"); });
+    document.getElementById("pmSwitch").addEventListener("click", async function () {
+      document.getElementById("profileMenu").close();
+      if (CLOUD) { await cloudSignOut(); session.email = null; DB.saveSession(session); state = blankState(); updateChrome(); openProfileDialog("#/map"); setProfileMode("signin"); }
+      else { openProfileDialog("#/map"); }
+    });
     document.getElementById("pmReset").addEventListener("click", function () { document.getElementById("profileMenu").close(); openReset(); });
     document.getElementById("pmClose").addEventListener("click", function () { document.getElementById("profileMenu").close(); });
 
@@ -2206,13 +2325,28 @@
   }
 
   /* ---- boot ---- */
-  if (session.email && currentProfile()) { state = loadProgress(session.email); }
-  else { session.email = null; }
-  initChrome();
-  initTheme();
-  updateChrome();
-  window.addEventListener("hashchange", router);
-  router();
+  (async function boot() {
+    initChrome();
+    initTheme();
+    if (CLOUD) {
+      const note = document.getElementById("profileCloudNote"); if (note) note.textContent = "Sign in with your email and a password — your progress follows you on any device.";
+      const help = document.getElementById("pfEmailHelp"); if (help) help.textContent = "You’ll use this email to sign in.";
+      session.email = null;              // trust Supabase, not any leftover local session
+      try {
+        const s = await sb.auth.getSession();
+        if (s.data && s.data.session && s.data.session.user) { await applyCloudUser(s.data.session.user); }
+        sb.auth.onAuthStateChange(function (event) {
+          if (event === "SIGNED_OUT") { session.email = null; DB.saveSession(session); cloudUserId = null; updateChrome(); }
+        });
+      } catch (e) { /* stay signed out */ }
+    } else {
+      if (session.email && currentProfile()) { state = loadProgress(session.email); }
+      else { session.email = null; }
+    }
+    updateChrome();
+    window.addEventListener("hashchange", router);
+    router();
+  })();
   </script>
 </body>
 </html>

@@ -55,10 +55,20 @@ data.
    [`supabase/schema.sql`](./supabase/schema.sql), and **Run**.
 3. Add yourself as admin: `insert into public.admins (email) values ('you@example.com');`
 4. Under **Project Settings → API**, copy the **Project URL** and the **anon public**
-   key (the anon key is safe to ship in a static site — RLS is what protects data).
-5. Share those two values and the rest is wired in: passwordless email sign-in,
-   per-user progress sync, the shared Showcase, and the admin dashboard over real
-   data.
+   key. Set them as `SUPABASE_URL` and `SUPABASE_KEY` near the top of the `<script>`
+   in `index.html`. The anon key is safe to ship in a static site — RLS is what
+   protects the data.
+5. In **Authentication → Providers → Email**, turn **off "Confirm email"** so sign-up
+   is instant (otherwise Supabase emails a confirmation link that points at the
+   wrong URL by default).
+6. Sign up on the site with the **same email** you added to the `admins` table in
+   step 3 — that account is the admin.
+
+When `SUPABASE_URL`/`SUPABASE_KEY` are set and the Supabase library loads, the app
+runs in **cloud mode**: email + password sign-in, per-user progress synced across
+devices, a shared Showcase, and the admin dashboard over everyone's real data. If
+the library can't load (e.g. offline, or the CSP-sandboxed Artifact preview), it
+falls back to **on-device mode** automatically — nothing breaks.
 
 ## Running it
 
