@@ -1,0 +1,131 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "meta": {
+    "name": "Propelr Design Tokens",
+    "version": "2.0.0",
+    "description": "Framework-independent design tokens for Propelr and endorsed products.",
+    "sourceOfTruth": "PROPELR_BRAND_GUIDELINES_FOR_CLAUDE_CODE.md"
+  },
+  "brand": {
+    "color": {
+      "black": { "$value": "#2C2C2C", "$type": "color" },
+      "yellow": { "$value": "#FFD700", "$type": "color" },
+      "white": { "$value": "#FFFFFF", "$type": "color" },
+      "darkGray": { "$value": "#4B4B4B", "$type": "color" },
+      "lightGray": { "$value": "#D9D9D9", "$type": "color" },
+      "offWhite": { "$value": "#F7F7F7", "$type": "color" },
+      "red": { "$value": "#FF0000", "$type": "color" }
+    }
+  },
+  "theme": {
+    "light": {
+      "background": { "$value": "#F7F7F7", "$type": "color" },
+      "surface": { "$value": "#FFFFFF", "$type": "color" },
+      "surfaceSubtle": { "$value": "#F7F7F7", "$type": "color" },
+      "surfaceElevated": { "$value": "#FFFFFF", "$type": "color" },
+      "textPrimary": { "$value": "#2C2C2C", "$type": "color" },
+      "textSecondary": { "$value": "#6A6A6A", "$type": "color" },
+      "textDisabled": { "$value": "#9A9A9A", "$type": "color" },
+      "accent": { "$value": "#FFD700", "$type": "color" },
+      "onAccent": { "$value": "#2C2C2C", "$type": "color" },
+      "border": { "$value": "#D9D9D9", "$type": "color" },
+      "borderStrong": { "$value": "#A8A8A8", "$type": "color" },
+      "success": { "$value": "#28A745", "$type": "color" },
+      "successText": { "$value": "#166534", "$type": "color" },
+      "warning": { "$value": "#F5A623", "$type": "color" },
+      "warningText": { "$value": "#8A4B00", "$type": "color" },
+      "error": { "$value": "#D92D20", "$type": "color" },
+      "focus": { "$value": "#2C2C2C", "$type": "color" }
+    },
+    "dark": {
+      "background": { "$value": "#0C0C0C", "$type": "color" },
+      "surface": { "$value": "#1A1A1A", "$type": "color" },
+      "surfaceSubtle": { "$value": "#151515", "$type": "color" },
+      "surfaceElevated": { "$value": "#222222", "$type": "color" },
+      "textPrimary": { "$value": "#FFFFFF", "$type": "color" },
+      "textSecondary": { "$value": "#B5B5B5", "$type": "color" },
+      "textDisabled": { "$value": "#777777", "$type": "color" },
+      "accent": { "$value": "#FFD700", "$type": "color" },
+      "onAccent": { "$value": "#2C2C2C", "$type": "color" },
+      "border": { "$value": "#2F2F2F", "$type": "color" },
+      "borderStrong": { "$value": "#555555", "$type": "color" },
+      "success": { "$value": "#34C759", "$type": "color" },
+      "warning": { "$value": "#FF9500", "$type": "color" },
+      "error": { "$value": "#FF453A", "$type": "color" },
+      "focus": { "$value": "#FFD700", "$type": "color" }
+    }
+  },
+  "font": {
+    "family": {
+      "heading": { "$value": "Poppins, Inter, Arial, sans-serif", "$type": "fontFamily" },
+      "body": { "$value": "Inter, Aptos, Calibri, Arial, sans-serif", "$type": "fontFamily" },
+      "mono": { "$value": "Space Mono, Courier New, monospace", "$type": "fontFamily" }
+    },
+    "weight": {
+      "regular": { "$value": 400, "$type": "fontWeight" },
+      "medium": { "$value": 500, "$type": "fontWeight" },
+      "semibold": { "$value": 600, "$type": "fontWeight" },
+      "bold": { "$value": 700, "$type": "fontWeight" }
+    },
+    "size": {
+      "caption": { "$value": "12px", "$type": "dimension" },
+      "small": { "$value": "14px", "$type": "dimension" },
+      "body": { "$value": "16px", "$type": "dimension" },
+      "bodyLarge": { "$value": "18px", "$type": "dimension" },
+      "h4": { "$value": "20px", "$type": "dimension" },
+      "h3": { "$value": "24px", "$type": "dimension" },
+      "h2": { "$value": "32px", "$type": "dimension" },
+      "h1": { "$value": "40px", "$type": "dimension" },
+      "display": { "$value": "52px", "$type": "dimension" },
+      "displayXL": { "$value": "64px", "$type": "dimension" }
+    }
+  },
+  "space": {
+    "0": { "$value": "0px", "$type": "dimension" },
+    "1": { "$value": "4px", "$type": "dimension" },
+    "2": { "$value": "8px", "$type": "dimension" },
+    "3": { "$value": "12px", "$type": "dimension" },
+    "4": { "$value": "16px", "$type": "dimension" },
+    "5": { "$value": "24px", "$type": "dimension" },
+    "6": { "$value": "32px", "$type": "dimension" },
+    "7": { "$value": "40px", "$type": "dimension" },
+    "8": { "$value": "48px", "$type": "dimension" },
+    "9": { "$value": "64px", "$type": "dimension" },
+    "10": { "$value": "80px", "$type": "dimension" },
+    "11": { "$value": "96px", "$type": "dimension" },
+    "12": { "$value": "128px", "$type": "dimension" }
+  },
+  "radius": {
+    "small": { "$value": "8px", "$type": "dimension" },
+    "control": { "$value": "12px", "$type": "dimension" },
+    "card": { "$value": "16px", "$type": "dimension" },
+    "dialog": { "$value": "20px", "$type": "dimension" },
+    "pill": { "$value": "999px", "$type": "dimension" }
+  },
+  "shadow": {
+    "cardLight": { "$value": "0 6px 16px rgba(44, 44, 44, 0.08)", "$type": "shadow" },
+    "overlayLight": { "$value": "0 16px 40px rgba(44, 44, 44, 0.14)", "$type": "shadow" },
+    "cardDark": { "$value": "0 8px 24px rgba(0, 0, 0, 0.32)", "$type": "shadow" },
+    "overlayDark": { "$value": "0 20px 48px rgba(0, 0, 0, 0.48)", "$type": "shadow" }
+  },
+  "motion": {
+    "duration": {
+      "fast": { "$value": "120ms", "$type": "duration" },
+      "standard": { "$value": "180ms", "$type": "duration" },
+      "slow": { "$value": "240ms", "$type": "duration" },
+      "emphasis": { "$value": "360ms", "$type": "duration" }
+    },
+    "easing": {
+      "standard": { "$value": "cubic-bezier(0.2, 0, 0, 1)", "$type": "cubicBezier" },
+      "enter": { "$value": "cubic-bezier(0, 0, 0, 1)", "$type": "cubicBezier" },
+      "exit": { "$value": "cubic-bezier(0.3, 0, 1, 1)", "$type": "cubicBezier" }
+    }
+  },
+  "layout": {
+    "contentMax": { "$value": "1280px", "$type": "dimension" },
+    "containerMax": { "$value": "1140px", "$type": "dimension" },
+    "readingMax": { "$value": "700px", "$type": "dimension" },
+    "touchTargetMin": { "$value": "44px", "$type": "dimension" },
+    "gridColumnsDesktop": { "$value": 12, "$type": "number" }
+  }
+}

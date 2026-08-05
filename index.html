@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tech for Non-Tech People — a Propelr course</title>
+  <meta name="description" content="A practical 6-week course that teaches PMs, founders, and non-technical leaders to speak the language of engineering, spot the bullshit, and write specs that ship." />
+  <style>
+    /* =========================================================
+       Propelr design tokens  (source of truth: PROPELR_BRAND_GUIDELINES)
+       ========================================================= */
+    :root {
+      color-scheme: light;
+
+      --font-heading: "Poppins", "Inter", Arial, sans-serif;
+      --font-body: "Inter", Aptos, Calibri, Arial, sans-serif;
+      --font-mono: "Space Mono", "Courier New", monospace;
+
+      --brand-black: #2c2c2c;
+      --brand-yellow: #ffd700;
+      --brand-white: #ffffff;
+      --brand-dark-gray: #4b4b4b;
+      --brand-light-gray: #d9d9d9;
+      --brand-off-white: #f7f7f7;
+      --brand-red: #ff0000;
+
+      --color-background: #f7f7f7;
+      --color-surface: #ffffff;
+      --color-surface-subtle: #f7f7f7;
+      --color-surface-elevated: #ffffff;
+      --color-text-primary: #2c2c2c;
+      --color-text-secondary: #6a6a6a;
+      --color-text-disabled: #9a9a9a;
+      --color-accent: #ffd700;
+      --color-on-accent: #2c2c2c;
+      --color-border: #d9d9d9;
+      --color-border-strong: #a8a8a8;
+      --color-success: #28a745;
+      --color-success-text: #166534;
+      --color-warning: #f5a623;
+      --color-warning-text: #8a4b00;
+      --color-error: #d92d20;
+      --color-focus: #2c2c2c;
+      --color-path-future: #d9d9d9;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-pill: 999px;
+
+      --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+      --space-5: 24px; --space-6: 32px; --space-7: 40px; --space-8: 48px;
+      --space-9: 64px; --space-10: 80px; --space-11: 96px; --space-12: 128px;
+
+      --shadow-card: 0 6px 16px rgba(44, 44, 44, 0.08);
+      --shadow-overlay: 0 16px 40px rgba(44, 44, 44, 0.14);
+
+      --duration-fast: 120ms;
+      --duration-standard: 180ms;
+      --duration-slow: 240ms;
+      --duration-emphasis: 360ms;
+      --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+      --ease-enter: cubic-bezier(0, 0, 0, 1);
+      --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+
+      --content-max: 1280px;
+      --container-max: 1140px;
+      --reading-max: 720px;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --color-background: #0c0c0c;
+      --color-surface: #1a1a1a;
+      --color-surface-subtle: #151515;
+      --color-surface-elevated: #222222;
+      --color-text-primary: #ffffff;
+      --color-text-secondary: #b5b5b5;
+      --color-text-disabled: #777777;
+      --color-accent: #ffd700;
+      --color-on-accent: #2c2c2c;
+      --color-border: #2f2f2f;
+      --color-border-strong: #555555;
+      --color-success: #34c759;
+      --color-success-text: #34c759;
+      --color-warning: #ff9500;
+      --color-warning-text: #ff9500;
+      --color-error: #ff453a;
+      --color-focus: #ffd700;
+      --color-path-future: #2f2f2f;
+      --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.32);
+      --shadow-overlay: 0 20px 48px rgba(0, 0, 0, 0.48);
+    }
+
+    /* =========================================================
+       Base
+       ========================================================= */
+    * { box-sizing: border-box; }
+    html {
+      font-family: var(--font-body);
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-heading); line-height: 1.2; margin: 0 0 var(--space-3); font-weight: 700; }
+    h1 { font-size: clamp(2rem, 4vw, 2.5rem); letter-spacing: -0.025em; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; }
+    h3 { font-size: 1.35rem; font-weight: 600; }
+    h4 { font-size: 1.1rem; font-weight: 600; }
+    p { margin: 0 0 var(--space-4); }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; border-radius: 3px; }
+    ::selection { background: var(--color-accent); color: var(--color-on-accent); }
+    img, svg { max-width: 100%; }
+
+    .container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-4); }
+    .reading { max-width: var(--reading-max); }
+    .muted { color: var(--color-text-secondary); }
+    .mono { font-family: var(--font-mono); }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    .skip-link {
+      position: absolute; left: var(--space-3); top: -60px; z-index: 200;
+      background: var(--color-surface); color: var(--color-text-primary);
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-md);
+      border: 1px solid var(--color-border); transition: top var(--duration-standard) var(--ease-standard);
+    }
+    .skip-link:focus { top: var(--space-3); }
+
+    /* =========================================================
+       Navigation
+       ========================================================= */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+      backdrop-filter: saturate(160%) blur(10px);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .nav__inner {
+      max-width: var(--content-max); margin: 0 auto;
+      min-height: 64px; padding: var(--space-2) var(--space-4);
+      display: flex; align-items: center; gap: var(--space-4);
+    }
+    .brand { display: inline-flex; align-items: center; gap: var(--space-2); text-decoration: none; color: inherit; }
+    .brand__mark {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      background: var(--brand-black); color: var(--brand-yellow);
+      display: grid; place-items: center; font-family: var(--font-heading); font-weight: 700; font-size: 20px;
+      flex: none;
+    }
+    [data-theme="dark"] .brand__mark { background: var(--brand-yellow); color: var(--brand-black); }
+    .brand__word { font-family: var(--font-heading); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+    .nav__spacer { flex: 1; }
+    .nav__link {
+      display: none; text-decoration: none; color: var(--color-text-secondary);
+      font-weight: 500; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+    }
+    .nav__link:hover { color: var(--color-text-primary); background: var(--color-surface-subtle); }
+    .nav__link[aria-current="page"] { color: var(--color-text-primary); font-weight: 600; }
+    @media (min-width: 768px) { .nav__link { display: inline-flex; } }
+
+    /* =========================================================
+       Buttons
+       ========================================================= */
+    .btn {
+      --btn-h: 44px;
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      min-height: var(--btn-h); min-width: 44px; padding: 0 var(--space-5);
+      font-family: var(--font-body); font-size: 15px; font-weight: 600; line-height: 1;
+      border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer;
+      text-decoration: none; background: var(--brand-black); color: var(--brand-white);
+      transition: background var(--duration-fast) var(--ease-standard),
+                  color var(--duration-fast) var(--ease-standard),
+                  border-color var(--duration-fast) var(--ease-standard),
+                  transform var(--duration-fast) var(--ease-standard);
+    }
+    .btn:hover { background: var(--brand-yellow); color: var(--brand-black); }
+    .btn:active { transform: translateY(1px); }
+    [data-theme="dark"] .btn { background: var(--brand-yellow); color: var(--brand-black); }
+    [data-theme="dark"] .btn:hover { background: #e6c200; }
+    .btn--secondary { background: transparent; color: var(--color-text-primary); border-color: var(--color-border-strong); }
+    .btn--secondary:hover { background: var(--color-surface-subtle); color: var(--color-text-primary); border-color: var(--color-border-strong); }
+    [data-theme="dark"] .btn--secondary { background: transparent; color: var(--color-text-primary); }
+    [data-theme="dark"] .btn--secondary:hover { background: var(--color-surface-elevated); }
+    .btn--ghost { background: transparent; color: var(--color-text-secondary); border-color: transparent; padding: 0 var(--space-3); }
+    .btn--ghost:hover { background: var(--color-surface-subtle); color: var(--color-text-primary); }
+    [data-theme="dark"] .btn--ghost:hover { background: var(--color-surface-elevated); }
+    .btn--danger { background: transparent; color: var(--color-error); border-color: var(--color-error); }
+    .btn--danger:hover { background: var(--color-error); color: #fff; }
+    .btn--sm { --btn-h: 36px; font-size: 14px; padding: 0 var(--space-4); }
+    .btn--lg { --btn-h: 52px; font-size: 16px; padding: 0 var(--space-6); }
+    .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .btn__icon { width: 18px; height: 18px; flex: none; }
+    .iconbtn {
+      display: inline-grid; place-items: center; width: 44px; height: 44px;
+      border-radius: var(--radius-md); border: 1px solid transparent; background: transparent;
+      color: var(--color-text-secondary); cursor: pointer;
+      transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+    }
+    .iconbtn:hover { background: var(--color-surface-subtle); color: var(--color-text-primary); }
+    [data-theme="dark"] .iconbtn:hover { background: var(--color-surface-elevated); }
+    .iconbtn svg { width: 20px; height: 20px; }
+
+    /* =========================================================
+       Layout primitives
+       ========================================================= */
+    .view { padding: var(--space-7) 0 var(--space-10); }
+    .stack > * + * { margin-top: var(--space-4); }
+    .card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-card);
+    }
+    @media (min-width: 768px) { .card { padding: var(--space-6); } }
+    .badge {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      font-size: 12px; font-weight: 600; line-height: 1;
+      padding: 6px 10px; border-radius: var(--radius-pill);
+      background: var(--color-surface-subtle); color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+    [data-theme="dark"] .badge { background: var(--color-surface-elevated); }
+    .badge--accent { background: var(--color-accent); color: var(--color-on-accent); border-color: transparent; }
+    .badge--done { color: var(--color-success-text); border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border)); }
+    .badge--done svg { color: var(--color-success); }
+    .badge .badge__i { width: 13px; height: 13px; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--color-text-secondary); margin: 0 0 var(--space-2);
+    }
+    .rule { height: 1px; background: var(--color-border); border: 0; margin: var(--space-6) 0; }
+
+    /* =========================================================
+       Welcome / hero
+       ========================================================= */
+    .hero { text-align: left; padding-top: var(--space-6); }
+    .hero__title { font-size: clamp(2.25rem, 6vw, 3.5rem); letter-spacing: -0.035em; margin-bottom: var(--space-3); }
+    .hero__lede { font-size: clamp(1.05rem, 2.5vw, 1.25rem); color: var(--color-text-secondary); max-width: 640px; }
+    .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+    .accent-bar { width: 56px; height: 5px; border-radius: var(--radius-pill); background: var(--brand-yellow); margin-bottom: var(--space-5); }
+    .feature-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; margin-top: var(--space-7); }
+    @media (min-width: 640px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .feature-grid { grid-template-columns: repeat(4, 1fr); } }
+    .feature { }
+    .feature__ic { width: 36px; height: 36px; color: var(--brand-black); background: var(--brand-yellow); border-radius: var(--radius-md); display: grid; place-items: center; margin-bottom: var(--space-3); }
+    .feature__ic svg { width: 20px; height: 20px; }
+    .feature h4 { margin-bottom: var(--space-1); }
+    .feature p { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
+
+    .note {
+      display: flex; gap: var(--space-3); align-items: flex-start;
+      background: var(--color-surface-subtle); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-4); font-size: 14px; color: var(--color-text-secondary);
+    }
+    .note svg { width: 18px; height: 18px; flex: none; color: var(--color-text-secondary); margin-top: 2px; }
+
+    /* Pace table */
+    .pace { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .pace th, .pace td { text-align: left; padding: var(--space-3) var(--space-3); border-bottom: 1px solid var(--color-border); vertical-align: top; }
+    .pace th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-secondary); font-weight: 600; }
+    .pace td:first-child { font-family: var(--font-mono); color: var(--color-text-secondary); white-space: nowrap; width: 1%; }
+    .pace .num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+    /* =========================================================
+       Journey map
+       ========================================================= */
+    .tracker { display: grid; gap: var(--space-5); grid-template-columns: 1fr; align-items: center; }
+    @media (min-width: 720px) { .tracker { grid-template-columns: auto 1fr; } }
+    .ring { position: relative; width: 128px; height: 128px; flex: none; margin: 0 auto; }
+    .ring svg { transform: rotate(-90deg); }
+    .ring__track { fill: none; stroke: var(--color-border); stroke-width: 12; }
+    .ring__val { fill: none; stroke: var(--brand-yellow); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset var(--duration-emphasis) var(--ease-standard); }
+    .ring__label { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+    .ring__pct { font-family: var(--font-heading); font-weight: 700; font-size: 26px; line-height: 1; }
+    .ring__cap { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stats { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    .stat { background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); min-width: 120px; flex: 1 1 120px; }
+    [data-theme="dark"] .stat { background: var(--color-surface-elevated); }
+    .stat__n { font-family: var(--font-mono); font-weight: 700; font-size: 22px; min-height: 28px; display: flex; align-items: center; }
+    .stat__n svg { width: 26px; height: 26px; color: var(--color-text-secondary); }
+    .stat__l { font-size: 13px; color: var(--color-text-secondary); }
+    .resume-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: space-between; margin-top: var(--space-5); }
+
+    .map-wrap { display: flex; justify-content: center; margin-top: var(--space-6); }
+    .map-svg { width: 100%; max-width: 460px; height: auto; overflow: visible; }
+    .map-base { fill: none; stroke: var(--color-path-future); stroke-width: 6; stroke-linecap: round; }
+    .map-done { fill: none; stroke: var(--brand-yellow); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset var(--duration-emphasis) var(--ease-standard); }
+    .node { cursor: pointer; }
+    .node__hit { fill: transparent; }
+    .node__circle { fill: var(--color-surface); stroke: var(--color-border-strong); stroke-width: 2; transition: fill var(--duration-standard) var(--ease-standard), stroke var(--duration-standard) var(--ease-standard); }
+    .node__num { font-family: var(--font-heading); font-weight: 700; font-size: 18px; fill: var(--color-text-secondary); text-anchor: middle; dominant-baseline: central; }
+    .node__label { font-family: var(--font-body); font-weight: 600; font-size: 12.5px; fill: var(--color-text-primary); text-anchor: middle; }
+    .node__sub { font-family: var(--font-mono); font-size: 10px; fill: var(--color-text-secondary); text-anchor: middle; }
+    .node.is-done .node__circle { fill: var(--brand-yellow); stroke: var(--brand-yellow); }
+    .node.is-done .node__num { fill: var(--brand-black); }
+    .node.is-current .node__circle { fill: var(--color-surface); stroke: var(--brand-yellow); stroke-width: 3; }
+    .node.is-current .node__num { fill: var(--color-text-primary); }
+    .node:hover .node__circle { stroke: var(--brand-black); }
+    [data-theme="dark"] .node:hover .node__circle { stroke: var(--brand-yellow); }
+    .node a:focus-visible { outline: none; }
+    .node a:focus-visible .node__circle { stroke: var(--color-focus); stroke-width: 3; }
+    .node__check { color: var(--brand-black); }
+    #avatar { pointer-events: none; }
+    .avatar__body { color: var(--brand-black); }
+    .avatar__disc { fill: var(--brand-yellow); stroke: var(--brand-black); stroke-width: 2; }
+    [data-theme="dark"] .avatar__disc { stroke: #0c0c0c; }
+    .avatar__bob { animation: bob 2.4s var(--ease-standard) infinite; }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--space-4); justify-content: center; margin-top: var(--space-5); font-size: 13px; color: var(--color-text-secondary); }
+    .legend span { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+    .legend .l-done { background: var(--brand-yellow); }
+    .legend .l-current { background: var(--color-surface); border: 3px solid var(--brand-yellow); }
+    .legend .l-future { background: var(--color-surface); border: 2px solid var(--color-border-strong); }
+
+    /* =========================================================
+       Module view
+       ========================================================= */
+    .crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: 14px; margin-bottom: var(--space-4); }
+    .crumbs a { color: var(--color-text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .crumbs a:hover { color: var(--color-text-primary); }
+    .mod-head { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-2); }
+    .mod-badges { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .section { margin-top: var(--space-7); }
+    .section > h2 { display: flex; align-items: center; gap: var(--space-3); }
+    .section__ic { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: var(--radius-sm); background: var(--color-surface-subtle); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+    [data-theme="dark"] .section__ic { background: var(--color-surface-elevated); }
+    .section__ic svg { width: 18px; height: 18px; }
+
+    /* Outcomes callout */
+    .outcomes {
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--brand-yellow);
+      background: var(--color-surface);
+      border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-card);
+    }
+    .outcomes h2 { font-size: 1.25rem; margin-bottom: var(--space-4); }
+    .outcomes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+    .outcomes li { display: flex; gap: var(--space-3); align-items: flex-start; }
+    .outcomes li svg { width: 20px; height: 20px; flex: none; color: var(--brand-black); background: var(--brand-yellow); border-radius: 50%; padding: 3px; margin-top: 1px; }
+    [data-theme="dark"] .outcomes li svg { color: var(--brand-black); }
+
+    /* Video cards */
+    .videos { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .videos { grid-template-columns: repeat(2, 1fr); } }
+    .vcard {
+      display: flex; gap: var(--space-3); align-items: flex-start; text-decoration: none; color: inherit;
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+      padding: var(--space-4); transition: border-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+    }
+    .vcard:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-card); transform: translateY(-1px); }
+    .vcard__ic { width: 40px; height: 40px; flex: none; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--brand-black); color: var(--brand-yellow); }
+    [data-theme="dark"] .vcard__ic { background: var(--brand-yellow); color: var(--brand-black); }
+    .vcard__ic svg { width: 20px; height: 20px; }
+    .vcard__t { font-weight: 600; font-size: 15px; margin: 0 0 4px; }
+    .vcard__m { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .vcard__ext { width: 15px; height: 15px; color: var(--color-text-disabled); flex: none; margin-left: auto; }
+
+    /* Concepts */
+    .concepts { display: grid; gap: 0; border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface); }
+    .concept { display: grid; gap: var(--space-1); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-border); }
+    @media (min-width: 640px) { .concept { grid-template-columns: 210px 1fr; gap: var(--space-4); align-items: baseline; } }
+    .concept:last-child { border-bottom: 0; }
+    .concept__t { font-weight: 700; font-family: var(--font-heading); font-size: 15px; }
+    .concept__d { color: var(--color-text-secondary); font-size: 15px; }
+    .concept__d strong { color: var(--color-text-primary); font-weight: 600; }
+
+    /* Apply-it */
+    .apply { display: flex; gap: var(--space-4); align-items: flex-start; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); }
+    [data-theme="dark"] .apply { background: var(--color-surface-elevated); }
+    .apply__ic { width: 40px; height: 40px; flex: none; border-radius: var(--radius-md); background: var(--brand-yellow); color: var(--brand-black); display: grid; place-items: center; }
+    .apply__ic svg { width: 22px; height: 22px; }
+    .apply h4 { margin: 0 0 var(--space-1); }
+    .apply p { margin: 0; color: var(--color-text-secondary); }
+
+    /* Pipeline diagram (Module 0) */
+    .pipeline { display: flex; flex-direction: column; gap: var(--space-2); }
+    @media (min-width: 720px) { .pipeline { flex-direction: row; align-items: stretch; } }
+    .pipe { flex: 1; text-align: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-3); }
+    .pipe strong { display: block; font-family: var(--font-heading); font-size: 15px; }
+    .pipe span { font-size: 12px; color: var(--color-text-secondary); }
+    .pipe.is-db { border-color: var(--brand-yellow); }
+    .pipe-arrow { display: grid; place-items: center; color: var(--color-text-disabled); }
+    .pipe-arrow svg { width: 20px; height: 20px; }
+    @media (min-width: 720px) { .pipe-arrow svg { transform: rotate(-90deg); } }
+
+    /* Quiz */
+    .quiz__q { margin-top: var(--space-5); border: 0; padding: 0; }
+    .quiz__q legend { font-weight: 600; font-size: 16px; padding: 0; margin-bottom: var(--space-3); }
+    .quiz__q .qhint { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-secondary); font-weight: 400; margin-left: var(--space-2); }
+    .opt { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-top: var(--space-2); cursor: pointer; background: var(--color-surface); transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+    .opt:hover { border-color: var(--color-border-strong); }
+    .opt input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--brand-black); flex: none; }
+    [data-theme="dark"] .opt input { accent-color: var(--brand-yellow); }
+    .opt.is-correct { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); }
+    .opt.is-wrong { border-color: var(--color-error); background: color-mix(in srgb, var(--color-error) 8%, var(--color-surface)); }
+    .opt__mark { margin-left: auto; font-size: 12px; font-weight: 700; display: none; align-items: center; gap: 4px; }
+    .opt__mark svg { width: 15px; height: 15px; }
+    .opt.is-correct .opt__mark { display: inline-flex; color: var(--color-success-text); }
+    .opt.is-wrong .opt__mark { display: inline-flex; color: var(--color-error); }
+    .explain { margin-top: var(--space-2); font-size: 14px; color: var(--color-text-secondary); padding-left: var(--space-4); border-left: 2px solid var(--color-border); display: none; }
+    .quiz__q.graded .explain { display: block; }
+    .quiz__result { margin-top: var(--space-5); }
+    .banner { display: flex; gap: var(--space-3); align-items: flex-start; border-radius: var(--radius-md); padding: var(--space-4); border: 1px solid var(--color-border); }
+    .banner svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+    .banner--pass { background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border)); }
+    .banner--pass svg { color: var(--color-success); }
+    .banner--fail { background: var(--color-surface-subtle); }
+    .banner--fail svg { color: var(--color-warning); }
+    .banner strong { display: block; }
+    .banner p { margin: 2px 0 0; font-size: 14px; color: var(--color-text-secondary); }
+
+    /* Checklist / project */
+    .project { border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+    .project__head { padding: var(--space-5); background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+    .project__head h4 { margin: 0 0 var(--space-2); }
+    .project__meta { display: flex; flex-wrap: wrap; gap: var(--space-3); font-size: 13px; color: var(--color-text-secondary); align-items: center; }
+    .project__meta svg { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
+    .project__meta b { color: var(--color-text-primary); font-weight: 600; }
+    .checklist { list-style: none; margin: 0; padding: var(--space-3) var(--space-5) var(--space-5); display: grid; gap: var(--space-2); background: var(--color-surface); }
+    .check { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-2) 0; cursor: pointer; }
+    .check input { margin-top: 3px; width: 20px; height: 20px; accent-color: var(--brand-black); flex: none; }
+    [data-theme="dark"] .check input { accent-color: var(--brand-yellow); }
+    .check span { font-size: 15px; }
+    .check input:checked + span { color: var(--color-text-secondary); text-decoration: line-through; }
+    .project__foot { padding: var(--space-4) var(--space-5); background: var(--color-surface-subtle); border-top: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--space-3); font-size: 14px; }
+    [data-theme="dark"] .project__foot { background: var(--color-surface-elevated); }
+
+    .mod-foot { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; align-items: center; margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+
+    /* Reference tables */
+    .bstable { width: 100%; border-collapse: collapse; }
+    .bstable th, .bstable td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); font-size: 15px; vertical-align: top; }
+    .bstable th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-secondary); }
+    .bstable td:first-child { color: var(--color-text-secondary); width: 42%; }
+    .bstable td:first-child::before { content: "\201C"; }
+    .bstable td:first-child::after { content: "\201D"; }
+    .bstable td:last-child { font-weight: 600; }
+    .principles { list-style: none; counter-reset: p; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+    .principles li { counter-increment: p; display: flex; gap: var(--space-4); align-items: flex-start; }
+    .principles li::before { content: counter(p); font-family: var(--font-mono); font-weight: 700; background: var(--brand-yellow); color: var(--brand-black); width: 30px; height: 30px; flex: none; border-radius: var(--radius-sm); display: grid; place-items: center; font-size: 14px; }
+
+    /* Locked capstone */
+    .locked { text-align: center; padding: var(--space-8) var(--space-5); }
+    .locked svg { width: 40px; height: 40px; color: var(--color-text-secondary); margin-bottom: var(--space-4); }
+
+    /* Dialog */
+    dialog {
+      border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6);
+      background: var(--color-surface); color: var(--color-text-primary); max-width: 420px; width: calc(100% - var(--space-8));
+      box-shadow: var(--shadow-overlay);
+    }
+    dialog::backdrop { background: rgba(0,0,0,0.45); }
+    dialog h3 { margin-top: 0; }
+    .dialog__actions { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
+
+    /* Footer */
+    .footer { border-top: 1px solid var(--color-border); margin-top: var(--space-10); padding: var(--space-7) 0; color: var(--color-text-secondary); font-size: 14px; }
+    .footer__row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; justify-content: space-between; }
+    .footer__promise { font-family: var(--font-heading); font-weight: 600; color: var(--color-text-primary); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+      .avatar__bob { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="#/" aria-label="Propelr home">
+        <span class="brand__mark" aria-hidden="true">P</span>
+        <span class="brand__word">Propelr</span>
+      </a>
+      <a class="nav__link" href="#/map" data-nav="map">Journey</a>
+      <a class="nav__link" href="#/reference" data-nav="reference">Reference</a>
+      <span class="nav__spacer"></span>
+      <button class="iconbtn" id="themeToggle" type="button" aria-label="Switch theme"></button>
+      <button class="iconbtn" id="resetBtn" type="button" aria-label="Reset progress" title="Reset progress"></button>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <footer class="footer">
+    <div class="container footer__row">
+      <span class="footer__promise">Inspiring Better Careers</span>
+      <span>Your progress is saved on this device. Nothing is uploaded.</span>
+    </div>
+  </footer>
+
+  <dialog id="resetDialog">
+    <h3>Reset your progress?</h3>
+    <p class="muted">This clears every quiz score, project, and your place on the map from this device. It cannot be undone.</p>
+    <div class="dialog__actions">
+      <button class="btn btn--secondary btn--sm" id="resetCancel" type="button">Keep my progress</button>
+      <button class="btn btn--danger btn--sm" id="resetConfirm" type="button">Reset everything</button>
+    </div>
+  </dialog>
+
+  <script>
+  /* ============================================================
+     ICONS (Lucide-style outline, inline so nothing loads remotely)
+     ============================================================ */
+  const ICONS = {
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    checkThin: '<path d="M20 6 9 17l-5-5"/>',
+    play: '<path d="m6 4 14 8-14 8Z"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    list: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+    ext: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    why: '<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    watch: '<path d="m6 4 14 8-14 8Z"/>',
+    layers: '<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
+    flask: '<path d="M9 3h6"/><path d="M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3"/><path d="M7.5 15h9"/>',
+    quiz: '<path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><rect x="3" y="3" width="18" height="18" rx="3"/>',
+    project: '<path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>',
+    arrowR: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    arrowL: '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+    arrowDown: '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+    lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    reset: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>',
+    map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/>',
+    trophy: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+    spark: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'
+  };
+  function icon(name, cls) {
+    return '<svg class="'+(cls||'')+'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[name]||'')+'</svg>';
+  }
+
+  /* ============================================================
+     COURSE CONTENT
+     ============================================================ */
+  const COURSE = {
+    title: "Tech for Non-Tech People",
+    lede: "A practical, hands-on course for PMs, founders, founder’s-office folks, and anyone running a tech team without writing code. You won’t learn to code. You’ll learn to speak the language, spot the bullshit, and write specs that don’t get sent back.",
+    pace: [
+      { w: "Week 1", do: "Modules 0 + 1. Open DevTools on your own product.", t: "3 hrs" },
+      { w: "Week 2", do: "Module 2. Make one API call in Postman.", t: "4 hrs" },
+      { w: "Week 3", do: "Module 3. Draw your data model. Learn four SQL queries.", t: "4 hrs" },
+      { w: "Week 4", do: "Modules 4 + 5. Sit in on a deploy. Write your permission matrix.", t: "3 hrs" },
+      { w: "Week 5", do: "Module 6. Audit last sprint. Fix your ticket template.", t: "3 hrs" },
+      { w: "Week 6", do: "Module 7. Rewrite one PRD properly. Get a dev to tear it apart.", t: "4 hrs" }
+    ],
+    modules: [
+      {
+        id: "m0", n: 0, week: "Week 1", title: "The mental model", tag: "The picture everything hangs off",
+        outcomes: [
+          "Draw the path any feature travels: User → Frontend → API → Backend → Database, and say what each layer does.",
+          "Classify any feature request as one of five actions: read, write, update, delete, or trigger.",
+          "Explain why “it’s complex” almost always means a question of where data lives, who can see it, or what happens when it fails."
+        ],
+        why: "Before any video, hold this picture in your head. Every feature you will ever spec is a move through this one pipeline. When a dev says something is complex, it’s almost always because of where the data lives, who is allowed to see it, or what happens when it fails.",
+        pipeline: true,
+        videos: [],
+        concepts: [
+          { t: "Frontend / Client", d: "What the user sees and touches — the browser or mobile app." },
+          { t: "API", d: "The contract between client and server: “send me this, I’ll send you back that.”" },
+          { t: "Backend / Server", d: "The logic and the rules. Users never touch it directly." },
+          { t: "Database", d: "Where the data actually lives." },
+          { t: "The five actions", d: "Every feature is one of: <strong>read</strong> (show data), <strong>write</strong> (capture new), <strong>update</strong> (change existing), <strong>delete</strong> (remove), or <strong>trigger</strong> (fire something else — a payment, email, or AI call)." }
+        ],
+        apply: "Take three features from your own product and label each one as read, write, update, delete, or trigger. Notice how few genuinely new shapes there are.",
+        quiz: [
+          { q: "Which layer holds the business logic and the rules?", opts: ["Frontend / Client", "The database", "Backend / Server", "The CDN"], a: 2, why: "The backend runs the logic. Users never touch it directly." },
+          { q: "A user changes their profile photo. Which of the five actions is this?", opts: ["Read", "Update", "Trigger", "Delete"], a: 1, why: "Changing existing data is an update." },
+          { q: "“Send an email when an order ships” is which action?", opts: ["Write", "Read", "Trigger", "Update"], a: 2, why: "It fires something elsewhere — a notification — so it’s a trigger." },
+          { q: "When a dev says a feature is “complex,” it’s usually about…", opts: ["The colour of the button", "Where data lives, who can see it, or what happens on failure", "How many people will use it", "The choice of programming language"], a: 1, why: "Complexity almost always lives in data location, permissions, and failure handling." },
+          { q: "In the pipeline, the API’s main job is to…", opts: ["Store the data", "Draw the screen", "Be the contract for how client and server talk", "Log the user in"], a: 2, why: "The API is the contract layer between what the user sees and where the logic runs." }
+        ],
+        project: {
+          title: "Map your product’s spine",
+          brief: "Pick one screen of your own product. For a single action on it (say, “load my dashboard”), draw the full five-layer pipeline and label which of the five actions it is.",
+          deliverable: "A one-page sketch: five boxes, arrows, and the action type named.",
+          checklist: [
+            "Picked one real screen and one action on it",
+            "Drew all five layers: User → Frontend → API → Backend → Database",
+            "Labelled the action as read / write / update / delete / trigger",
+            "Noted where the data for that screen actually lives"
+          ]
+        }
+      },
+      {
+        id: "m1", n: 1, week: "Week 1", title: "How the web works", tag: "Internet, HTTP, and “it works on my machine”",
+        outcomes: [
+          "Tell the difference between “the site is down,” “the API is down,” and “it works on my machine.”",
+          "Read an HTTP status code and know whose problem it is — yours, theirs, or the server’s.",
+          "Use your browser’s Network tab to watch your own product talk to itself."
+        ],
+        why: "So you stop saying “the site is down” when it’s the API, and so you understand why “it works on my machine” is a real thing.",
+        videos: [
+          { t: "The Internet — Crash Course Computer Science #29", src: "Crash Course", meta: "12 min · best single primer", type: "video", url: "https://www.youtube.com/watch?v=AEaKrq3SpW8" },
+          { t: "How does the internet work? — full course", src: "freeCodeCamp", meta: "2 hrs · zero prior knowledge", type: "video", url: "https://www.youtube.com/watch?v=zN8YNNHcaZc" },
+          { t: "Fireship — 100-second tech explainers", src: "YouTube channel", meta: "every buzzword your team name-drops", type: "channel", url: "https://www.youtube.com/@Fireship" },
+          { t: "Traversy Media — watch real code get built", src: "YouTube channel", meta: "diagrams into real projects", type: "channel", url: "https://www.youtube.com/@TraversyMedia" }
+        ],
+        concepts: [
+          { t: "Client / frontend", d: "What the user sees. Browser, mobile app." },
+          { t: "Server / backend", d: "The machine running the logic. Users never touch it." },
+          { t: "Request / response", d: "Every action is a question and an answer." },
+          { t: "HTTP methods", d: "<strong>GET</strong> (read), <strong>POST</strong> (create), <strong>PUT/PATCH</strong> (update), <strong>DELETE</strong> (remove)." },
+          { t: "Status codes", d: "<strong>200</strong> fine. <strong>400</strong> you sent junk. <strong>401</strong> not logged in. <strong>403</strong> logged in but not allowed. <strong>404</strong> doesn’t exist. <strong>500</strong> server broke." },
+          { t: "Latency", d: "How long the round trip takes. Users feel this." },
+          { t: "Cache", d: "A saved copy so you don’t ask again. Cause of half your “stale data” bugs." },
+          { t: "DNS", d: "Turns a domain name into a machine address." },
+          { t: "CDN", d: "Copies of your files sitting near the user. Makes things fast." },
+          { t: "Payload", d: "The actual data inside a request or response." }
+        ],
+        apply: "Open your own product in Chrome, hit F12, go to the Network tab, and click around. Watch the requests fire — that’s your product talking to itself. Do this once and half the abstraction dissolves.",
+        quiz: [
+          { q: "A user is logged in but gets blocked from an admin page. Which status code fits?", opts: ["401", "403", "404", "500"], a: 1, why: "401 = not logged in. 403 = logged in but not allowed — that’s this case." },
+          { q: "Which HTTP method creates new data?", opts: ["GET", "DELETE", "POST", "PATCH"], a: 2, why: "POST creates. GET reads, PATCH/PUT update, DELETE removes." },
+          { q: "A user swears they saved a change but sees the old version. Most likely culprit?", opts: ["DNS", "Caching", "The CDN went down", "A 500 error"], a: 1, why: "A stale cached copy is behind half of “stale data” reports." },
+          { q: "500 means…", opts: ["The user sent junk", "The page doesn’t exist", "The server broke — not the user’s fault", "The user isn’t logged in"], a: 2, why: "5xx codes are the server’s problem, not the user’s." },
+          { q: "What does DNS actually do?", opts: ["Stores your data near users", "Turns a domain name into a machine address", "Encrypts the request", "Counts your API calls"], a: 1, why: "DNS is the phone book: name → address." }
+        ],
+        project: {
+          title: "Network-tab detective",
+          brief: "Open your product’s DevTools Network tab and trigger one action (log in, load a list, save something).",
+          deliverable: "A short note on one request: its method, its status code, and roughly how long it took.",
+          checklist: [
+            "Opened DevTools → Network on your own product",
+            "Triggered one real action and watched the requests fire",
+            "Recorded the request method (GET/POST/…) and the status code",
+            "Noted the latency — and whether it felt slow to a user"
+          ]
+        }
+      },
+      {
+        id: "m2", n: 2, week: "Week 2", title: "APIs", tag: "The highest-value module on this list",
+        outcomes: [
+          "Read a simple JSON response and name what fields exist, what’s required, and what can be null.",
+          "Catch scope creep in the gap between what a design shows and what the API actually returns.",
+          "Ask the three questions that de-risk any integration: the contract, the rate limit, and who owns uptime."
+        ],
+        why: "Every integration, every partner conversation, every “can we pull data from X” question is an API question. Understand API contracts and you catch scope creep two weeks before it lands.",
+        videos: [
+          { t: "What is an API? In plain English", src: "YouTube", meta: "the gentle intro", type: "video", url: "https://www.youtube.com/watch?v=Yzx7ihtCGBs" },
+          { t: "What is an API? — the classic", src: "MuleSoft", meta: "3 min", type: "video", url: "https://www.youtube.com/watch?v=s7wmiS2mSXY" },
+          { t: "APIs for Beginners — watch Units 1 & 2, skip the coding", src: "freeCodeCamp · Craig Dennis", meta: "3 hrs full course", type: "video", url: "https://www.youtube.com/watch?v=WXsD0ZgxjRw" }
+        ],
+        concepts: [
+          { t: "API", d: "A contract: “send me this, I’ll send you back that.”" },
+          { t: "Endpoint", d: "One address in that contract, e.g. <span class=\"mono\">/users/123/courses</span>." },
+          { t: "REST vs GraphQL", d: "REST is the common style. GraphQL is the alternative where the client asks for exactly the fields it wants." },
+          { t: "JSON", d: "The format the data arrives in — nested labels and values. Ten minutes to learn to read." },
+          { t: "API key / token", d: "The password the calling system uses." },
+          { t: "Rate limit", d: "How many calls you’re allowed per hour. This kills integrations at scale — ask early." },
+          { t: "Webhook", d: "The reverse of polling: instead of you asking repeatedly, they call you when something happens." },
+          { t: "Third-party API", d: "Someone else’s system. Every one you add is a permanent dependency on their uptime, pricing, and breaking changes." }
+        ],
+        apply: "Open a public API in Postman (free) and make one call — weather, GitHub, anything. After you’ve done it once you’ll never be intimidated in an integration discussion again.",
+        callout: { h: "The PM move", p: "Before UI design starts, ask for the API contract — what fields exist, what’s required, what’s optional, what can be null. Scope balloons in the gap between “the design shows a name” and “the API doesn’t return a name.”" },
+        quiz: [
+          { q: "An API is best described as…", opts: ["A database", "A contract between two systems", "A programming language", "A design file"], a: 1, why: "“Send me this, I’ll send you back that” — it’s a contract." },
+          { q: "A webhook is…", opts: ["A faster database", "You asking the server on a loop", "The system calling you when something happens", "A type of API key"], a: 2, why: "A webhook flips the direction: they notify you, you don’t poll." },
+          { q: "Your integration works in testing but breaks once real traffic hits. Likely cause?", opts: ["JSON formatting", "The rate limit", "A missing webhook", "GraphQL"], a: 1, why: "Rate limits cap calls per hour and quietly kill integrations at scale." },
+          { q: "GraphQL differs from REST mainly because…", opts: ["It has no endpoints at all", "The client asks for exactly the fields it wants", "It doesn’t use JSON", "It needs no API key"], a: 1, why: "GraphQL lets the client request precisely the fields it needs." },
+          { q: "Before UI design starts, the sharp PM move is to…", opts: ["Pick the button colours", "Ask for the API contract: fields, required, optional, nullable", "Write the marketing copy", "Estimate the story points"], a: 1, why: "The contract closes the gap where scope silently balloons." }
+        ],
+        project: {
+          title: "Make your first API call",
+          brief: "Use Postman (or any tool) to hit one public API. Then actually read the JSON that comes back.",
+          deliverable: "A list of three fields from the response — and, for each, whether it could ever be null.",
+          checklist: [
+            "Made one successful call to a public API",
+            "Read the JSON response top to bottom",
+            "Listed three fields and what each contains",
+            "Flagged which fields could be missing or null (the scope-creep trap)"
+          ]
+        }
+      },
+      {
+        id: "m3", n: 3, week: "Week 3", title: "Data & databases", tag: "“Can we just add a field?”",
+        outcomes: [
+          "Say whether your product is probably SQL or NoSQL — and why that choice matters.",
+          "Sketch your product’s data model: entities as boxes, relationships as lines.",
+          "Write four SQL queries (SELECT, WHERE, GROUP BY, JOIN) to answer your own data questions."
+        ],
+        why: "“Can we just add a field” is either five minutes or three weeks, and the difference is the data model. Learning basic SQL is the highest-ROI technical skill for a PM, full stop.",
+        videos: [
+          { t: "SQL vs NoSQL Explained", src: "YouTube", meta: "4 min", type: "video", url: "https://www.youtube.com/watch?v=_Ss42Vb1SU4" },
+          { t: "SQL vs NoSQL — structure, storage, scaling", src: "YouTube", meta: "the longer breakdown", type: "video", url: "https://www.youtube.com/watch?v=ruz-vK8IesE" },
+          { t: "SQL for product managers — beginners", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=SQL+for+product+managers+beginners" }
+        ],
+        concepts: [
+          { t: "SQL / relational", d: "Postgres, MySQL. Rigid tables, strong guarantees. Most business software — your platform is probably here." },
+          { t: "NoSQL", d: "MongoDB, Firebase. Flexible shape, easier to change, weaker guarantees." },
+          { t: "Schema", d: "The shape of your data. Changing it after launch is expensive — have the data-model conversation before build." },
+          { t: "Migration", d: "Changing the schema on live data. Risky. Always ask “what’s the rollback?”" },
+          { t: "Keys & joins", d: "Primary key, foreign key, join — how tables link. “One user has many enrolments” is relational modelling." },
+          { t: "Index", d: "Makes lookups fast. A missing index is the usual answer to “why is this screen slow?”" }
+        ],
+        apply: "Draw your product’s data model on paper — entities as boxes, relationships as lines. Show it to a dev. They’ll correct you, and the correction is the lesson.",
+        quiz: [
+          { q: "Your platform has institutions, admins, and learners with strict rules. Likely database type?", opts: ["NoSQL", "SQL / relational", "A spreadsheet", "It doesn’t matter"], a: 1, why: "Strong guarantees and clear relationships point to relational/SQL." },
+          { q: "“Why is this one screen so slow?” — most common technical answer?", opts: ["A missing index", "The wrong font", "Too many buttons", "A slow CDN"], a: 0, why: "A missing index is the classic cause of a slow lookup." },
+          { q: "Changing the shape of live data is called a…", opts: ["Deploy", "Migration — and always ask for the rollback", "Join", "Cache"], a: 1, why: "A migration alters the schema on live data; rollback is the safety question." },
+          { q: "“One user has many enrolments” is modelled with…", opts: ["An index", "A cache", "A foreign key / join", "A webhook"], a: 2, why: "Foreign keys and joins express relationships between tables." },
+          { q: "NoSQL mainly trades away ___ in exchange for flexibility.", opts: ["Speed", "Strong guarantees", "Storage space", "The need for a schema forever"], a: 1, why: "Flexible shape comes at the cost of weaker guarantees." }
+        ],
+        project: {
+          title: "Draw your data model",
+          brief: "Sketch your product’s main entities as boxes and their relationships as lines.",
+          deliverable: "A box-and-line diagram plus one SELECT…WHERE question you wish you could answer without raising a ticket.",
+          checklist: [
+            "Listed your product’s core entities (users, orgs, courses, orders…)",
+            "Drew the relationships between them as lines",
+            "Marked at least one “one-to-many” relationship",
+            "Wrote one plain-English data question you’d answer with SQL"
+          ]
+        }
+      },
+      {
+        id: "m4", n: 4, week: "Week 4", title: "Environments & deployment", tag: "Local, staging, prod, and the cloud",
+        outcomes: [
+          "Name the four environments in order — and never demo from prod again.",
+          "Ask whether a release can be rolled back before it ships.",
+          "Explain how a feature flag separates “built” from “launched.”"
+        ],
+        why: "So you never demo from someone’s laptop, and so you know what “we’ll ship it Friday” actually involves.",
+        videos: [
+          { t: "Fireship — cloud, Docker, CI/CD explainers", src: "YouTube channel", meta: "short and sharp", type: "channel", url: "https://www.youtube.com/@Fireship" },
+          { t: "What is CI/CD, explained simply", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=what+is+CI+CD+explained+simply" },
+          { t: "Cloud computing for beginners — AWS basics", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=cloud+computing+explained+for+beginners+AWS+basics" }
+        ],
+        concepts: [
+          { t: "Local → Dev → Staging → Production", d: "Test on staging. Demo on staging. Never touch prod." },
+          { t: "Deploy & rollback", d: "Deploy = pushing new code live. Rollback = undoing it. Ask if rollback is possible before any risky release." },
+          { t: "Hotfix", d: "An emergency patch. Should be rare. If it’s weekly, your QA is broken." },
+          { t: "CI/CD", d: "Automation that tests and ships code. Good CI/CD means faster, safer releases. Worth fighting for." },
+          { t: "Feature flag", d: "Ship the code but keep it switched off, then turn it on for 5% of users. It separates “built” from “launched” and lets you kill a bad feature in seconds." },
+          { t: "Uptime / SLA", d: "The reliability promise. Matters enormously in government and enterprise contracts." },
+          { t: "Load / scale", d: "Will it survive 10,000 concurrent users? Ask before the big launch, not after." }
+        ],
+        apply: "Ask your team to walk you through one full deploy, start to finish. Watch it happen. Take notes.",
+        quiz: [
+          { q: "Where should you run a client demo?", opts: ["Production", "Staging", "A developer’s laptop", "Local"], a: 1, why: "Demo on staging. Never touch prod." },
+          { q: "A feature flag lets you…", opts: ["Delete a feature forever", "Ship code switched off and enable it gradually", "Skip testing", "Roll back the database"], a: 1, why: "Flags separate “built” from “launched” and let you kill a feature instantly." },
+          { q: "Weekly hotfixes usually signal…", opts: ["A fast team", "Broken QA", "Good CI/CD", "Too many feature flags"], a: 1, why: "Hotfixes should be rare; frequent ones mean QA is failing upstream." },
+          { q: "Before a risky release, the question to ask is…", opts: ["What colour is the button?", "Is rollback possible?", "How many story points?", "Which font?"], a: 1, why: "Knowing you can undo it is the safety net for a risky ship." },
+          { q: "CI/CD is best described as…", opts: ["A cloud provider", "A database", "Automation that tests and ships code", "A type of server"], a: 2, why: "CI/CD automates testing and delivery for faster, safer releases." }
+        ],
+        project: {
+          title: "Trace a deploy",
+          brief: "Get your team to walk you through a single deploy from start to finish.",
+          deliverable: "A short timeline of the steps, with staging and the rollback plan marked.",
+          checklist: [
+            "Watched (or had someone narrate) one full deploy",
+            "Noted where staging sits in the flow",
+            "Confirmed whether a rollback exists and how long it takes",
+            "Wrote down one thing that surprised you"
+          ]
+        }
+      },
+      {
+        id: "m5", n: 5, week: "Week 4", title: "Auth, roles & security", tag: "Where multi-tenant products live or die",
+        outcomes: [
+          "Tell authentication (who are you) from authorisation (what can you do).",
+          "Write a permission matrix: roles down the side, actions across the top.",
+          "Flag multi-tenancy and data residency early — before they become impossible to retrofit."
+        ],
+        why: "Multi-tenant products — any platform with institutions, admins, and learners under one roof — live or die on this. Get roles wrong and you rebuild.",
+        videos: [
+          { t: "Authentication vs authorization, explained", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=authentication+vs+authorization+explained" },
+          { t: "OAuth 2.0 explained simply", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=OAuth+2.0+explained+simply" },
+          { t: "Single sign-on (SSO) explained", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=single+sign+on+SSO+explained" }
+        ],
+        concepts: [
+          { t: "Authentication vs authorisation", d: "Authentication = who are you. Authorisation = what are you allowed to do. Different problems, different bugs." },
+          { t: "RBAC", d: "Role-based access control — permissions attached to roles, not individuals. Design the role matrix on day one and put it in the PRD as a table." },
+          { t: "Multi-tenancy", d: "Many organisations on one platform, each seeing only their own data. The hardest thing to retrofit — decide early." },
+          { t: "SSO", d: "Log in with Google, an institutional ID, or a government ID. Almost always required in institutional deals." },
+          { t: "PII, encryption, data residency", d: "What personal data you hold, how it’s protected, and which country the servers sit in. Government contracts turn on this." }
+        ],
+        apply: "Write your permission matrix — roles down the side, actions across the top, ticks in the middle. If you can’t fill it in, neither can your devs.",
+        quiz: [
+          { q: "“Who are you?” is the question answered by…", opts: ["Authorisation", "Authentication", "Encryption", "A webhook"], a: 1, why: "Authentication establishes identity. Authorisation is about permissions." },
+          { q: "Permissions attached to roles rather than individuals is called…", opts: ["SSO", "PII", "RBAC", "OAuth"], a: 2, why: "RBAC = role-based access control." },
+          { q: "Many organisations on one platform, each seeing only their own data, is…", opts: ["Multi-tenancy", "Single sign-on", "A migration", "Rate limiting"], a: 0, why: "That isolation between orgs is multi-tenancy." },
+          { q: "Which of these is hardest to retrofit and should be decided early?", opts: ["The button colours", "Multi-tenancy", "The logo", "The font"], a: 1, why: "Retrofitting tenant isolation onto a live product is brutally expensive." },
+          { q: "In government procurement, which tends to matter most?", opts: ["Animation speed", "Data residency and PII handling", "Dark mode", "The number of endpoints"], a: 1, why: "Where the data physically sits and how PII is protected can make or break the deal." }
+        ],
+        project: {
+          title: "Build your permission matrix",
+          brief: "Make a grid: your product’s roles down the side, the key actions across the top, ticks where a role is allowed.",
+          deliverable: "A filled-in roles × actions table — plus one cell you couldn’t confidently fill.",
+          checklist: [
+            "Listed every role (admin, institution manager, learner, guest…)",
+            "Listed the key actions (view, create, edit, delete, export…)",
+            "Ticked who can do what",
+            "Circled at least one cell that needs a product decision"
+          ]
+        }
+      },
+      {
+        id: "m6", n: 6, week: "Week 5", title: "Agile, Scrum & Jira", tag: "The operating system your team runs on",
+        outcomes: [
+          "Break work down correctly: epic → story → subtask, and know what a spike is for.",
+          "Run your side of each ceremony without turning standup into status theatre.",
+          "Protect a sprint: freeze scope, swap instead of add, and never weaponise velocity."
+        ],
+        why: "It’s the operating system your team runs on. Bad process burns more time than bad code.",
+        videos: [
+          { t: "Scrum Essentials in Under 10 Minutes", src: "YouTube", meta: "fast primer", type: "video", url: "https://www.youtube.com/watch?v=RtQ3tpq-RuE" },
+          { t: "The Scrum Guide in under 15 minutes", src: "YouTube", meta: "the canonical version", type: "video", url: "https://www.youtube.com/watch?v=hLkDdAl8OYg" },
+          { t: "Intro to Scrum in Under 10 Minutes", src: "YouTube", meta: "another angle", type: "video", url: "https://www.youtube.com/watch?v=XU0llRltyFM" },
+          { t: "Jira Tutorial for Beginners — Atlassian official", src: "Atlassian", meta: "from the source", type: "video", url: "https://www.youtube.com/watch?v=emidrJeUTaM" },
+          { t: "Jira for Beginners — full free course", src: "YouTube", meta: "go deeper", type: "video", url: "https://www.youtube.com/watch?v=NDVSMlVYxm8" },
+          { t: "Atlassian Jira full course playlist", src: "YouTube playlist", meta: "reference set", type: "playlist", url: "https://www.youtube.com/playlist?list=PLuAoMvvRllpQruEtbJQjsKRUI-FHaTyiV" }
+        ],
+        concepts: [
+          { t: "The hierarchy", d: "<strong>Epic</strong> = a big chunk of value (weeks). <strong>Story</strong> = one user-facing slice (days). <strong>Subtask</strong> = the dev’s own breakdown. <strong>Bug</strong> = its own type. <strong>Spike</strong> = a time-boxed investigation when nobody knows the answer yet." },
+          { t: "Story points", d: "Complexity, not hours. Never argue points. Never convert them to days in public." },
+          { t: "Velocity", d: "Points completed per sprint. Use it to forecast — never as a performance metric, or the numbers get gamed." },
+          { t: "Frozen scope", d: "Sprint scope is frozen. Something urgent lands, you swap something out. You don’t add." },
+          { t: "Ready & Done", d: "Definition of Ready = what a ticket needs before a dev picks it up. Definition of Done = what it needs before you close it. Write both once, then hold the line." },
+          { t: "Kanban vs Scrum", d: "Scrum for feature work in cycles; Kanban for continuous flow (support, ops, content). Pick per team, not per company." }
+        ],
+        apply: "Audit your last sprint. How many tickets got added mid-sprint? How many rolled over? That number is your real process debt.",
+        quiz: [
+          { q: "Story points measure…", opts: ["Hours of work", "Complexity", "Developer salary", "Calendar days"], a: 1, why: "Points are complexity. Converting them to days in public is how they get gamed." },
+          { q: "Something urgent lands mid-sprint. The right move is to…", opts: ["Add it on top", "Swap something out for it", "Cancel the sprint", "Ignore it until next sprint no matter what"], a: 1, why: "Scope is frozen: you swap, you don’t add." },
+          { q: "Using velocity as a performance metric leads to…", opts: ["Faster teams", "Gamed, useless numbers", "Better forecasting", "Fewer bugs"], a: 1, why: "The moment velocity becomes a target, it stops measuring reality." },
+          { q: "A time-boxed investigation when nobody knows the answer yet is a…", opts: ["Bug", "Epic", "Spike", "Retro"], a: 2, why: "A spike buys time to reduce an unknown." },
+          { q: "Kanban is the better fit for…", opts: ["Fixed-cycle feature work", "Continuous flow like support and ops", "Writing PRDs", "Sprint planning only"], a: 1, why: "Kanban suits continuous streams; Scrum suits cyclic feature work." }
+        ],
+        project: {
+          title: "Sprint audit",
+          brief: "Pull up your last sprint and count the churn.",
+          deliverable: "Two numbers — tickets added mid-sprint and tickets rolled over — plus one process fix.",
+          checklist: [
+            "Counted tickets added after the sprint started",
+            "Counted tickets that rolled over unfinished",
+            "Named the biggest source of churn",
+            "Wrote one change to your Definition of Ready or ticket template"
+          ]
+        }
+      },
+      {
+        id: "m7", n: 7, week: "Week 6", title: "PRDs & acceptance criteria", tag: "The module that makes you effective",
+        outcomes: [
+          "Write a PRD that leads with the problem and an explicit out-of-scope section.",
+          "Turn a feature into thin, vertical user stories in the “As a… I want… so that…” format.",
+          "Write Given / When / Then acceptance criteria a QA engineer could actually test."
+        ],
+        why: "Highest-leverage module here. Everything else makes you conversant; this one makes you effective. Acceptance criteria are the product — everything upstream is context, everything downstream is execution.",
+        videos: [
+          { t: "How to write a PRD (product requirements document)", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=how+to+write+a+PRD+product+requirements+document" },
+          { t: "How to write acceptance criteria & user stories", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=how+to+write+acceptance+criteria+user+stories" }
+        ],
+        concepts: [
+          { t: "The PRD skeleton", d: "Problem → User & context → Success metric → Scope → Out of scope → User flows → Edge & error states → Data & permissions → Dependencies → Open questions." },
+          { t: "Out of scope, written first", d: "The cheapest conflict-prevention tool in existence. Write it before you write anything else." },
+          { t: "One precise success metric", d: "One primary number, defined precisely. If you can’t measure it, you can’t claim it worked." },
+          { t: "User story", d: "<span class=\"mono\">As a [role], I want to [action], so that [outcome].</span> One story = one shippable slice. Vertical (thin, end-to-end), never horizontal." },
+          { t: "Acceptance criteria", d: "<span class=\"mono\">Given / When / Then.</span> If a QA engineer can’t test it from your AC, it isn’t AC — it’s a wish. Cover the negative cases too." },
+          { t: "Edge & error states", d: "Empty, loading, failure, no-permission, offline. Devs build the happy path perfectly, then ask what happens when the list is empty. Have the answer ready." }
+        ],
+        apply: "Take your worst ticket from last sprint and rewrite it with proper acceptance criteria. Show the dev both versions. Watch their face.",
+        quiz: [
+          { q: "Which PRD section should you write first?", opts: ["User flows", "Out of scope", "Open questions", "Dependencies"], a: 1, why: "Out-of-scope, written first, prevents most arguments before they start." },
+          { q: "A good user story is…", opts: ["“Build the whole database this sprint”", "One thin, shippable, end-to-end slice", "A list of every screen", "The developer’s task breakdown"], a: 1, why: "Stories are vertical slices — thin, end-to-end, shippable." },
+          { q: "“If a QA engineer can’t test it, it isn’t AC. It’s a ___.”", opts: ["bug", "wish", "spike", "story"], a: 1, why: "Untestable AC is just a wish." },
+          { q: "Acceptance criteria are written in which format?", opts: ["As a / I want / so that", "Given / When / Then", "Problem / Solution", "Epic / Story / Subtask"], a: 1, why: "Given/When/Then makes the criterion concretely testable." },
+          { q: "Beyond the happy path, AC must also cover…", opts: ["The marketing plan", "The negative and failure cases", "The pricing", "The colour palette"], a: 1, why: "Empty, failure, and no-permission states are where the happy path breaks." }
+        ],
+        project: {
+          title: "Rewrite your worst ticket",
+          brief: "Take one genuinely weak ticket from a recent sprint and rebuild it properly.",
+          deliverable: "One user story plus at least three Given/When/Then criteria — including one failure case.",
+          checklist: [
+            "Rewrote the request as “As a… I want… so that…”",
+            "Confirmed it’s a thin vertical slice, not a horizontal one",
+            "Wrote 3+ Given/When/Then acceptance criteria",
+            "Included at least one negative / failure case"
+          ]
+        }
+      },
+      {
+        id: "m8", n: 8, week: "Reference", title: "Git & version control", tag: "Light touch — so the words stop being noise",
+        outcomes: [
+          "Follow a code conversation: what repo, branch, commit, merge, and PR actually mean.",
+          "Know that “it’s in review” is a real queue you must put in your timelines.",
+          "Understand what a merge conflict is and why it slows a team down."
+        ],
+        why: "You’ll never use it directly, but you’ll hear it daily and should know what’s being said. When a dev says “it’s in review,” a PR is open and another dev has to approve it — a real queue and a real delay. Put it in your timelines.",
+        videos: [
+          { t: "Git & GitHub explained for beginners", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=git+and+github+explained+for+beginners" },
+          { t: "Fireship — Git in 100 Seconds", src: "YouTube channel", meta: "the fastest possible intro", type: "channel", url: "https://www.youtube.com/@Fireship" }
+        ],
+        concepts: [
+          { t: "Repo", d: "The codebase." },
+          { t: "Branch", d: "A parallel copy for new work." },
+          { t: "Commit", d: "A saved change." },
+          { t: "Merge", d: "Folding a branch back into the main one." },
+          { t: "Pull request (PR)", d: "“Review my branch before it merges.” That’s a real approval queue." },
+          { t: "Merge conflict", d: "Two people changed the same line. Someone has to resolve it by hand." },
+          { t: "Main & revert", d: "Main = the live truth. Revert = undoing a change." }
+        ],
+        apply: "Next time you hear “it’s in review,” ask which PR and who’s reviewing — then add that delay to your timeline.",
+        quiz: [
+          { q: "“It’s in review” means…", opts: ["The code is live", "A PR is open and another dev must approve it", "The tests failed", "The branch was deleted"], a: 1, why: "A PR in review is a real queue — build it into your estimate." },
+          { q: "Two people changed the same line of code. That’s a…", opts: ["Commit", "Merge conflict", "Revert", "Spike"], a: 1, why: "A merge conflict has to be resolved by hand." },
+          { q: "A branch is…", opts: ["The live codebase", "A parallel copy for new work", "A saved change", "A code review"], a: 1, why: "Branches let work happen in parallel without touching main." },
+          { q: "Folding a branch back into the main line is a…", opts: ["Merge", "Commit", "Clone", "Fork"], a: 0, why: "Merging folds the branch’s changes into main." },
+          { q: "“Main” refers to…", opts: ["A test server", "The live truth of the codebase", "A single developer", "The design file"], a: 1, why: "Main is the authoritative, live version of the code." }
+        ],
+        project: {
+          title: "Read a real pull request",
+          brief: "Open one actual pull request in your team’s repository and just read it.",
+          deliverable: "A note on the branch name, who’s reviewing, and how long it has been open.",
+          checklist: [
+            "Opened one real PR in your repo",
+            "Noted the branch name and what it changes",
+            "Found who the reviewer is",
+            "Checked how long it’s been waiting — that’s hidden delay in your timeline"
+          ]
+        }
+      },
+      {
+        id: "m9", n: 9, week: "Reference", title: "The AI layer", tag: "The vocabulary behind every AI product chat",
+        outcomes: [
+          "Speak the vocabulary in any AI product conversation: tokens, context window, RAG, embeddings.",
+          "Know when the answer is RAG plus better prompts — not fine-tuning.",
+          "Ask the two numbers that decide whether an AI feature survives at scale: inference cost and latency."
+        ],
+        why: "This vocabulary comes up in every AI product conversation. Knowing it is the difference between steering the feature and being sold one.",
+        videos: [
+          { t: "LLMs explained for product managers", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=LLM+explained+for+product+managers" },
+          { t: "RAG (retrieval-augmented generation) explained", src: "YouTube search", meta: "pick the best recent result", type: "search", url: "https://www.youtube.com/results?search_query=RAG+retrieval+augmented+generation+explained" },
+          { t: "Fireship — LLMs, RAG, agents, vector databases", src: "YouTube channel", meta: "short explainers", type: "channel", url: "https://www.youtube.com/@Fireship" }
+        ],
+        concepts: [
+          { t: "Model, token, context window", d: "The token is the unit of text; the context window is how much the model holds at once. Tokens are cost." },
+          { t: "Prompt, system prompt, temperature", d: "The instruction, the persistent instruction, and the randomness dial." },
+          { t: "RAG", d: "Feeding the model your own documents at query time so it answers from your content instead of guessing. Most “AI on our data” projects are this." },
+          { t: "Embeddings & vector database", d: "How the system finds the relevant chunk of your content to feed in." },
+          { t: "Fine-tuning", d: "Retraining on your data. Expensive, usually the wrong answer — try RAG and better prompts first." },
+          { t: "Hallucination, evals, guardrails", d: "The model makes things up; evals measure how often; guardrails contain it. If a vendor can’t show you their evals, they don’t have any." },
+          { t: "Inference cost & latency", d: "The two numbers that decide whether your AI feature survives at scale. Ask for both, per user session, early." }
+        ],
+        apply: "For one AI feature idea, ask your team for two numbers: the inference cost per user session and the latency. Then decide whether it survives at scale.",
+        quiz: [
+          { q: "“AI that answers from our own documents” is usually…", opts: ["Fine-tuning", "RAG", "A bigger context window", "A webhook"], a: 1, why: "Most “AI on our data” projects are retrieval-augmented generation." },
+          { q: "Tokens are…", opts: ["A security key", "The unit of text — and the thing you pay for", "A type of model", "A database row"], a: 1, why: "Tokens are the unit of text and drive cost." },
+          { q: "A vendor can’t show you their evals. That means…", opts: ["Their model is fine", "They probably don’t have any", "Evals aren’t needed", "The model is cheap"], a: 1, why: "No evals shown usually means no evals exist — you can’t measure quality." },
+          { q: "Fine-tuning should usually be…", opts: ["The first thing you try", "The last resort — try RAG and better prompts first", "Free", "Required for every AI feature"], a: 1, why: "Fine-tuning is expensive and often unnecessary; RAG and prompts come first." },
+          { q: "The two numbers that decide if an AI feature survives at scale are…", opts: ["Colour and font", "Inference cost and latency", "Tokens and temperature", "Uptime and DNS"], a: 1, why: "Cost per session and latency decide whether it works for real users." }
+        ],
+        project: {
+          title: "Cost & latency check",
+          brief: "Take one AI feature idea and pressure-test it on the two numbers that matter.",
+          deliverable: "The inference cost per user session, the latency, and a verdict at 10,000 users.",
+          checklist: [
+            "Picked one concrete AI feature idea",
+            "Got (or estimated) the inference cost per user session",
+            "Got (or estimated) the latency per call",
+            "Wrote a yes/no verdict for 10,000 concurrent users"
+          ]
+        }
+      }
+    ],
+    capstone: {
+      id: "capstone", title: "Write a PRD that ships", tag: "Your graduation project",
+      outcomes: [
+        "Turn everything you’ve learned into one document a team could actually build from.",
+        "Ground a feature in its data model, permissions, API contract, and testable acceptance criteria.",
+        "Lead with the problem and an out-of-scope section — the two things that prevent most arguments."
+      ],
+      brief: "Put it all together. Take one real feature on your own product and write a full PRD using the Module 7 skeleton — pulling in the data model from Module 3, the permission matrix from Module 5, and the API-contract questions from Module 2. This is where the whole course becomes a habit.",
+      checklist: [
+        "Problem stated with evidence — and no solution language",
+        "Out-of-scope section written first",
+        "One precise, measurable success metric",
+        "Happy path plus every alternate flow",
+        "Edge & error states: empty, loading, failure, no-permission, offline",
+        "A permission matrix — roles × actions (Module 5)",
+        "A data-model sketch of the entities involved (Module 3)",
+        "The API-contract questions you’d ask before UI design (Module 2)",
+        "3+ user stories with Given/When/Then acceptance criteria, including failure cases (Module 7)",
+        "Dependencies and open questions, each with an owner and a date"
+      ]
+    },
+    detector: [
+      { say: "It’s complex.", reply: "What’s the smallest version that ships this week?" },
+      { say: "It’ll take a month.", reply: "What’s the riskiest unknown in that month?" },
+      { say: "That’s not possible.", reply: "Not possible, or not possible this sprint?" },
+      { say: "We need to refactor first.", reply: "What breaks if we don’t? What does it buy us?" },
+      { say: "It’s done.", reply: "Merged, deployed to staging, and tested against the AC?" },
+      { say: "We’ll fix it later.", reply: "Which ticket, which sprint?" }
+    ],
+    principles: [
+      "Own the what and the why. Never the how. Spec implementation and you’ve taken responsibility for a decision you’re not qualified to make.",
+      "Write the out-of-scope section first. The cheapest conflict-prevention tool in existence.",
+      "Acceptance criteria are the product. Everything upstream is context; everything downstream is execution.",
+      "Budget 20% of every sprint for tech debt. Skip it three sprints running and your velocity halves.",
+      "Learn SQL. Four queries, one weekend, a permanent change in your relationship with your own data.",
+      "Sit in on one deploy, one bug triage, one code review. More learning in those three hours than in this whole course.",
+      "Devs respect precision, not deference. A tight ticket buys more credibility than any amount of being nice about it."
+    ]
+  };
+
+  /* ============================================================
+     STATE  (persisted on-device)
+     ============================================================ */
+  const STORE_KEY = "propelr_tnt_progress_v1";
+  const N_MODULES = COURSE.modules.length;      // 10
+  const N_STOPS = N_MODULES + 1;                 // + capstone
+
+  function blankState() {
+    const m = {};
+    COURSE.modules.forEach(function (mod) {
+      m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false) };
+    });
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), theme: null, started: false };
+  }
+  function loadState() {
+    let s;
+    try { s = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { s = null; }
+    const base = blankState();
+    if (!s || typeof s !== "object") return base;
+    // merge defensively so content changes never crash old saves
+    base.started = !!s.started;
+    base.theme = s.theme || null;
+    if (Array.isArray(s.capstone)) base.capstone.forEach(function (_, i) { base.capstone[i] = !!s.capstone[i]; });
+    if (s.modules) COURSE.modules.forEach(function (mod) {
+      const sm = s.modules[mod.id]; const bm = base.modules[mod.id];
+      if (sm) {
+        bm.quizBest = (typeof sm.quizBest === "number") ? sm.quizBest : null;
+        bm.quizPassed = !!sm.quizPassed;
+        if (Array.isArray(sm.project)) bm.project.forEach(function (_, i) { bm.project[i] = !!sm.project[i]; });
+      }
+    });
+    return base;
+  }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+  let state = loadState();
+
+  /* derived helpers */
+  function quizzesPassed() { return COURSE.modules.filter(function (m) { return state.modules[m.id].quizPassed; }).length; }
+  function projectDone(id) { const p = state.modules[id].project; return p.length > 0 && p.every(Boolean); }
+  function projectsDone() { return COURSE.modules.filter(function (m) { return projectDone(m.id); }).length; }
+  function capstoneUnlocked() { return quizzesPassed() === N_MODULES; }
+  function capstoneDone() { return state.capstone.length > 0 && state.capstone.every(Boolean); }
+  // Avatar sits at the first module whose quiz isn't passed; once all pass, it's at the capstone stop.
+  function currentStop() {
+    for (let i = 0; i < N_MODULES; i++) { if (!state.modules[COURSE.modules[i].id].quizPassed) return i; }
+    return N_MODULES;
+  }
+  function overallPercent() {
+    const total = N_MODULES + N_MODULES + 1; // quizzes + projects + capstone
+    const done = quizzesPassed() + projectsDone() + (capstoneDone() ? 1 : 0);
+    return Math.round((done / total) * 100);
+  }
+
+  const reduceMotion = function () { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; };
+
+  /* ============================================================
+     THEME
+     ============================================================ */
+  function initTheme() {
+    let t = state.theme;
+    if (!t) t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    setTheme(t, false);
+  }
+  function setTheme(t, persist) {
+    document.documentElement.setAttribute("data-theme", t);
+    const btn = document.getElementById("themeToggle");
+    btn.innerHTML = icon(t === "dark" ? "sun" : "moon");
+    btn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    if (persist) { state.theme = t; save(); }
+  }
+
+  /* ============================================================
+     RENDER HELPERS
+     ============================================================ */
+  const main = document.getElementById("main");
+  function esc(s) { return String(s); }
+  function moduleById(id) { return COURSE.modules.find(function (m) { return m.id === id; }); }
+
+  function videoCard(v) {
+    const isSearch = v.type === "search";
+    const ic = isSearch ? "search" : "play";
+    const typeLabel = ({ video: "Video", search: "YouTube search", channel: "Channel", playlist: "Playlist" })[v.type] || "Video";
+    return '<a class="vcard" href="' + v.url + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="vcard__ic">' + icon(ic) + '</span>' +
+      '<span style="flex:1;min-width:0">' +
+        '<span class="vcard__t">' + v.t + '</span>' +
+        '<span class="vcard__m"><span>' + v.src + '</span><span aria-hidden="true">·</span><span>' + v.meta + '</span></span>' +
+        '<span class="vcard__m" style="margin-top:4px"><span class="badge" style="padding:3px 8px">' + typeLabel + '</span></span>' +
+      '</span>' +
+      icon("ext", "vcard__ext") +
+    '</a>';
+  }
+
+  function pipelineHTML() {
+    const steps = [
+      { n: "User", s: "what they want" },
+      { n: "Frontend", s: "what they see" },
+      { n: "API", s: "the contract" },
+      { n: "Backend", s: "the logic & rules" },
+      { n: "Database", s: "where data lives" }
+    ];
+    let h = '<div class="pipeline" role="img" aria-label="Pipeline: User to Frontend to API to Backend to Database">';
+    steps.forEach(function (st, i) {
+      h += '<div class="pipe' + (i === steps.length - 1 ? ' is-db' : '') + '"><strong>' + st.n + '</strong><span>' + st.s + '</span></div>';
+      if (i < steps.length - 1) h += '<div class="pipe-arrow">' + icon("arrowR") + '</div>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  /* ============================================================
+     VIEW: WELCOME
+     ============================================================ */
+  function renderWelcome() {
+    const resuming = state.started && (quizzesPassed() > 0 || projectsDone() > 0);
+    let pace = '<table class="pace"><thead><tr><th>When</th><th>Do this</th><th class="num">Time</th></tr></thead><tbody>';
+    COURSE.pace.forEach(function (r) { pace += '<tr><td>' + r.w + '</td><td>' + r.do + '</td><td class="num">' + r.t + '</td></tr>'; });
+    pace += '</tbody></table>';
+
+    const features = [
+      { i: "map", h: "A journey map", p: "Watch yourself move stop by stop across a map of the whole course." },
+      { i: "quiz", h: "Quizzes with feedback", p: "A short check after every module, with the reasoning on every answer." },
+      { i: "project", h: "A mini-project each module", p: "Apply each idea to your own product — that’s where it sticks." },
+      { i: "trophy", h: "A capstone", p: "Finish by writing a real PRD, grounded in everything you’ve learned." }
+    ];
+    let feat = '<div class="feature-grid">';
+    features.forEach(function (f) {
+      feat += '<div class="feature"><span class="feature__ic">' + icon(f.i) + '</span><h4>' + f.h + '</h4><p>' + f.p + '</p></div>';
+    });
+    feat += '</div>';
+
+    main.innerHTML =
+      '<section class="view"><div class="container">' +
+        '<div class="hero">' +
+          '<div class="accent-bar"></div>' +
+          '<p class="eyebrow">A Propelr course</p>' +
+          '<h1 class="hero__title">' + COURSE.title + '</h1>' +
+          '<p class="hero__lede">' + COURSE.lede + '</p>' +
+          '<div class="hero__cta">' +
+            '<a class="btn btn--lg" href="#/map">' + (resuming ? 'Resume the journey' : 'Start the journey') + icon("arrowR", "btn__icon") + '</a>' +
+            '<a class="btn btn--secondary btn--lg" href="#/reference">See the reference</a>' +
+          '</div>' +
+        '</div>' +
+        feat +
+        '<hr class="rule" />' +
+        '<div class="feature-grid" style="grid-template-columns:1fr;gap:var(--space-5)">' +
+          '<div class="card reading" style="max-width:100%">' +
+            '<h2>How to use this</h2>' +
+            '<p class="muted">Don’t race through it. Work one module a week over about six weeks, three to four hours each. After each module, do the mini-project on your own product — that’s where it sticks. Watching without applying is entertainment.</p>' +
+            '<p class="muted" style="margin:0">You’re not learning to code. You’re learning to speak the language, spot the bullshit, and write specs that don’t get sent back.</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="section"><h2>Suggested pace</h2><div class="card" style="padding:var(--space-2) var(--space-4)">' + pace + '</div>' +
+          '<p class="muted" style="font-size:14px;margin-top:var(--space-3)">Modules 8 and 9 are reference — read them when they come up.</p>' +
+        '</div>' +
+        '<div class="note" style="margin-top:var(--space-6)">' + icon("info") + '<span>Your progress — quiz scores, projects, and your place on the map — is saved only in this browser, on this device. Nothing is uploaded, and clearing your browser data will clear it.</span></div>' +
+      '</div></section>';
+    setNav(null);
+  }
+
+  /* ============================================================
+     VIEW: MAP  (+ moving avatar)
+     ============================================================ */
+  const STOPS = [
+    { x: 118, y: 86 }, { x: 322, y: 210 }, { x: 118, y: 334 }, { x: 322, y: 458 },
+    { x: 118, y: 582 }, { x: 322, y: 706 }, { x: 118, y: 830 }, { x: 322, y: 954 },
+    { x: 118, y: 1078 }, { x: 322, y: 1202 }, { x: 220, y: 1352 }
+  ];
+  const VIEW_W = 440, VIEW_H = 1440;
+  let lastRenderedStop = null;
+
+  function catmullPath(pts) {
+    if (pts.length < 2) return "";
+    let d = "M " + pts[0].x + " " + pts[0].y;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
+      const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+      const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+      d += " C " + c1x + " " + c1y + " " + c2x + " " + c2y + " " + p2.x + " " + p2.y;
+    }
+    return d;
+  }
+
+  function renderMap() {
+    const pct = overallPercent();
+    const qp = quizzesPassed(), pd = projectsDone();
+    const cur = currentStop();
+
+    // resume target
+    let resumeHref, resumeLabel;
+    if (qp < N_MODULES) { const m = COURSE.modules[cur]; resumeHref = "#/module/" + m.id; resumeLabel = "Module " + m.n + " · " + m.title; }
+    else if (!capstoneDone()) { resumeHref = "#/capstone"; resumeLabel = "The capstone"; }
+    else { resumeHref = "#/reference"; resumeLabel = "The reference"; }
+
+    const C = 2 * Math.PI * 54;
+    const ring =
+      '<div class="ring"><svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true">' +
+        '<circle class="ring__track" cx="64" cy="64" r="54"></circle>' +
+        '<circle class="ring__val" cx="64" cy="64" r="54" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - pct / 100)) + '"></circle>' +
+      '</svg><div class="ring__label"><span class="ring__pct">' + pct + '%</span><span class="ring__cap">Journey</span></div></div>';
+
+    const stats =
+      '<div class="stats">' +
+        '<div class="stat"><div class="stat__n">' + qp + '<span style="font-size:14px;color:var(--color-text-secondary)">/' + N_MODULES + '</span></div><div class="stat__l">Modules cleared</div></div>' +
+        '<div class="stat"><div class="stat__n">' + pd + '<span style="font-size:14px;color:var(--color-text-secondary)">/' + N_MODULES + '</span></div><div class="stat__l">Projects done</div></div>' +
+        '<div class="stat"><div class="stat__n">' + (capstoneDone() ? icon("check") : (capstoneUnlocked() ? "•" : icon("lock"))) + '</div><div class="stat__l">Capstone ' + (capstoneDone() ? "complete" : (capstoneUnlocked() ? "unlocked" : "locked")) + '</div></div>' +
+      '</div>';
+
+    main.innerHTML =
+      '<section class="view"><div class="container">' +
+        '<p class="eyebrow">Your journey</p>' +
+        '<h1 style="margin-bottom:var(--space-2)">' + (pct === 100 ? "You’ve finished the journey" : "Move across the map, one module at a time") + '</h1>' +
+        '<p class="muted reading">Each stop is a module. Clear its quiz and your traveller walks on to the next. The yellow trail is how far you’ve come.</p>' +
+        '<div class="card" style="margin-top:var(--space-5)"><div class="tracker">' + ring + '<div>' + stats +
+          '<div class="resume-row"><div style="font-size:14px"><span class="muted">Up next</span><br><b>' + resumeLabel + '</b></div>' +
+          '<a class="btn" href="' + resumeHref + '">' + (pct === 100 ? "Revisit" : "Continue") + icon("arrowR", "btn__icon") + '</a></div>' +
+        '</div></div></div>' +
+        '<div class="map-wrap"><svg class="map-svg" id="journey" viewBox="0 0 ' + VIEW_W + ' ' + VIEW_H + '" role="list" aria-label="Course map">' +
+          '<path id="mapBase" class="map-base"></path>' +
+          '<path id="mapDone" class="map-done"></path>' +
+          '<g id="nodes"></g>' +
+          '<g id="avatar" aria-hidden="true"></g>' +
+        '</svg></div>' +
+        '<div class="legend">' +
+          '<span><i class="l-done"></i> Cleared</span>' +
+          '<span><i class="l-current"></i> You are here</span>' +
+          '<span><i class="l-future"></i> Ahead</span>' +
+        '</div>' +
+      '</div></section>';
+
+    buildMap(cur);
+    setNav("map");
+  }
+
+  function buildMap(cur) {
+    const base = document.getElementById("mapBase");
+    const done = document.getElementById("mapDone");
+    const nodesG = document.getElementById("nodes");
+    const d = catmullPath(STOPS);
+    base.setAttribute("d", d);
+    done.setAttribute("d", d);
+
+    const L = base.getTotalLength();
+    // path length nearest to each stop point
+    const stopLen = STOPS.map(function (p) { return nearestLength(base, p, L); });
+
+    // yellow trail up to current stop
+    done.style.strokeDasharray = L;
+    const frac = cur / (N_STOPS - 1);
+    // disable transition on first paint to avoid an initial sweep
+    if (lastRenderedStop === null) { done.style.transition = "none"; }
+    done.style.strokeDashoffset = L * (1 - frac);
+    if (lastRenderedStop === null) { void done.getBoundingClientRect(); done.style.transition = ""; }
+
+    // nodes
+    let nh = "";
+    for (let i = 0; i < N_STOPS; i++) {
+      const p = STOPS[i];
+      const isCap = i === N_MODULES;
+      const mod = isCap ? COURSE.capstone : COURSE.modules[i];
+      const doneState = isCap ? capstoneDone() : state.modules[mod.id].quizPassed;
+      const isCurrent = i === cur;
+      const href = isCap ? "#/capstone" : ("#/module/" + mod.id);
+      const cls = "node" + (doneState ? " is-done" : "") + (isCurrent ? " is-current" : "");
+      const numMarkup = isCap
+        ? '<g transform="translate(' + p.x + ',' + p.y + ')"><g class="node__check" transform="translate(-9,-9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' + ICONS.flag + '</svg></g></g>'
+        : (doneState
+            ? '<g class="node__check" transform="translate(' + (p.x - 9) + ',' + (p.y - 9) + ')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' + ICONS.check + '</svg></g>'
+            : '<text class="node__num" x="' + p.x + '" y="' + p.y + '">' + mod.n + '</text>');
+      const label = isCap ? "Capstone" : ("Module " + mod.n);
+      const title = isCap ? COURSE.capstone.title : mod.title;
+      const status = doneState ? "Cleared" : (isCurrent ? "You are here" : "");
+      nh += '<g class="' + cls + '" role="listitem">' +
+        '<a href="' + href + '" aria-label="' + label + ': ' + title + (status ? ' — ' + status : '') + '">' +
+          '<circle class="node__hit" cx="' + p.x + '" cy="' + p.y + '" r="46"></circle>' +
+          '<circle class="node__circle" cx="' + p.x + '" cy="' + p.y + '" r="26"></circle>' +
+          numMarkup +
+          '<text class="node__label" x="' + p.x + '" y="' + (p.y + 48) + '">' + label + '</text>' +
+          '<text class="node__sub" x="' + p.x + '" y="' + (p.y + 63) + '">' + (status || title.slice(0, 22)) + '</text>' +
+        '</a></g>';
+    }
+    nodesG.innerHTML = nh;
+
+    // avatar
+    const from = (lastRenderedStop === null) ? cur : lastRenderedStop;
+    placeAvatar(base, stopLen[from]);
+    if (from !== cur && !reduceMotion()) {
+      animateAvatar(base, stopLen[from], stopLen[cur]);
+    } else {
+      placeAvatar(base, stopLen[cur]);
+    }
+    lastRenderedStop = cur;
+  }
+
+  function nearestLength(path, pt, L) {
+    let best = 0, bestD = Infinity;
+    const steps = 500;
+    for (let i = 0; i <= steps; i++) {
+      const len = (L * i) / steps;
+      const q = path.getPointAtLength(len);
+      const dd = (q.x - pt.x) * (q.x - pt.x) + (q.y - pt.y) * (q.y - pt.y);
+      if (dd < bestD) { bestD = dd; best = len; }
+    }
+    return best;
+  }
+
+  function avatarMarkup() {
+    return '<g class="avatar__bob">' +
+      '<circle class="avatar__disc" cx="0" cy="0" r="17"></circle>' +
+      '<g class="avatar__body" transform="translate(-9,-9)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M6 20a6 6 0 0 1 12 0"/></svg></g>' +
+    '</g>';
+  }
+
+  function placeAvatar(path, len) {
+    const g = document.getElementById("avatar");
+    if (!g.innerHTML) g.innerHTML = avatarMarkup();
+    const p = path.getPointAtLength(len);
+    g.setAttribute("transform", "translate(" + p.x + "," + p.y + ")");
+  }
+
+  function animateAvatar(path, fromLen, toLen) {
+    const g = document.getElementById("avatar");
+    if (!g.innerHTML) g.innerHTML = avatarMarkup();
+    const dur = 900;
+    const start = performance.now();
+    const ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+    function frame(now) {
+      const k = Math.min(1, (now - start) / dur);
+      const len = fromLen + (toLen - fromLen) * ease(k);
+      const p = path.getPointAtLength(len);
+      g.setAttribute("transform", "translate(" + p.x + "," + p.y + ")");
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ============================================================
+     VIEW: MODULE
+     ============================================================ */
+  let justPassed = null; // module id that was passed this session moment, for the map hint
+
+  function renderModule(id) {
+    const mod = moduleById(id);
+    if (!mod) { location.hash = "#/map"; return; }
+    const idx = COURSE.modules.indexOf(mod);
+    const sm = state.modules[id];
+
+    // outcomes
+    let outs = '<div class="outcomes"><h2>What you can do at the end of this module</h2><ul>';
+    mod.outcomes.forEach(function (o) { outs += '<li>' + icon("check") + '<span>' + o + '</span></li>'; });
+    outs += '</ul></div>';
+
+    // videos or pipeline
+    let watch = "";
+    if (mod.pipeline) {
+      watch = '<div class="section"><h2><span class="section__ic">' + icon("layers") + '</span>The one picture</h2>' +
+        '<p class="muted reading">Hold this in your head before anything else. Every feature you’ll ever spec is a move through this pipeline.</p>' +
+        pipelineHTML() + '</div>';
+    }
+    if (mod.videos && mod.videos.length) {
+      watch += '<div class="section"><h2><span class="section__ic">' + icon("watch") + '</span>Watch</h2><div class="videos">';
+      mod.videos.forEach(function (v) { watch += videoCard(v); });
+      watch += '</div></div>';
+    }
+
+    // concepts
+    let concepts = '<div class="section"><h2><span class="section__ic">' + icon("book") + '</span>' + (mod.pipeline ? "The vocabulary" : "Key concepts") + '</h2><div class="concepts">';
+    mod.concepts.forEach(function (c) { concepts += '<div class="concept"><div class="concept__t">' + c.t + '</div><div class="concept__d">' + c.d + '</div></div>'; });
+    concepts += '</div></div>';
+
+    // optional callout (PM move)
+    let callout = "";
+    if (mod.callout) {
+      callout = '<div class="note" style="margin-top:var(--space-5);border-left:4px solid var(--brand-yellow)">' + icon("spark") + '<span><b style="color:var(--color-text-primary)">' + mod.callout.h + ':</b> ' + mod.callout.p + '</span></div>';
+    }
+
+    // apply it
+    const apply = '<div class="section"><div class="apply"><span class="apply__ic">' + icon("flask") + '</span><div><h4>Apply it</h4><p>' + mod.apply + '</p></div></div></div>';
+
+    // quiz + project + footer are rendered by dedicated fns
+    const nextMod = COURSE.modules[idx + 1];
+    const nextHref = nextMod ? ("#/module/" + nextMod.id) : "#/capstone";
+    const nextLabel = nextMod ? ("Next: Module " + nextMod.n) : "On to the capstone";
+
+    main.innerHTML =
+      '<section class="view"><div class="container">' +
+        '<div class="crumbs"><a href="#/map">' + icon("arrowL") + ' The map</a></div>' +
+        '<div class="mod-badges" style="margin-bottom:var(--space-3)">' +
+          '<span class="badge badge--accent">Module ' + mod.n + '</span>' +
+          '<span class="badge">' + mod.week + '</span>' +
+          (sm.quizPassed ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Quiz cleared</span>' : '') +
+          (projectDone(id) ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Project done</span>' : '') +
+        '</div>' +
+        '<h1 style="margin-bottom:var(--space-2)">' + mod.title + '</h1>' +
+        '<p class="muted" style="font-size:1.05rem;margin-bottom:var(--space-6)">' + mod.tag + '</p>' +
+        outs +
+        '<div class="section"><h2><span class="section__ic">' + icon("why") + '</span>Why this matters</h2><p class="reading" style="font-size:1.05rem">' + mod.why + '</p></div>' +
+        watch +
+        concepts + callout +
+        apply +
+        '<div class="section"><h2><span class="section__ic">' + icon("quiz") + '</span>Quick quiz</h2>' +
+          '<p class="muted">' + mod.quiz.length + ' questions. Clear ' + Math.ceil(mod.quiz.length * 0.7) + ' to advance your traveller. You can retry as many times as you like.</p>' +
+          '<div id="quiz"></div></div>' +
+        '<div class="section"><h2><span class="section__ic">' + icon("project") + '</span>Mini-project</h2>' +
+          '<p class="muted">' + (mod.week === "Reference" ? "Optional, but this is where it sticks." : "This is where it sticks — do it on your own product.") + '</p>' +
+          '<div id="project"></div></div>' +
+        '<div class="mod-foot">' +
+          '<a class="btn btn--secondary" href="#/map">' + icon("map", "btn__icon") + ' Back to map</a>' +
+          '<a class="btn" href="' + nextHref + '">' + nextLabel + icon("arrowR", "btn__icon") + '</a>' +
+        '</div>' +
+      '</div></section>';
+
+    renderQuiz(mod);
+    renderProject(mod);
+    setNav(null);
+    window.scrollTo(0, 0);
+  }
+
+  /* ---- Quiz engine ---- */
+  function renderQuiz(mod, showResult) {
+    const wrap = document.getElementById("quiz");
+    const sm = state.modules[mod.id];
+    let h = '<form id="quizForm" novalidate>';
+    mod.quiz.forEach(function (q, qi) {
+      h += '<fieldset class="quiz__q" data-qi="' + qi + '"><legend>' + (qi + 1) + '. ' + q.q + '</legend>';
+      q.opts.forEach(function (opt, oi) {
+        h += '<label class="opt" data-oi="' + oi + '">' +
+          '<input type="radio" name="q' + qi + '" value="' + oi + '" />' +
+          '<span style="flex:1">' + opt + '</span>' +
+          '<span class="opt__mark"></span>' +
+        '</label>';
+      });
+      h += '<div class="explain">' + q.why + '</div></fieldset>';
+    });
+    h += '<div class="quiz__result" id="quizResult"></div>';
+    h += '<div style="margin-top:var(--space-5);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
+      '<button type="submit" class="btn" id="quizSubmit">Check my answers</button>' +
+      '<button type="button" class="btn btn--ghost" id="quizReset" style="display:none">Try again</button>' +
+    '</div></form>';
+    wrap.innerHTML = h;
+
+    const form = document.getElementById("quizForm");
+    form.addEventListener("submit", function (e) { e.preventDefault(); gradeQuiz(mod); });
+    document.getElementById("quizReset").addEventListener("click", function () { renderQuiz(mod); });
+
+    if (sm.quizBest !== null) {
+      const r = document.getElementById("quizResult");
+      r.innerHTML = '<div class="banner ' + (sm.quizPassed ? "banner--pass" : "banner--fail") + '">' +
+        icon(sm.quizPassed ? "check" : "info") +
+        '<div><strong>' + (sm.quizPassed ? "You’ve cleared this quiz" : "Best score so far: " + sm.quizBest + "%") + '</strong>' +
+        '<p>' + (sm.quizPassed ? "Your best score is " + sm.quizBest + "%. Retake it any time to sharpen up." : "Clear " + Math.ceil(mod.quiz.length * 0.7) + " of " + mod.quiz.length + " to advance.") + '</p></div></div>';
+    }
+  }
+
+  function gradeQuiz(mod) {
+    const form = document.getElementById("quizForm");
+    let correct = 0;
+    mod.quiz.forEach(function (q, qi) {
+      const fs = form.querySelector('fieldset[data-qi="' + qi + '"]');
+      fs.classList.add("graded");
+      const chosen = form.querySelector('input[name="q' + qi + '"]:checked');
+      const chosenVal = chosen ? parseInt(chosen.value, 10) : -1;
+      if (chosenVal === q.a) correct++;
+      fs.querySelectorAll(".opt").forEach(function (opt) {
+        const oi = parseInt(opt.getAttribute("data-oi"), 10);
+        const mark = opt.querySelector(".opt__mark");
+        opt.querySelector("input").disabled = true;
+        if (oi === q.a) { opt.classList.add("is-correct"); mark.innerHTML = icon("check") + "Correct"; }
+        else if (oi === chosenVal) { opt.classList.add("is-wrong"); mark.innerHTML = "Your pick"; }
+      });
+    });
+    const total = mod.quiz.length;
+    const pct = Math.round((correct / total) * 100);
+    const passed = pct >= 70;
+    const sm = state.modules[mod.id];
+    const wasPassed = sm.quizPassed;
+    sm.quizBest = (sm.quizBest === null) ? pct : Math.max(sm.quizBest, pct);
+    if (passed) sm.quizPassed = true;
+    save();
+
+    const newlyPassed = passed && !wasPassed;
+    const r = document.getElementById("quizResult");
+    r.innerHTML = '<div class="banner ' + (passed ? "banner--pass" : "banner--fail") + '">' +
+      icon(passed ? "check" : "info") +
+      '<div><strong>' + correct + ' / ' + total + ' correct — ' + pct + '%' + (passed ? " · cleared!" : "") + '</strong>' +
+      '<p>' + (passed
+        ? (newlyPassed ? "Nice. Your traveller moves forward on the map." : "Still cleared — nice refresher.")
+        : "You need " + Math.ceil(total * 0.7) + " right to advance. Review the explanations and try again.") + '</p></div></div>';
+
+    document.getElementById("quizSubmit").style.display = "none";
+    document.getElementById("quizReset").style.display = "inline-flex";
+
+    // update badges without a full re-render
+    if (newlyPassed) {
+      justPassed = mod.id;
+      lastRenderedStop = currentStopBefore(mod.id); // so the map animates from the old spot
+      // add a "go see the map" nudge
+      r.innerHTML += '<div style="margin-top:var(--space-4)"><a class="btn" href="#/map">See your traveller move' + icon("arrowR", "btn__icon") + '</a></div>';
+    }
+    r.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "nearest" });
+  }
+
+  // where the avatar was standing before this module got cleared (its own index)
+  function currentStopBefore(id) {
+    const idx = COURSE.modules.findIndex(function (m) { return m.id === id; });
+    return idx;
+  }
+
+  /* ---- Project checklist ---- */
+  function renderProject(mod) {
+    const wrap = document.getElementById("project");
+    const p = mod.project;
+    const arr = state.modules[mod.id].project;
+    let h = '<div class="project"><div class="project__head"><h4>' + p.title + '</h4>' +
+      '<p style="margin:0 0 var(--space-3)">' + p.brief + '</p>' +
+      '<div class="project__meta"><span>' + icon("target") + ' <b>Deliverable:</b> ' + p.deliverable + '</span></div></div>' +
+      '<ul class="checklist">';
+    p.checklist.forEach(function (item, i) {
+      h += '<li><label class="check"><input type="checkbox" data-i="' + i + '"' + (arr[i] ? " checked" : "") + ' /><span>' + item + '</span></label></li>';
+    });
+    h += '</ul><div class="project__foot" id="projFoot"></div></div>';
+    wrap.innerHTML = h;
+    updateProjFoot(mod);
+    wrap.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        state.modules[mod.id].project[parseInt(cb.getAttribute("data-i"), 10)] = cb.checked;
+        save();
+        updateProjFoot(mod);
+      });
+    });
+  }
+  function updateProjFoot(mod) {
+    const foot = document.getElementById("projFoot");
+    if (!foot) return;
+    const arr = state.modules[mod.id].project;
+    const done = arr.filter(Boolean).length;
+    if (done === arr.length) {
+      foot.innerHTML = icon("check") + '<span style="color:var(--color-success-text);font-weight:600">Project complete — nicely done.</span>';
+      foot.querySelector("svg").style.color = "var(--color-success)";
+      foot.querySelector("svg").style.width = "18px"; foot.querySelector("svg").style.height = "18px";
+    } else {
+      foot.innerHTML = '<span class="mono" style="color:var(--color-text-secondary)">' + done + " / " + arr.length + ' steps done</span>';
+    }
+  }
+
+  /* ============================================================
+     VIEW: CAPSTONE
+     ============================================================ */
+  function renderCapstone() {
+    const cap = COURSE.capstone;
+    if (!capstoneUnlocked()) {
+      const left = N_MODULES - quizzesPassed();
+      main.innerHTML = '<section class="view"><div class="container">' +
+        '<div class="crumbs"><a href="#/map">' + icon("arrowL") + ' The map</a></div>' +
+        '<div class="card locked">' + icon("lock") +
+        '<h2>The capstone is locked</h2>' +
+        '<p class="muted reading" style="margin:0 auto">Clear the quiz on every module to unlock your graduation project. ' +
+        '<b>' + left + '</b> module' + (left === 1 ? "" : "s") + ' to go.</p>' +
+        '<div style="margin-top:var(--space-5)"><a class="btn" href="#/map">Back to the map' + icon("arrowR", "btn__icon") + '</a></div>' +
+        '</div></div></section>';
+      setNav(null); return;
+    }
+    let outs = '<div class="outcomes"><h2>What you can do at the end of this module</h2><ul>';
+    cap.outcomes.forEach(function (o) { outs += '<li>' + icon("check") + '<span>' + o + '</span></li>'; });
+    outs += '</ul></div>';
+
+    let checks = '<ul class="checklist">';
+    cap.checklist.forEach(function (item, i) {
+      checks += '<li><label class="check"><input type="checkbox" data-i="' + i + '"' + (state.capstone[i] ? " checked" : "") + ' /><span>' + item + '</span></label></li>';
+    });
+    checks += '</ul>';
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<div class="crumbs"><a href="#/map">' + icon("arrowL") + ' The map</a></div>' +
+      '<div class="mod-badges" style="margin-bottom:var(--space-3)"><span class="badge badge--accent">' + icon("flag", "badge__i") + ' Capstone</span>' +
+      (capstoneDone() ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Complete</span>' : '') + '</div>' +
+      '<h1 style="margin-bottom:var(--space-2)">' + cap.title + '</h1>' +
+      '<p class="muted" style="font-size:1.05rem;margin-bottom:var(--space-6)">' + cap.tag + '</p>' +
+      outs +
+      '<div class="section"><h2><span class="section__ic">' + icon("why") + '</span>The brief</h2><p class="reading" style="font-size:1.05rem">' + cap.brief + '</p></div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("project") + '</span>Your PRD checklist</h2>' +
+        '<div class="project"><div class="project__head"><h4>Ship-ready PRD</h4><p style="margin:0" class="muted">Tick each piece as your document covers it.</p></div>' + checks +
+        '<div class="project__foot" id="capFoot"></div></div></div>' +
+      '<div id="capBanner"></div>' +
+      '<div class="mod-foot"><a class="btn btn--secondary" href="#/map">' + icon("map", "btn__icon") + ' Back to map</a>' +
+      '<a class="btn btn--secondary" href="#/reference">The reference' + icon("arrowR", "btn__icon") + '</a></div>' +
+    '</div></section>';
+
+    updateCapFoot();
+    main.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        state.capstone[parseInt(cb.getAttribute("data-i"), 10)] = cb.checked;
+        save(); updateCapFoot();
+      });
+    });
+    setNav(null); window.scrollTo(0, 0);
+  }
+  function updateCapFoot() {
+    const foot = document.getElementById("capFoot");
+    if (!foot) return;
+    const done = state.capstone.filter(Boolean).length;
+    const banner = document.getElementById("capBanner");
+    if (done === state.capstone.length) {
+      foot.innerHTML = icon("trophy") + '<span style="color:var(--color-success-text);font-weight:600">Capstone complete — you’ve finished the course.</span>';
+      foot.querySelector("svg").style.color = "var(--color-success)";
+      foot.querySelector("svg").style.width = "18px"; foot.querySelector("svg").style.height = "18px";
+      if (banner) banner.innerHTML = '<div class="banner banner--pass" style="margin-top:var(--space-6)">' + icon("trophy") + '<div><strong>That’s the whole journey.</strong><p>You can now hold your own in the pipeline, APIs, data, deployment, roles, process, PRDs, Git, and AI — and you’ve written a PRD to prove it. Head back to the map to see 100%.</p></div></div>';
+    } else {
+      foot.innerHTML = '<span class="mono" style="color:var(--color-text-secondary)">' + done + " / " + state.capstone.length + ' pieces covered</span>';
+      if (banner) banner.innerHTML = "";
+    }
+  }
+
+  /* ============================================================
+     VIEW: REFERENCE
+     ============================================================ */
+  function renderReference() {
+    let det = '<table class="bstable"><thead><tr><th>When they say</th><th>You say</th></tr></thead><tbody>';
+    COURSE.detector.forEach(function (d) { det += '<tr><td>' + d.say + '</td><td>' + d.reply + '</td></tr>'; });
+    det += '</tbody></table>';
+
+    let pr = '<ol class="principles">';
+    COURSE.principles.forEach(function (p) { pr += '<li><span>' + p + '</span></li>'; });
+    pr += '</ol>';
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<div class="crumbs"><a href="#/map">' + icon("arrowL") + ' The map</a></div>' +
+      '<p class="eyebrow">Keep these close</p>' +
+      '<h1>The reference</h1>' +
+      '<p class="muted reading">Two things worth pinning above your desk: the questions that cut through vague answers, and the principles that keep you effective.</p>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("spark") + '</span>The bullshit detector</h2>' +
+        '<p class="muted">When you hear the line on the left, the reply on the right keeps things honest.</p>' +
+        '<div class="card" style="padding:var(--space-2) var(--space-4)">' + det + '</div></div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("book") + '</span>Standing principles</h2>' +
+        '<div class="card">' + pr + '</div></div>' +
+      '<div class="section"><div class="apply"><span class="apply__ic">' + icon("spark") + '</span><div><h4>Two things you should stop saying</h4>' +
+        '<p>“Just add a button” — nothing is <em>just</em> anything. And “make it like [competitor]” — that isn’t a requirement. Own the <b>what</b> and the <b>why</b>; never the <b>how</b>.</p></div></div></div>' +
+      '<div class="mod-foot"><a class="btn btn--secondary" href="#/map">' + icon("map", "btn__icon") + ' Back to map</a>' +
+      (capstoneUnlocked() ? '<a class="btn" href="#/capstone">Your capstone' + icon("arrowR", "btn__icon") + '</a>' : '<a class="btn" href="#/map">Continue the journey' + icon("arrowR", "btn__icon") + '</a>') + '</div>' +
+    '</div></section>';
+    setNav("reference");
+  }
+
+  /* ============================================================
+     ROUTER + CHROME
+     ============================================================ */
+  function setNav(active) {
+    document.querySelectorAll("[data-nav]").forEach(function (a) {
+      if (a.getAttribute("data-nav") === active) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+  }
+
+  function router() {
+    const h = location.hash || "#/";
+    if (h.indexOf("#/module/") === 0) {
+      state.started = true; save();
+      renderModule(h.slice("#/module/".length));
+    } else if (h === "#/map") {
+      state.started = true; save();
+      renderMap();
+    } else if (h === "#/capstone") {
+      state.started = true; save();
+      renderCapstone();
+    } else if (h === "#/reference") {
+      renderReference();
+    } else {
+      renderWelcome();
+    }
+  }
+
+  // theme toggle
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    const cur = document.documentElement.getAttribute("data-theme");
+    setTheme(cur === "dark" ? "light" : "dark", true);
+    // repaint map ring/paths colours by re-rendering current view if on map
+    if ((location.hash || "#/") === "#/map") { lastRenderedStop = currentStop(); renderMap(); }
+  });
+
+  // reset flow
+  const dlg = document.getElementById("resetDialog");
+  document.getElementById("resetBtn").innerHTML = icon("reset");
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (typeof dlg.showModal === "function") dlg.showModal(); else if (confirm("Reset all progress?")) doReset();
+  });
+  document.getElementById("resetCancel").addEventListener("click", function () { dlg.close(); });
+  document.getElementById("resetConfirm").addEventListener("click", function () { dlg.close(); doReset(); });
+  function doReset() {
+    const theme = document.documentElement.getAttribute("data-theme");
+    state = blankState(); state.theme = theme; save();
+    lastRenderedStop = null; justPassed = null;
+    location.hash = "#/"; router();
+  }
+
+  window.addEventListener("hashchange", router);
+  initTheme();
+  router();
+  </script>
+</body>
+</html>
