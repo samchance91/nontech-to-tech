@@ -561,9 +561,59 @@
     .empty { text-align: center; padding: var(--space-8) var(--space-5); color: var(--color-text-secondary); }
     .empty svg { width: 36px; height: 36px; margin-bottom: var(--space-3); }
 
+    /* Baseline check */
+    .bl-callout { display: flex; align-items: center; gap: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-left: 4px solid var(--brand-yellow); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin: var(--space-6) 0 0; text-decoration: none; color: inherit; box-shadow: var(--shadow-card); transition: transform var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard); }
+    .bl-callout:hover { transform: translateY(-2px); box-shadow: var(--shadow-overlay); }
+    .bl-callout__ic { width: 44px; height: 44px; flex: none; border-radius: var(--radius-md); background: var(--brand-yellow); color: var(--brand-black); display: grid; place-items: center; }
+    .bl-callout__ic svg { width: 22px; height: 22px; }
+    .bl-callout__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .bl-callout__txt strong { font-family: var(--font-heading); font-size: 1.05rem; }
+    .bl-callout__txt span { color: var(--color-text-secondary); font-size: 14px; }
+    .bl-callout__arw { flex: none; color: var(--color-text-secondary); }
+
+    .bl-cards { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+    @media (min-width: 720px) { .bl-cards { grid-template-columns: 1fr 1fr; } }
+    .bl-status { margin-top: var(--space-2); display: flex; align-items: center; gap: var(--space-2); }
+
+    .bl-sticky { position: sticky; top: 64px; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: var(--space-2) var(--space-4); margin: var(--space-4) 0; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-card); }
+    .bl-timer { font-family: var(--font-mono); font-weight: 700; background: var(--brand-black); color: var(--brand-white); padding: 4px 12px; border-radius: var(--radius-pill); font-variant-numeric: tabular-nums; }
+    :root[data-theme="dark"] .bl-timer { background: var(--brand-yellow); color: var(--brand-black); }
+    .bl-timer--warn { background: var(--color-error); color: #fff; animation: blpulse 1s ease-in-out infinite; }
+    @keyframes blpulse { 50% { opacity: 0.6; } }
+
+    .bl-bars { display: flex; flex-direction: column; gap: var(--space-4); }
+    .blbar-row__top { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .blbar { height: 12px; border-radius: var(--radius-pill); background: var(--color-border); overflow: hidden; }
+    .blbar > i { display: block; height: 100%; border-radius: var(--radius-pill); background: var(--brand-yellow); transition: width var(--duration-slow, 400ms) var(--ease-standard); }
+    .blbar-row__sub { font-size: 13px; color: var(--color-text-secondary); margin-top: 6px; }
+
+    .likert { padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border); }
+    .likert__q { font-weight: 600; margin-bottom: var(--space-3); }
+    .likert__scale { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .likert__opt { position: relative; }
+    .likert__opt input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
+    .likert__opt span { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--color-border-strong); font-weight: 700; font-size: 15px; transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+    .likert__opt:hover span { border-color: var(--color-text-primary); }
+    .likert__opt input:checked + span { background: var(--brand-yellow); color: var(--brand-black); border-color: var(--brand-yellow); }
+    .likert__opt input:focus-visible + span { outline: 2px solid var(--color-text-primary); outline-offset: 2px; }
+    @media (max-width: 460px) { .likert__opt span { width: 40px; height: 40px; } }
+
+    .bl-reviews { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+    .bl-review { border: 1px solid var(--color-border); border-left: 3px solid var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+    .bl-review.is-ok { border-left-color: var(--color-success); }
+    .bl-review.is-no { border-left-color: var(--color-error); }
+    .bl-review__q { font-weight: 600; margin-bottom: var(--space-2); }
+    .bl-review__a, .bl-review__ok { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; margin-bottom: 4px; }
+    .bl-review__a svg, .bl-review__ok svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+    .bl-review.is-ok .bl-review__a svg { color: var(--color-success); }
+    .bl-review.is-no .bl-review__a svg { color: var(--color-error); }
+    .bl-review__ok svg { color: var(--color-success); }
+    .bl-review__why { font-size: 13px; color: var(--color-text-secondary); margin-top: 6px; }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
+      .bl-timer--warn { animation: none; }
     }
   </style>
 </head>
@@ -575,6 +625,7 @@
         <span class="brand__mark" aria-hidden="true">P</span>
         <span class="brand__word">Propelr</span>
       </a>
+      <a class="nav__link" href="#/baseline" data-nav="baseline">Baseline</a>
       <a class="nav__link" href="#/map" data-nav="map">Journey</a>
       <a class="nav__link" href="#/showcase" data-nav="showcase">Showcase</a>
       <a class="nav__link" href="#/reference" data-nav="reference">Reference</a>
@@ -1181,6 +1232,90 @@
   };
 
   /* ============================================================
+     BASELINE CHECK  (technical baseline + profile, taken before the journey)
+     ============================================================ */
+  const BASELINE = {
+    durationSec: 60 * 60,   // 1 hour for the technical check
+    tech: [
+      // --- Web & internet ---
+      { area: "Web & internet", q: "You type a website address and press Enter. What has to happen first so the browser can reach the right server?", opts: ["A cookie is saved to your computer", "DNS translates the name into an IP address", "The database runs a query", "The CSS file is downloaded"], a: 1, why: "DNS is the internet’s phone book — it turns a human name like example.com into the numeric IP address of the server." },
+      { area: "Web & internet", q: "In plain terms, what is the difference between a “client” and a “server”?", opts: ["The client stores data; the server displays it", "The client is the user’s device making requests; the server responds to them", "They’re two words for the same thing", "The client is the internet; the server is the app"], a: 1, why: "Your browser (the client) asks; a computer somewhere (the server) answers." },
+      { area: "Web & internet", q: "The padlock / HTTPS on a site mainly tells you that…", opts: ["the website is safe and trustworthy", "the connection is encrypted so others can’t read it in transit", "the site has no bugs", "your data is backed up"], a: 1, why: "HTTPS encrypts the traffic between you and the site. It doesn’t guarantee the site itself is honest or bug-free." },
+      { area: "Web & internet", q: "A page returns a “404”. What does that usually mean?", opts: ["The server is overloaded", "You’re not logged in", "The requested page or resource wasn’t found", "The internet is down"], a: 2, why: "404 = Not Found. The address exists but there’s nothing at that path." },
+      { area: "Web & internet", q: "Which of these normally runs on the user’s device (the browser), not on the server?", opts: ["The database", "The webpage’s HTML, CSS and JavaScript", "The payment processing", "The email sending"], a: 1, why: "The browser downloads and runs the page’s HTML/CSS/JS locally to draw what you see." },
+      // --- Frontend ---
+      { area: "Frontend", q: "Roughly, what do HTML, CSS and JavaScript each do?", opts: ["HTML styles, CSS structures, JS stores data", "HTML is the structure, CSS is the styling, JS is the behaviour", "They’re three names for the same file", "HTML is the server, CSS the client, JS the database"], a: 1, why: "HTML = the bones, CSS = the paint, JavaScript = the moving parts." },
+      { area: "Frontend", q: "“The frontend” of an application refers to…", opts: ["the servers and databases", "what the user sees and interacts with", "the company’s internal tools only", "the deployment pipeline"], a: 1, why: "Frontend = the presentation layer the user touches." },
+      { area: "Frontend", q: "A page looks broken for one specific user but fine for everyone else. The most likely first thing to check is…", opts: ["the database schema", "that user’s browser, cache, or device", "the company’s bank account", "the server’s electricity"], a: 1, why: "When it’s isolated to one user, the cause is usually on their side — old cache, an odd browser, a slow connection." },
+      { area: "Frontend", q: "“Responsive design” means…", opts: ["the site replies to emails automatically", "the layout adapts to different screen sizes", "the site loads faster", "the buttons make sounds"], a: 1, why: "Responsive layouts rearrange themselves to fit phones, tablets and desktops." },
+      { area: "Frontend", q: "In a modern frontend, a “component” is best described as…", opts: ["a reusable building block of the interface", "a type of database", "a server location", "a security certificate"], a: 0, why: "Components (a button, a card, a nav bar) are reusable UI pieces you assemble into pages." },
+      // --- APIs ---
+      { area: "APIs", q: "An API is best described as…", opts: ["a kind of database", "an agreed way for two systems to talk and exchange data", "a design tool", "a programming language"], a: 1, why: "An API is a contract: send this, get that back — letting systems talk without knowing each other’s internals." },
+      { area: "APIs", q: "An API “endpoint” is…", opts: ["the last line of code", "a specific address (URL) you call to get or send particular data", "the end of a project", "a type of error"], a: 1, why: "Each endpoint is a specific URL that does one job, e.g. /users or /orders." },
+      { area: "APIs", q: "What format is most commonly used to exchange data with web APIs today?", opts: ["PDF", "JSON", "Word documents", "MP3"], a: 1, why: "JSON — lightweight, human-readable key/value data — is the default language of web APIs." },
+      { area: "APIs", q: "In an API, what’s the usual difference between a GET and a POST request?", opts: ["GET is faster than POST", "GET retrieves data; POST sends or creates data", "GET is secure; POST is not", "They’re identical"], a: 1, why: "GET reads; POST writes. It’s the difference between fetching a record and creating one." },
+      { area: "APIs", q: "An API has a “rate limit”. That means…", opts: ["it charges money per call", "there’s a cap on how many requests you can make in a period", "it only works at certain times of day", "it limits how much data each record can hold"], a: 1, why: "Rate limits cap requests per minute/hour to protect the service from overload or abuse." },
+      // --- Data & databases ---
+      { area: "Data & databases", q: "In a relational database, data is organised into…", opts: ["folders and files", "tables of rows and columns", "one long document", "images"], a: 1, why: "Think spreadsheets: each table has columns (fields) and rows (records)." },
+      { area: "Data & databases", q: "A “primary key” in a table is…", opts: ["the password to the database", "a unique identifier for each row", "the first column alphabetically", "the most important piece of data"], a: 1, why: "A primary key (like an id) uniquely identifies each row so it can be referenced reliably." },
+      { area: "Data & databases", q: "Which is an example of a “one-to-many” relationship?", opts: ["One person has one passport", "One customer has many orders", "Many users share one password", "One country has one flag"], a: 1, why: "One customer → many orders is the classic one-to-many. The order table points back to the customer." },
+      { area: "Data & databases", q: "SQL is a language used mainly to…", opts: ["design logos", "query and manipulate data in a database", "build mobile apps", "edit videos"], a: 1, why: "SQL asks questions of, and updates, the data in a relational database." },
+      { area: "Data & databases", q: "A database “join” does what?", opts: ["Merges two companies", "Combines rows from two tables based on a related column", "Deletes duplicate rows", "Backs up the database"], a: 1, why: "A join stitches tables together on a shared key, e.g. orders joined to customers by customer_id." },
+      // --- Delivery & security ---
+      { area: "Delivery & security", q: "What’s the difference between “staging” and “production”?", opts: ["Staging is the live site users see; production is the test copy", "Staging is a test copy; production is the live environment real users use", "They’re the same thing", "Staging is for designers; production is for developers"], a: 1, why: "You try changes on staging first, then release to production where real users are." },
+      { area: "Delivery & security", q: "“Deploying” a change means…", opts: ["writing the code", "releasing a new version of the software to an environment", "deleting the old code", "designing the feature"], a: 1, why: "Deployment is the act of pushing a build out to run somewhere (staging or production)." },
+      { area: "Delivery & security", q: "“CI/CD” is broadly about…", opts: ["customer support tickets", "automatically building, testing and releasing code", "cloud invoicing", "code documentation"], a: 1, why: "Continuous Integration/Delivery automates the path from a code change to a tested release." },
+      { area: "Delivery & security", q: "What’s the difference between authentication and authorization?", opts: ["Authentication = what you’re allowed to do; authorization = who you are", "Authentication = who you are; authorization = what you’re allowed to do", "They’re the same", "Authentication is for admins only"], a: 1, why: "First we confirm who you are (authentication), then what you may do (authorization)." },
+      { area: "Delivery & security", q: "A “rollback” is…", opts: ["a new feature", "reverting to a previous working version after a bad release", "a database backup", "a type of meeting"], a: 1, why: "When a release breaks things, rolling back restores the last version that worked." },
+      // --- Working with engineers ---
+      { area: "Working with engineers", q: "A well-written ticket or user story usually makes clear…", opts: ["only the deadline", "the who, the what, and how you’ll know it’s done (acceptance criteria)", "the developer’s salary", "the programming language to use"], a: 1, why: "Who it’s for, what they need, and clear acceptance criteria are what stop a ticket bouncing back." },
+      { area: "Working with engineers", q: "In agile, a “sprint” is…", opts: ["a bug that must be fixed fast", "a fixed short period to deliver an agreed set of work", "a type of server", "an emergency meeting"], a: 1, why: "A sprint is a timeboxed cycle (often 1–2 weeks) with a committed scope." },
+      { area: "Working with engineers", q: "“Technical debt” refers to…", opts: ["money owed to a software vendor", "shortcuts in the code that cost more time to fix later", "the cost of new laptops", "unpaid engineers"], a: 1, why: "Quick-and-dirty choices get things shipped now but accrue ‘interest’ you pay back later in extra effort." },
+      { area: "Working with engineers", q: "When an engineer says a task is “blocked”, they mean…", opts: ["it’s finished", "they can’t proceed until something else is resolved", "it was rejected", "it’s the top priority"], a: 1, why: "Blocked = waiting on a dependency — a decision, another task, access, or an answer." },
+      { area: "Working with engineers", q: "The single best way to cut back-and-forth on a spec is to…", opts: ["make it longer", "add clear acceptance criteria / a definition of ‘done’", "send it in a meeting instead", "let the engineers decide everything"], a: 1, why: "Clear, testable acceptance criteria remove ambiguity — the main cause of rework." }
+    ],
+    psychDims: [
+      { key: "growth", label: "Growth mindset", blurb: "You treat technical ability as something you can build, not a fixed trait." },
+      { key: "curiosity", label: "Curiosity", blurb: "You’re drawn to how things work under the hood." },
+      { key: "rigour", label: "Structure & rigour", blurb: "You work in clear steps and notice the details that matter for specs." },
+      { key: "resilience", label: "Resilience", blurb: "You stay with hard problems and bounce back from setbacks." },
+      { key: "collaboration", label: "Collaboration", blurb: "You ask questions, explain clearly, and work well with technical people." }
+    ],
+    psych: [
+      { dim: "growth", q: "With enough effort, I can understand technical topics that seem hard at first." },
+      { dim: "growth", rev: true, q: "Some people are just “tech people” and I’m simply not one of them." },
+      { dim: "growth", q: "When I don’t understand something technical, I believe I can figure it out over time." },
+      { dim: "growth", rev: true, q: "My ability with technical things is basically fixed and won’t change much." },
+      { dim: "growth", q: "I enjoy the feeling of slowly getting better at something difficult." },
+      { dim: "growth", rev: true, q: "Failing at a technical task mostly means I’m not cut out for it." },
+      { dim: "curiosity", q: "I often wonder how the apps and tools I use actually work." },
+      { dim: "curiosity", rev: true, q: "I rarely care about what’s happening “under the hood”." },
+      { dim: "curiosity", q: "I like taking things apart — literally or figuratively — to see how they work." },
+      { dim: "curiosity", rev: true, q: "As long as something works, I’m happy not to know why." },
+      { dim: "curiosity", q: "I enjoy learning new concepts even outside my day job." },
+      { dim: "curiosity", q: "When I hear new technical jargon, I want to look it up." },
+      { dim: "rigour", q: "I like breaking a big task into clear, ordered steps." },
+      { dim: "rigour", q: "I tend to notice small details that others miss." },
+      { dim: "rigour", rev: true, q: "I usually skip the details and just go with the gist." },
+      { dim: "rigour", q: "I double-check my work before I call it done." },
+      { dim: "rigour", rev: true, q: "Precise wording in a document doesn’t really matter to me." },
+      { dim: "rigour", q: "I like having a clear definition of what “finished” looks like." },
+      { dim: "resilience", q: "When something is confusing, I keep at it rather than give up." },
+      { dim: "resilience", q: "A setback usually makes me try a different approach." },
+      { dim: "resilience", rev: true, q: "I tend to get discouraged quickly when I’m stuck." },
+      { dim: "resilience", q: "I can stay motivated on a long, hard goal." },
+      { dim: "resilience", rev: true, q: "Frustration usually makes me want to quit." },
+      { dim: "resilience", q: "I bounce back from mistakes fairly quickly." },
+      { dim: "collaboration", q: "I’m comfortable asking questions even when they might seem basic." },
+      { dim: "collaboration", rev: true, q: "I’d rather stay quiet than admit I don’t understand something." },
+      { dim: "collaboration", q: "I can explain my ideas clearly to other people." },
+      { dim: "collaboration", q: "I work well with people who think very differently from me." },
+      { dim: "collaboration", rev: true, q: "I avoid talking to technical people because it feels intimidating." },
+      { dim: "collaboration", q: "I actively look for feedback on my work." }
+    ]
+  };
+
+  /* ============================================================
      STORAGE LAYER
      ------------------------------------------------------------
      All persistence goes through DB. Today it is backed by this
@@ -1230,7 +1365,7 @@
     COURSE.modules.forEach(function (mod) {
       m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false) };
     });
-    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false };
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null } };
   }
   function mergeState(s) {
     const base = blankState();
@@ -1245,6 +1380,11 @@
         if (Array.isArray(sm.project)) bm.project.forEach(function (_, i) { bm.project[i] = !!sm.project[i]; });
       }
     });
+    if (s.baseline && typeof s.baseline === "object") {
+      base.baseline.tech = s.baseline.tech || null;
+      base.baseline.psych = s.baseline.psych || null;
+      base.baseline.techAttempt = s.baseline.techAttempt || null;
+    }
     return base;
   }
   function loadProgress(email) { return mergeState(DB.getProgress(email)); }
@@ -1429,6 +1569,11 @@
             '<a class="btn btn--ghost btn--lg" href="#/reference">See the reference</a>' +
           '</div>' +
         '</div>' +
+        '<a class="bl-callout" href="#/baseline">' +
+          '<span class="bl-callout__ic">' + icon("target") + '</span>' +
+          '<span class="bl-callout__txt"><strong>New here? Start with a baseline check.</strong><span>Two short, optional checks — a 30-question technical baseline and a quick learner profile — so you can see exactly where you’re starting from.</span></span>' +
+          icon("arrowR", "bl-callout__arw") +
+        '</a>' +
         feat +
         '<hr class="rule" />' +
         '<div class="feature-grid" style="grid-template-columns:1fr;gap:var(--space-5)">' +
@@ -2162,12 +2307,13 @@
         '<td class="num">' + quizzesPassed(p.progress) + ' / ' + N_MODULES + '</td>' +
         '<td class="num">' + projectsDone(p.progress) + ' / ' + N_MODULES + '</td>' +
         '<td>' + (capstoneDone(p.progress) ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Done</span>' : '<span class="muted">—</span>') + '</td>' +
+        '<td>' + ((p.progress.baseline && p.progress.baseline.tech) ? '<span class="mono">' + p.progress.baseline.tech.pct + '%</span>' : '<span class="muted">—</span>') + ((p.progress.baseline && p.progress.baseline.psych) ? ' <span class="badge" title="Profile check done" style="padding:2px 7px;font-size:10px">profile</span>' : '') + '</td>' +
         '<td><span class="mini-bar"><i style="width:' + pct + '%"></i></span> <span class="mono">' + pct + '%</span></td>' +
       '</tr>';
     }).join("");
 
     const table = learners
-      ? '<div class="table-wrap"><table class="atable"><thead><tr><th>Learner</th><th class="num">Modules</th><th class="num">Projects</th><th>Capstone</th><th>Overall</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+      ? '<div class="table-wrap"><table class="atable"><thead><tr><th>Learner</th><th class="num">Modules</th><th class="num">Projects</th><th>Capstone</th><th>Baseline</th><th>Overall</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
       : '<div class="card empty">' + icon("users") + '<h3>No profiles yet</h3><p>' + (CLOUD ? "When people create profiles they’ll appear here." : "Profiles created on this device will appear here. Connect the shared database to see everyone across all devices.") + '</p></div>';
 
     let postList;
@@ -2198,6 +2344,249 @@
   }
 
   /* ============================================================
+     VIEW: BASELINE CHECK  (technical + profile, before the journey)
+     ============================================================ */
+  let baselineTimer = null;
+  function stopBaselineTimer() { if (baselineTimer) { clearInterval(baselineTimer); baselineTimer = null; } }
+  function baselineTechRemaining() {
+    const at = state.baseline.techAttempt;
+    if (!at) return BASELINE.durationSec;
+    return BASELINE.durationSec - Math.floor((Date.now() - at.startedAt) / 1000);
+  }
+  function fmtClock(sec) { if (sec < 0) sec = 0; const m = Math.floor(sec / 60), s = sec % 60; return m + ":" + (s < 10 ? "0" : "") + s; }
+  function blBand(pct) { if (pct >= 70) return { t: "Strong", c: "var(--color-success)" }; if (pct >= 45) return { t: "Developing", c: "var(--brand-black)" }; return { t: "Emerging", c: "var(--color-text-secondary)" }; }
+  function blbar(label, pct, sub) {
+    return '<div class="blbar-row"><div class="blbar-row__top"><span>' + esc(label) + '</span><span class="mono">' + pct + '%</span></div>' +
+      '<div class="blbar"><i style="width:' + pct + '%"></i></div>' + (sub ? '<div class="blbar-row__sub">' + sub + '</div>' : '') + '</div>';
+  }
+
+  /* ---- hub ---- */
+  function renderBaseline() {
+    setNav("baseline");
+    const b = state.baseline;
+    const techDone = !!b.tech, psychDone = !!b.psych, inProg = !!b.techAttempt;
+    const bothDone = techDone && psychDone;
+
+    let snapshot = "";
+    if (bothDone) {
+      const top = BASELINE.psychDims.map(function (d) { return { label: d.label, pct: b.psych.dims[d.key] || 0 }; }).sort(function (a, c) { return c.pct - a.pct; })[0];
+      snapshot = '<div class="card" style="border-color:color-mix(in srgb,var(--brand-yellow) 55%,var(--color-border))">' +
+        '<h2 style="font-size:1.25rem">Your baseline snapshot</h2>' +
+        '<p class="muted">You scored <b style="color:var(--color-text-primary)">' + b.tech.pct + '%</b> on the technical check, and your standout trait is <b style="color:var(--color-text-primary)">' + esc(top.label) + '</b>. That’s your starting line — the whole journey is built to move you forward from exactly here.</p>' +
+        '<a class="btn" href="#/map">Start the journey' + icon("arrowR", "btn__icon") + '</a></div>';
+    }
+
+    function card(kind, title, desc, statusHTML, btns) {
+      return '<div class="card"><div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-2)"><span class="feature__ic" style="margin:0">' + icon(kind) + '</span><h2 style="font-size:1.2rem;margin:0">' + title + '</h2></div>' +
+        '<p class="muted" style="margin-top:0">' + desc + '</p>' + statusHTML +
+        '<div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-3)">' + btns + '</div></div>';
+    }
+
+    const techStatus = techDone
+      ? '<div class="bl-status"><span class="badge badge--done">' + icon("check", "badge__i") + ' Completed</span> <span class="mono">' + b.tech.pct + '%</span></div>'
+      : (inProg ? '<div class="bl-status"><span class="badge badge--accent">In progress</span> <span class="mono">' + fmtClock(baselineTechRemaining()) + ' left</span></div>' : '');
+    const techBtns = techDone
+      ? '<a class="btn btn--secondary btn--sm" href="#/baseline/tech">See my results</a>'
+      : (inProg ? '<a class="btn btn--sm" href="#/baseline/tech">Resume</a><button class="btn btn--ghost btn--sm" id="blDiscard" type="button">Start over</button>'
+        : '<a class="btn btn--sm" href="#/baseline/tech">Start technical check</a>');
+
+    const psychStatus = psychDone ? '<div class="bl-status"><span class="badge badge--done">' + icon("check", "badge__i") + ' Completed</span></div>' : '';
+    const psychBtns = psychDone
+      ? '<a class="btn btn--secondary btn--sm" href="#/baseline/psych">See my profile</a>'
+      : '<a class="btn btn--sm" href="#/baseline/psych">Start profile check</a>';
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Before you begin</p>' +
+      '<h1 style="margin-bottom:var(--space-2)">Baseline check</h1>' +
+      '<p class="muted reading">Two short, optional checks to see where you’re starting from — a technical baseline and a quick profile of how you learn. This isn’t a test to pass or a gate to clear. It’s a mirror, so you can spot where the journey will help you most and look back later to see how far you’ve come.</p>' +
+      '<div class="note" style="margin:var(--space-4) 0">' + icon("info") + '<span>Nothing here is pass/fail, and you can skip straight to the journey any time. Your results are saved with your progress.</span></div>' +
+      snapshot +
+      '<div class="bl-cards" style="margin-top:var(--space-5)">' +
+        card("quiz", "Technical baseline", "30 multiple-choice questions across the six areas the course covers. You get 60 minutes, and you can leave and come back — the timer keeps running.", techStatus, techBtns) +
+        card("user", "Learner profile", "30 quick “how much is this like me?” statements across five traits that help on a learning journey. About 10 minutes. No right answers.", psychStatus, psychBtns) +
+      '</div>' +
+      '<div style="margin-top:var(--space-6)"><a class="btn btn--ghost" href="#/map">Skip for now, take me to the journey' + icon("arrowR", "btn__icon") + '</a></div>' +
+      '</div></section>';
+
+    const disc = document.getElementById("blDiscard");
+    if (disc) disc.addEventListener("click", function () { if (confirm("Discard your in-progress technical check?")) { state.baseline.techAttempt = null; save(); renderBaseline(); } });
+    window.scrollTo(0, 0);
+  }
+
+  /* ---- technical check ---- */
+  function renderBaselineTech() {
+    setNav("baseline");
+    const b = state.baseline;
+    if (b.tech && !b.techAttempt) { showTechResults(); return; }
+    if (!b.techAttempt) { b.techAttempt = { startedAt: Date.now(), answers: {} }; save(); }
+    if (baselineTechRemaining() <= 0) { gradeBaselineTech(true); return; }
+    const ans = b.techAttempt.answers;
+
+    let qs = "";
+    BASELINE.tech.forEach(function (q, i) {
+      qs += '<fieldset class="quiz__q" data-qi="' + i + '"><legend>' + (i + 1) + '. ' + esc(q.q) + ' <span class="badge" style="font-weight:500;font-size:11px;vertical-align:middle">' + esc(q.area) + '</span></legend>';
+      q.opts.forEach(function (opt, oi) {
+        qs += '<label class="opt"><input type="radio" name="bt' + i + '" value="' + oi + '"' + (ans[i] === oi ? " checked" : "") + ' /><span style="flex:1">' + esc(opt) + '</span><span class="opt__mark"></span></label>';
+      });
+      qs += '</fieldset>';
+    });
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Baseline · Technical check</p>' +
+      '<h1 style="margin-bottom:var(--space-2)">Technical baseline</h1>' +
+      '<p class="muted reading">30 questions across the six areas the course covers. No trick questions, no pass mark — just a snapshot. Answer what you can; you can leave and come back, and the timer keeps running.</p>' +
+      '<div class="bl-sticky"><span id="blCount">0 of 30 answered</span><span class="bl-timer" id="blTimer">' + fmtClock(baselineTechRemaining()) + '</span></div>' +
+      '<form id="blTechForm" novalidate>' + qs +
+        '<div style="margin-top:var(--space-5);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
+          '<button type="submit" class="btn">Finish &amp; see my baseline</button>' +
+          '<a class="btn btn--ghost" href="#/baseline">Save &amp; exit</a>' +
+        '</div></form></div></section>';
+
+    const form = document.getElementById("blTechForm");
+    function updateCount() { const n = Object.keys(state.baseline.techAttempt.answers).length; const el = document.getElementById("blCount"); if (el) el.textContent = n + " of 30 answered"; }
+    updateCount();
+    form.addEventListener("change", function (e) {
+      const t = e.target;
+      if (t.name && t.name.indexOf("bt") === 0) { state.baseline.techAttempt.answers[parseInt(t.name.slice(2), 10)] = parseInt(t.value, 10); save(); updateCount(); }
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); if (confirm("Finish the technical check and see your baseline?")) gradeBaselineTech(false); });
+    startBaselineTimer();
+    window.scrollTo(0, 0);
+  }
+  function startBaselineTimer() {
+    stopBaselineTimer();
+    baselineTimer = setInterval(function () {
+      const el = document.getElementById("blTimer");
+      if (!el || !state.baseline.techAttempt) { stopBaselineTimer(); return; }
+      const rem = baselineTechRemaining();
+      if (rem <= 0) { el.textContent = "0:00"; stopBaselineTimer(); gradeBaselineTech(true); return; }
+      el.textContent = fmtClock(rem);
+      el.classList.toggle("bl-timer--warn", rem <= 300);
+    }, 1000);
+  }
+  function gradeBaselineTech(auto) {
+    stopBaselineTimer();
+    const b = state.baseline;
+    const answers = (b.techAttempt && b.techAttempt.answers) || {};
+    const byArea = {}; let correct = 0;
+    BASELINE.tech.forEach(function (q, i) {
+      const a = byArea[q.area] || (byArea[q.area] = { c: 0, n: 0 });
+      a.n++; if (answers[i] === q.a) { correct++; a.c++; }
+    });
+    const total = BASELINE.tech.length;
+    b.tech = { pct: Math.round(correct / total * 100), correct: correct, total: total, byArea: byArea, answers: answers, takenAt: Date.now(), auto: !!auto };
+    b.techAttempt = null;
+    save();
+    if ((location.hash || "") !== "#/baseline/tech") location.hash = "#/baseline/tech"; else showTechResults();
+  }
+  function showTechResults() {
+    setNav("baseline");
+    const t = state.baseline.tech;
+    let bars = "";
+    Object.keys(t.byArea).forEach(function (a) { const ar = t.byArea[a]; bars += blbar(a, Math.round(ar.c / ar.n * 100), ar.c + " of " + ar.n + " right"); });
+    let review = "";
+    BASELINE.tech.forEach(function (q, i) {
+      const chosen = (t.answers && (i in t.answers)) ? t.answers[i] : null;
+      const ok = chosen === q.a;
+      review += '<div class="bl-review ' + (ok ? "is-ok" : "is-no") + '">' +
+        '<div class="bl-review__q">' + (i + 1) + '. ' + esc(q.q) + '</div>' +
+        '<div class="bl-review__a">' + icon(ok ? "check" : "info") + '<span>' + (chosen == null ? "Not answered" : ("You chose: " + esc(q.opts[chosen]))) + '</span></div>' +
+        (ok ? '' : '<div class="bl-review__ok">' + icon("check") + '<span>Answer: ' + esc(q.opts[q.a]) + '</span></div>') +
+        '<div class="bl-review__why">' + esc(q.why) + '</div></div>';
+    });
+    const psychDone = !!state.baseline.psych;
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Baseline · Technical check</p>' +
+      '<h1 style="margin-bottom:var(--space-3)">Your technical baseline</h1>' +
+      (t.auto ? '<div class="note" style="margin-bottom:var(--space-4)">' + icon("info") + '<span>Time was up, so we scored what you’d answered. You can retake it whenever you like.</span></div>' : '') +
+      '<div class="card" style="text-align:center"><div style="font-family:var(--font-heading);font-weight:700;font-size:3rem;line-height:1">' + t.pct + '%</div>' +
+      '<div class="muted">' + t.correct + ' of ' + t.total + ' correct</div></div>' +
+      '<div class="note" style="margin:var(--space-4) 0">' + icon("spark") + '<span>This is a starting line, not a verdict. The areas with lower bars are exactly what the modules build — begin the journey and watch them grow.</span></div>' +
+      '<div class="card"><h2 style="font-size:1.15rem">By area</h2><div class="bl-bars">' + bars + '</div></div>' +
+      '<details style="margin-top:var(--space-4)"><summary>Review all 30 answers &amp; explanations</summary><div class="bl-reviews">' + review + '</div></details>' +
+      '<div style="margin-top:var(--space-6);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
+        (psychDone ? '<a class="btn" href="#/baseline">See my full baseline' + icon("arrowR", "btn__icon") + '</a>' : '<a class="btn" href="#/baseline/psych">Next: the profile check' + icon("arrowR", "btn__icon") + '</a>') +
+        '<button class="btn btn--ghost" id="blTechRetake" type="button">Retake</button>' +
+        '<a class="btn btn--ghost" href="#/map">Go to the journey</a>' +
+      '</div></div></section>';
+    document.getElementById("blTechRetake").addEventListener("click", function () {
+      if (!confirm("Retake the technical check? Your current result will be replaced when you finish.")) return;
+      state.baseline.tech = null; state.baseline.techAttempt = null; save(); renderBaselineTech();
+    });
+    window.scrollTo(0, 0);
+  }
+
+  /* ---- profile check ---- */
+  function renderBaselinePsych() {
+    setNav("baseline");
+    if (state.baseline.psych) { showPsychResults(); return; }
+    let qs = "";
+    BASELINE.psych.forEach(function (item, i) {
+      qs += '<div class="likert"><div class="likert__q">' + (i + 1) + '. ' + esc(item.q) + '</div><div class="likert__scale">';
+      for (let v = 1; v <= 5; v++) qs += '<label class="likert__opt" title="' + v + '"><input type="radio" name="bp' + i + '" value="' + v + '" /><span>' + v + '</span></label>';
+      qs += '</div></div>';
+    });
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Baseline · Profile check</p>' +
+      '<h1 style="margin-bottom:var(--space-2)">Your learner profile</h1>' +
+      '<p class="muted reading">30 quick statements. There are no right answers — just say how much each one sounds like you. It maps five traits that help on a learning journey. This is about self-awareness, not judgement.</p>' +
+      '<div class="note" style="margin:var(--space-4) 0">' + icon("info") + '<span>Rate each from <b>1 = strongly disagree</b> to <b>5 = strongly agree</b> (3 is neutral).</span></div>' +
+      '<form id="blPsychForm" novalidate>' + qs +
+        '<div id="blPsychErr" class="note" style="display:none;margin-top:var(--space-4);border-color:color-mix(in srgb,var(--color-error) 40%,var(--color-border))">' + icon("info") + '<span></span></div>' +
+        '<div style="margin-top:var(--space-5);display:flex;gap:var(--space-3);flex-wrap:wrap"><button type="submit" class="btn">See my profile</button><a class="btn btn--ghost" href="#/baseline">Cancel</a></div>' +
+      '</form></div></section>';
+    document.getElementById("blPsychForm").addEventListener("submit", function (e) { e.preventDefault(); gradeBaselinePsych(); });
+    window.scrollTo(0, 0);
+  }
+  function gradeBaselinePsych() {
+    const form = document.getElementById("blPsychForm");
+    const sums = {}, counts = {};
+    BASELINE.psychDims.forEach(function (d) { sums[d.key] = 0; counts[d.key] = 0; });
+    let firstMissing = -1, missing = 0;
+    BASELINE.psych.forEach(function (item, i) {
+      const chosen = form.querySelector('input[name="bp' + i + '"]:checked');
+      if (!chosen) { missing++; if (firstMissing < 0) firstMissing = i; return; }
+      let v = parseInt(chosen.value, 10); if (item.rev) v = 6 - v;
+      sums[item.dim] += v; counts[item.dim]++;
+    });
+    if (missing) {
+      const err = document.getElementById("blPsychErr");
+      err.querySelector("span").textContent = "Please answer all 30 — you have " + missing + " left. (Jump to the first one below.)";
+      err.style.display = "flex";
+      const els = form.querySelectorAll(".likert");
+      if (els[firstMissing]) els[firstMissing].scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" });
+      return;
+    }
+    const dims = {};
+    BASELINE.psychDims.forEach(function (d) { const min = counts[d.key], max = counts[d.key] * 5; dims[d.key] = Math.round((sums[d.key] - min) / (max - min) * 100); });
+    state.baseline.psych = { dims: dims, takenAt: Date.now() };
+    save();
+    if ((location.hash || "") !== "#/baseline/psych") location.hash = "#/baseline/psych"; else showPsychResults();
+  }
+  function showPsychResults() {
+    setNav("baseline");
+    const dims = state.baseline.psych.dims;
+    const sorted = BASELINE.psychDims.map(function (d) { return { d: d, pct: dims[d.key] || 0 }; }).sort(function (a, c) { return c.pct - a.pct; });
+    let bars = "";
+    BASELINE.psychDims.forEach(function (d) { const pct = dims[d.key] || 0; const band = blBand(pct); bars += blbar(d.label, pct, '<b style="color:' + band.c + '">' + band.t + '</b> · ' + esc(d.blurb)); });
+    const top = sorted[0].d.label, top2 = sorted[1].d.label, low = sorted[sorted.length - 1].d.label;
+    const techDone = !!state.baseline.tech;
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Baseline · Profile check</p>' +
+      '<h1 style="margin-bottom:var(--space-3)">Your learner profile</h1>' +
+      '<div class="card"><div class="bl-bars">' + bars + '</div></div>' +
+      '<div class="card"><h2 style="font-size:1.15rem">What this says about you</h2>' +
+      '<p class="muted">Your standout traits are <b style="color:var(--color-text-primary)">' + esc(top) + '</b> and <b style="color:var(--color-text-primary)">' + esc(top2) + '</b> — lean on those as you learn. The journey will most stretch your <b style="color:var(--color-text-primary)">' + esc(low) + '</b>, and that’s completely trainable: the mini-projects and the Showcase community are built to grow it. None of these are fixed — retake this any time to see them shift.</p></div>' +
+      '<div style="margin-top:var(--space-6);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
+        (techDone ? '<a class="btn" href="#/map">Start the journey' + icon("arrowR", "btn__icon") + '</a>' : '<a class="btn" href="#/baseline/tech">Next: the technical check' + icon("arrowR", "btn__icon") + '</a>') +
+        '<button class="btn btn--ghost" id="blPsychRetake" type="button">Retake</button>' +
+        '<a class="btn btn--ghost" href="#/baseline">Back to baseline</a>' +
+      '</div></div></section>';
+    document.getElementById("blPsychRetake").addEventListener("click", function () { if (!confirm("Retake the profile check?")) return; state.baseline.psych = null; save(); renderBaselinePsych(); });
+    window.scrollTo(0, 0);
+  }
+
+  /* ============================================================
      ROUTER + CHROME
      ============================================================ */
   function setNav(active) {
@@ -2217,6 +2606,7 @@
 
   function router() {
     updateChrome();
+    stopBaselineTimer();
     const h = location.hash || "#/";
     if (h.indexOf("#/module/") === 0) {
       if (!requireProfile(h)) return;
@@ -2230,6 +2620,15 @@
       if (!requireProfile(h)) return;
       state.started = true; save();
       renderCapstone();
+    } else if (h === "#/baseline") {
+      if (!requireProfile(h)) return;
+      renderBaseline();
+    } else if (h === "#/baseline/tech") {
+      if (!requireProfile(h)) return;
+      renderBaselineTech();
+    } else if (h === "#/baseline/psych") {
+      if (!requireProfile(h)) return;
+      renderBaselinePsych();
     } else if (h === "#/showcase") {
       renderShowcase();
     } else if (h === "#/admin") {

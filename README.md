@@ -20,6 +20,10 @@ it, and it runs.
 - **A final capstone** — write a real PRD for your own product — unlocked once every
   module quiz is cleared.
 - A **reference** section: the "nonsense detector" and the standing principles.
+- **A baseline check** taken before the journey: a 30-question technical baseline
+  with a 60-minute timer (scored by area, no pass/fail) and a 30-statement learner
+  profile across five traits. Encouraging by design — a starting-point mirror, not
+  a gate. Results save with progress and appear in the admin dashboard.
 - **Profiles** — each learner creates a profile with a name and email; progress is
   saved per profile, and several profiles can coexist on one device.
 - **A community Showcase** — post your projects, findings, and experiments (with an
