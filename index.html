@@ -675,6 +675,34 @@
     .softgate__l { display: block; font-size: 14px; font-weight: 600; margin-bottom: var(--space-2); }
     .softgate__opt { font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 2px 8px; margin-left: 6px; }
 
+    /* Engagement: next-best-action, streak, level-up, backbone strip */
+    .nba { display: flex; align-items: center; gap: var(--space-3); background: var(--brand-black); color: var(--brand-white); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); text-decoration: none; transition: transform var(--duration-fast) var(--ease-standard); }
+    .nba:hover { transform: translateY(-2px); }
+    :root[data-theme="dark"] .nba { background: var(--color-surface-elevated); border: 1px solid var(--color-border); }
+    .nba__ic { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--brand-yellow); color: var(--brand-black); display: grid; place-items: center; }
+    .nba__ic svg { width: 20px; height: 20px; }
+    .nba__tx { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .nba__l { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--brand-yellow); font-weight: 700; }
+    .nba__v { font-family: var(--font-heading); font-weight: 600; font-size: 1.05rem; color: var(--brand-white); }
+    :root[data-theme="dark"] .nba__v { color: var(--color-text-primary); }
+    .nba__arw { color: var(--brand-white); flex: none; }
+    :root[data-theme="dark"] .nba__arw { color: var(--color-text-secondary); }
+
+    .streak { display: inline-flex; align-items: center; gap: 5px; background: color-mix(in srgb, var(--brand-yellow) 22%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--brand-yellow) 50%, var(--color-border)); color: var(--color-text-primary); border-radius: var(--radius-pill); padding: 5px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .streak svg { width: 15px; height: 15px; color: var(--brand-black); }
+    :root[data-theme="dark"] .streak svg { color: var(--brand-yellow); }
+
+    .levelup { display: flex; gap: var(--space-3); align-items: flex-start; background: color-mix(in srgb, var(--brand-yellow) 14%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--brand-yellow) 45%, var(--color-border)); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: 14px; margin-bottom: var(--space-2); }
+    .levelup svg { width: 20px; height: 20px; flex: none; color: var(--brand-black); margin-top: 1px; }
+    :root[data-theme="dark"] .levelup svg { color: var(--brand-yellow); }
+
+    .bbstrip { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: var(--space-3) 0; -webkit-overflow-scrolling: touch; }
+    .bbchip { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); min-width: 78px; }
+    .bbchip__k { font-family: var(--font-heading); font-weight: 700; font-size: 13px; color: var(--brand-black); background: var(--brand-yellow); border-radius: 6px; padding: 1px 7px; }
+    .bbchip__n { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap; }
+    .bbchip__arw { flex: 0 0 auto; color: var(--color-text-secondary); }
+    .bbchip__arw svg { width: 16px; height: 16px; }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
@@ -1434,7 +1462,7 @@
     COURSE.modules.forEach(function (mod) {
       m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false), phase: { calibrate: null, ground: "", engage: "", stress: "", commit: "" } };
     });
-    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] } };
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] }, streak: { last: null, count: 0 } };
   }
   function mergeState(s) {
     const base = blankState();
@@ -1459,6 +1487,7 @@
       base.baseline.techAttempt = s.baseline.techAttempt || null;
     }
     if (s.skills && Array.isArray(s.skills.snapshots)) base.skills.snapshots = s.skills.snapshots;
+    if (s.streak && typeof s.streak === "object") { base.streak.last = s.streak.last || null; base.streak.count = (typeof s.streak.count === "number") ? s.streak.count : 0; }
     return base;
   }
   function loadProgress(email) { return mergeState(DB.getProgress(email)); }
@@ -1556,12 +1585,28 @@
   ];
   function moduleQuizPct(st, mid) { const m = st.modules[mid]; return (m && typeof m.quizBest === "number") ? m.quizBest : 0; }
   function moduleProjFrac(st, mid) { const m = st.modules[mid]; if (!m || !m.project.length) return 0; return m.project.filter(Boolean).length / m.project.length; }
-  function softSignal(st, key) {
-    switch (key) {
-      case "quizzes": return quizzesPassed(st) / N_MODULES;
-      case "projects": return projectsDone(st) / N_MODULES;
-      case "commit": return (capstoneDone(st) ? 0.5 : 0) + 0.5 * (projectsDone(st) / N_MODULES);
-      default: return overallPercent(st) / 100;
+  function clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+  // Fraction of modules where a given backbone phase was engaged (soft-gate filled / calibrated).
+  function phaseFrac(st, key) {
+    let c = 0;
+    COURSE.modules.forEach(function (m) {
+      const ph = st.modules[m.id].phase;
+      if (key === "calibrate") { if (ph.calibrate != null) c++; }
+      else if ((ph[key] || "").trim()) c++;
+    });
+    return c / N_MODULES;
+  }
+  // Behaviour evidence for each soft skill — now blends journey progress with real backbone actions.
+  function softBehavior(st, id) {
+    const qF = quizzesPassed(st) / N_MODULES, pF = projectsDone(st) / N_MODULES, ov = overallPercent(st) / 100;
+    const g = phaseFrac(st, "ground"), e = phaseFrac(st, "engage"), s = phaseFrac(st, "stress"), c = phaseFrac(st, "commit"), cal = phaseFrac(st, "calibrate");
+    switch (id) {
+      case "S1": return clamp01(ov * 0.5 + cal * 0.25 + c * 0.25);          // Growth: progress + honest self-assessment + committing
+      case "S2": return clamp01(qF * 0.5 + g * 0.5);                          // Curiosity: quizzes + grounding in the real world
+      case "S3": return clamp01(pF * 0.4 + g * 0.3 + s * 0.3);               // Rigour: finishing projects + grounding + stress-testing
+      case "S4": return clamp01(qF * 0.6 + s * 0.4);                          // Resilience: clearing quizzes + facing weaknesses
+      case "S5": return clamp01(e * 0.4 + c * 0.3 + (capstoneDone(st) ? 0.3 : 0)); // Comms: engaging real people + positions + capstone
+      default: return ov;
     }
   }
   // Compute every skill's score (0-100) and met/total parameters from a progress state.
@@ -1581,7 +1626,7 @@
       } else {
         const dimPct = (st.baseline.psych && typeof st.baseline.psych.dims[sk.dim] === "number") ? st.baseline.psych.dims[sk.dim] / 100 : 0;
         met += Math.round(dimPct * sk.seed);
-        met += Math.round(softSignal(st, sk.signal) * sk.behavior);
+        met += Math.round(softBehavior(st, sk.id) * sk.behavior);
       }
       if (met > sk.n) met = sk.n;
       out[sk.id] = { met: met, n: sk.n, score: Math.round(met / sk.n * 100) };
@@ -1606,6 +1651,33 @@
     save();
   }
   function baselineSnapshot() { return state.skills.snapshots.find(function (s) { return s.trigger === "baseline"; }) || null; }
+
+  /* ---- engagement: streak + next best action ---- */
+  function dayStr(d) { d = d || new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function touchStreak() {
+    if (!session.email || !state.streak) return;
+    const s = state.streak, today = dayStr();
+    if (s.last === today) return;
+    const yd = new Date(); yd.setDate(yd.getDate() - 1);
+    s.count = (s.last === dayStr(yd)) ? (s.count + 1) : 1;
+    s.last = today;
+    save();
+  }
+  function streakBadge() { return (state.streak && state.streak.count > 0) ? '<span class="streak" title="Keep it going — come back tomorrow">' + icon("spark") + state.streak.count + '-day streak</span>' : ""; }
+  function nextAction(st) {
+    st = st || state;
+    if (!st.baseline.tech) return { label: "Take your technical baseline", href: "#/baseline/tech", ic: "target" };
+    if (!st.baseline.psych) return { label: "Take the 10-minute profile check", href: "#/baseline/psych", ic: "user" };
+    for (let i = 0; i < N_MODULES; i++) { const m = COURSE.modules[i]; if (!st.modules[m.id].quizPassed) return { label: "Clear Module " + m.n + " — " + m.title, href: "#/module/" + m.id, ic: "quiz" }; }
+    for (let i = 0; i < N_MODULES; i++) { const m = COURSE.modules[i]; if (!projectDone(m.id, st)) return { label: "Finish Module " + m.n + "’s mini-project", href: "#/module/" + m.id, ic: "project" }; }
+    if (!capstoneDone(st)) return { label: "Write your capstone PRD", href: "#/capstone", ic: "trophy" };
+    return { label: "You’ve completed everything — revisit your profile", href: "#/profile", ic: "spark" };
+  }
+  function nbaCard() {
+    const a = nextAction(state);
+    return '<a class="nba" href="' + a.href + '"><span class="nba__ic">' + icon(a.ic) + '</span>' +
+      '<span class="nba__tx"><span class="nba__l">Your next step</span><span class="nba__v">' + esc(a.label) + '</span></span>' + icon("arrowR", "nba__arw") + '</a>';
+  }
 
   const reduceMotion = function () { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; };
 
@@ -1722,6 +1794,10 @@
           icon("arrowR", "bl-callout__arw") +
         '</a>' +
         feat +
+        '<div class="section"><h2>How the journey works</h2>' +
+          '<p class="muted reading">It starts with a baseline — <b>where are you now?</b> — and then every module runs the same proven loop, the Universal Learning Backbone. You don’t just watch: you find your bearings, tie ideas to something real, build, take your work to a real person while it can still change, try to break it, and commit to a position you’d defend. What you carry forward is a portfolio of what you actually did.</p>' +
+          '<div class="bbstrip">' + PHASES.map(function (p, i) { return '<div class="bbchip"><span class="bbchip__k">' + p.k + '</span><span class="bbchip__n">' + p.name + '</span></div>' + (i < PHASES.length - 1 ? '<span class="bbchip__arw" aria-hidden="true">' + icon("arrowR") + '</span>' : ""); }).join("") + '</div>' +
+        '</div>' +
         '<hr class="rule" />' +
         '<div class="feature-grid" style="grid-template-columns:1fr;gap:var(--space-5)">' +
           '<div class="card reading" style="max-width:100%">' +
@@ -1788,10 +1864,11 @@
 
     main.innerHTML =
       '<section class="view"><div class="container">' +
-        '<p class="eyebrow">Your journey</p>' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);flex-wrap:wrap"><p class="eyebrow">Your journey</p>' + streakBadge() + '</div>' +
         '<h1 style="margin-bottom:var(--space-2)">' + (pct === 100 ? "You’ve finished the journey" : "Move across the map, one module at a time") + '</h1>' +
-        '<p class="muted reading">Each stop is a module. Clear its quiz and your traveller walks on to the next. The yellow trail is how far you’ve come.</p>' +
-        '<div class="card" style="margin-top:var(--space-5)"><div class="tracker">' + ring + '<div>' + stats +
+        '<p class="muted reading">Each stop is a module — and each module is a full loop of the backbone: <b>calibrate → orient → ground → construct → engage → stress → commit → persist</b>. Clear its quiz and your traveller walks on.</p>' +
+        '<div style="margin:var(--space-4) 0">' + nbaCard() + '</div>' +
+        '<div class="card"><div class="tracker">' + ring + '<div>' + stats +
           '<div class="resume-row"><div style="font-size:14px"><span class="muted">Up next</span><br><b>' + resumeLabel + '</b></div>' +
           '<a class="btn" href="' + resumeHref + '">' + (pct === 100 ? "Revisit" : "Continue") + icon("arrowR", "btn__icon") + '</a></div>' +
         '</div></div></div>' +
@@ -2568,11 +2645,22 @@
     const learners = profs.length;
     const avg = learners ? Math.round(profs.reduce(function (s, p) { return s + overallPercent(p.progress); }, 0) / learners) : 0;
     const grads = profs.filter(function (p) { return capstoneDone(p.progress); }).length;
+    const cohortAvgTech = learners ? Math.round(profs.reduce(function (s, p) { return s + techMastery(p.progress); }, 0) / learners) : 0;
+    let cohortCard = "";
+    if (learners) {
+      const flat = {}; techSkillIds().forEach(function (id) { flat[id] = 0; });
+      profs.forEach(function (p) { const sc = computeSkills(p.progress); techSkillIds().forEach(function (id) { flat[id] += sc[id].score; }); });
+      techSkillIds().forEach(function (id) { flat[id] = Math.round(flat[id] / learners); });
+      const cRadar = radarSVG(SKILLS.filter(function (s) { return s.kind === "tech"; }).map(function (s) { return { id: s.id, label: s.short }; }), flat, null);
+      cohortCard = '<div class="card" style="margin-bottom:var(--space-4)"><h3 style="font-size:1.05rem">Cohort skill web</h3>' +
+        '<p class="muted" style="font-size:14px;margin-top:0">Average across all ' + learners + ' learner' + (learners === 1 ? "" : "s") + '. The low points are where the group needs the most help.</p>' +
+        cRadar + '<div class="radar-legend"><span><i class="lg-cur"></i>Cohort average — technical mastery ' + cohortAvgTech + '%</span></div></div>';
+    }
 
     const rows = profs.slice().sort(function (a, b) { return overallPercent(b.progress) - overallPercent(a.progress); }).map(function (p) {
       const pct = overallPercent(p.progress);
       return '<tr>' +
-        '<td><div class="who"><span class="avatar avatar--sm" aria-hidden="true">' + esc(initials(p.name, p.email)) + '</span><div><div style="font-weight:600">' + esc(p.name) + '</div><div class="mono" style="font-size:12px;color:var(--color-text-secondary)">' + esc(p.email) + '</div></div></div></td>' +
+        '<td><div class="who"><span class="avatar avatar--sm" aria-hidden="true">' + esc(initials(p.name, p.email)) + '</span><div><a href="#/admin/l/' + encodeURIComponent(p.email) + '" style="font-weight:600;text-decoration:none;border-bottom:2px solid var(--brand-yellow)">' + esc(p.name) + '</a><div class="mono" style="font-size:12px;color:var(--color-text-secondary)">' + esc(p.email) + '</div></div></div></td>' +
         '<td class="num">' + quizzesPassed(p.progress) + ' / ' + N_MODULES + '</td>' +
         '<td class="num">' + projectsDone(p.progress) + ' / ' + N_MODULES + '</td>' +
         '<td>' + (capstoneDone(p.progress) ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Done</span>' : '<span class="muted">—</span>') + '</td>' +
@@ -2599,7 +2687,7 @@
         '<div class="astat"><div class="astat__n">' + grads + '</div><div class="astat__l">Capstones done</div></div>' +
         '<div class="astat"><div class="astat__n">' + posts.length + '</div><div class="astat__l">Showcase posts</div></div>' +
       '</div>' +
-      '<div class="section"><h2><span class="section__ic">' + icon("users") + '</span>Learners</h2>' + table + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("users") + '</span>Learners</h2><p class="muted">Tap a name to open their full skill profile.</p>' + cohortCard + table + '</div>' +
       '<div class="section"><h2><span class="section__ic">' + icon("post") + '</span>Showcase posts</h2><p class="muted">You can remove any post here.</p>' + postList + '</div>' +
       '</div></section>';
 
@@ -2609,6 +2697,39 @@
         dataDeletePost(b.getAttribute("data-del")).then(function () { renderAdmin(); });
       });
     });
+    window.scrollTo(0, 0);
+  }
+
+  async function renderAdminLearner(email) {
+    setNav(null);
+    const all = await dataAllProfiles();
+    const learner = all.find(function (p) { return p.email === email; });
+    if (!learner) {
+      main.innerHTML = '<section class="view"><div class="container"><div class="crumbs"><a href="#/admin">' + icon("arrowL") + ' All learners</a></div><div class="card empty">' + icon("users") + '<h3>Learner not found</h3><p>They may not have synced yet.</p></div></div></section>';
+      window.scrollTo(0, 0); return;
+    }
+    const st = learner.progress, b = st.baseline;
+    const tm = techMastery(st), ss = softStrength(st), ov = skillsOverall(st);
+    const baselineCard = '<div class="card"><h2 style="font-size:1.15rem">Baseline &amp; progress</h2><div class="pf-list" style="margin-top:var(--space-2)">' +
+      '<div class="pf-item"><span class="pf-ic">' + icon("target") + '</span><div><div class="pf-t">Technical baseline</div><div class="pf-d">' + (b.tech ? b.tech.pct + "%" : "not taken") + '</div></div></div>' +
+      '<div class="pf-item"><span class="pf-ic">' + icon("user") + '</span><div><div class="pf-t">Learner profile</div><div class="pf-d">' + (b.psych ? "completed" : "not taken") + '</div></div></div>' +
+      '<div class="pf-item"><span class="pf-ic">' + icon("quiz") + '</span><div><div class="pf-t">Modules cleared</div><div class="pf-d">' + quizzesPassed(st) + " / " + N_MODULES + '</div></div></div>' +
+      '<div class="pf-item"><span class="pf-ic">' + icon("trophy") + '</span><div><div class="pf-t">Capstone</div><div class="pf-d">' + (capstoneDone(st) ? "defended" : "not yet") + '</div></div></div>' +
+      '</div></div>';
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<div class="crumbs"><a href="#/admin">' + icon("arrowL") + ' All learners</a></div>' +
+      '<div class="mod-badges" style="margin-bottom:var(--space-3)"><span class="badge badge--accent">' + icon("shield", "badge__i") + ' Admin</span></div>' +
+      '<div style="display:flex;gap:var(--space-3);align-items:center;margin-bottom:var(--space-5)"><span class="avatar avatar--lg" aria-hidden="true">' + esc(initials(learner.name, learner.email)) + '</span><div style="min-width:0"><h1 style="margin:0;font-size:1.8rem">' + esc(learner.name) + '</h1><div class="mono muted" style="font-size:13px;word-break:break-all">' + esc(learner.email) + '</div></div></div>' +
+      '<div class="admin-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:var(--space-6)">' +
+        '<div class="astat"><div class="astat__n">' + tm + '%</div><div class="astat__l">Technical mastery</div></div>' +
+        '<div class="astat"><div class="astat__n">' + ss + '%</div><div class="astat__l">Profile strength</div></div>' +
+        '<div class="astat"><div class="astat__n">' + ov + '%</div><div class="astat__l">Overall</div></div>' +
+      '</div>' +
+      '<div class="pf-grid"><div class="card"><h2 style="font-size:1.15rem">Skill web</h2>' + radarHTMLFor(st, null) + '<div class="radar-legend"><span><i class="lg-cur"></i>Current</span></div></div>' + baselineCard + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("layers") + '</span>Technical skills</h2>' + skillBarsHTML(st, "tech") + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("spark") + '</span>How they learn</h2>' + skillBarsHTML(st, "soft") + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("trophy") + '</span>Portfolio</h2>' + portfolioHTML(st) + '</div>' +
+      '</div></section>';
     window.scrollTo(0, 0);
   }
 
@@ -2904,6 +3025,23 @@
   }
   function snapLabel(trig) { if (trig === "baseline") return "Start"; if (trig === "capstone") return "PRD"; const m = moduleById(trig); return m ? ("M" + m.n) : trig; }
 
+  function skillBarsHTML(st, kind) {
+    const cur = computeSkills(st);
+    return '<div class="bl-bars">' + SKILLS.filter(function (s) { return s.kind === kind; }).map(function (s) { return blbar(s.name, cur[s.id].score, cur[s.id].met + " of " + cur[s.id].n + " checkpoints"); }).join("") + "</div>";
+  }
+  function portfolioHTML(st) {
+    const pf = [];
+    if (st.baseline.tech) pf.push({ ic: "target", t: "Technical baseline", d: st.baseline.tech.pct + "%" });
+    if (st.baseline.psych) pf.push({ ic: "user", t: "Learner profile", d: "completed" });
+    COURSE.modules.forEach(function (m) { if (st.modules[m.id].quizPassed) pf.push({ ic: "quiz", t: "Cleared: Module " + m.n + " — " + m.title, d: "quiz " + (st.modules[m.id].quizBest || 0) + "%" + (projectDone(m.id, st) ? " · project done" : "") }); });
+    if (capstoneDone(st)) pf.push({ ic: "trophy", t: "Capstone PRD", d: "defended" });
+    return pf.length ? '<div class="pf-list">' + pf.map(function (x) { return '<div class="pf-item"><span class="pf-ic">' + icon(x.ic) + '</span><div><div class="pf-t">' + esc(x.t) + '</div><div class="pf-d">' + esc(x.d) + '</div></div></div>'; }).join("") + "</div>" : '<p class="muted">No portfolio items yet.</p>';
+  }
+  function radarHTMLFor(st, base) {
+    const cur = computeSkills(st); const flat = {}; SKILLS.forEach(function (s) { flat[s.id] = cur[s.id].score; });
+    return radarSVG(SKILLS.filter(function (s) { return s.kind === "tech"; }).map(function (s) { return { id: s.id, label: s.short }; }), flat, base || null);
+  }
+
   function renderProfile() {
     setNav("profile");
     const cur = computeSkills(state);
@@ -2931,17 +3069,25 @@
 
     function barRows(list) { return '<div class="bl-bars">' + list.map(function (s) { return blbar(s.name, cur[s.id].score, cur[s.id].met + " of " + cur[s.id].n + " checkpoints"); }).join("") + "</div>"; }
 
-    // portfolio
-    const pf = [];
-    if (state.baseline.tech) pf.push({ ic: "target", t: "Technical baseline", d: state.baseline.tech.pct + "% — " + new Date(state.baseline.tech.takenAt).toLocaleDateString() });
-    if (state.baseline.psych) pf.push({ ic: "user", t: "Learner profile", d: "completed" });
-    COURSE.modules.forEach(function (m) { if (state.modules[m.id].quizPassed) pf.push({ ic: "quiz", t: "Cleared: Module " + m.n + " — " + m.title, d: "quiz " + (state.modules[m.id].quizBest || 0) + "%" + (projectDone(m.id) ? " · project done" : "") }); });
-    if (capstoneDone()) pf.push({ ic: "trophy", t: "Capstone PRD", d: "defended" });
-    let pfHTML = pf.length ? '<div class="pf-list">' + pf.map(function (x) { return '<div class="pf-item"><span class="pf-ic">' + icon(x.ic) + '</span><div><div class="pf-t">' + esc(x.t) + '</div><div class="pf-d">' + esc(x.d) + '</div></div></div>'; }).join("") + "</div>" : '<p class="muted">Your portfolio fills as you complete work.</p>';
+    const pfHTML = portfolioHTML(state);
+
+    // skill-up delta since last milestone
+    let deltaHTML = "";
+    if (snaps.length >= 2) {
+      const a = snaps[snaps.length - 2], bb = snaps[snaps.length - 1], dTech = bb.tech - a.tech;
+      let best = null, bestD = 0;
+      techSkillIds().forEach(function (idd) { const dd = (bb.scores[idd] || 0) - (a.scores[idd] || 0); if (dd > bestD) { bestD = dd; best = idd; } });
+      if (dTech > 0 || bestD > 0) {
+        const bestName = best ? SKILLS.find(function (s) { return s.id === best; }).name : "";
+        deltaHTML = '<div class="levelup">' + icon("spark") + '<div><b>Your skills moved.</b> Technical mastery ' + (dTech >= 0 ? "+" : "") + dTech + '% since your last milestone' + (best ? ' — biggest jump in <b>' + esc(bestName) + '</b> (+' + bestD + '%)' : "") + '.</div></div>';
+      }
+    }
 
     main.innerHTML = '<section class="view"><div class="container">' +
       '<p class="eyebrow">Your profile</p>' +
-      '<h1 style="margin-bottom:var(--space-3)">Your skills, as they grow</h1>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);flex-wrap:wrap"><h1 style="margin-bottom:var(--space-3)">Your skills, as they grow</h1>' + streakBadge() + '</div>' +
+      deltaHTML +
+      '<div style="margin:var(--space-4) 0">' + nbaCard() + '</div>' +
       '<div class="admin-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:var(--space-6)">' +
         '<div class="astat"><div class="astat__n">' + tm + '%</div><div class="astat__l">Technical mastery</div></div>' +
         '<div class="astat"><div class="astat__n">' + ss + '%</div><div class="astat__l">Profile strength</div></div>' +
@@ -2981,6 +3127,7 @@
   function router() {
     updateChrome();
     stopBaselineTimer();
+    touchStreak();
     const h = location.hash || "#/";
     if (h.indexOf("#/module/") === 0) {
       if (!requireProfile(h)) return;
@@ -3011,6 +3158,9 @@
     } else if (h === "#/admin") {
       if (!isAdmin()) { renderWelcome(); openAdminGate(); return; }
       renderAdmin();
+    } else if (h.indexOf("#/admin/l/") === 0) {
+      if (!isAdmin()) { renderWelcome(); openAdminGate(); return; }
+      renderAdminLearner(decodeURIComponent(h.slice("#/admin/l/".length)));
     } else if (h === "#/reference") {
       renderReference();
     } else {
