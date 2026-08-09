@@ -645,6 +645,36 @@
     .pf-t { font-weight: 600; font-size: 14px; }
     .pf-d { font-size: 13px; color: var(--color-text-secondary); font-family: var(--font-mono); }
 
+    /* Backbone phases (per-module mini-arc) */
+    .prail { display: flex; gap: 6px; overflow-x: auto; padding: var(--space-2) 0 var(--space-4); margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); -webkit-overflow-scrolling: touch; }
+    .prail__step { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; background: transparent; border: none; cursor: pointer; padding: 4px 6px; min-width: 62px; font-family: var(--font-body); }
+    .prail__k { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-heading); font-weight: 700; font-size: 12px; border: 1.5px solid var(--color-border-strong); color: var(--color-text-secondary); background: var(--color-surface); transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+    .prail__k svg { width: 16px; height: 16px; }
+    .prail__n { font-size: 11px; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap; }
+    .prail__step.is-cur .prail__k { border-color: var(--color-text-primary); color: var(--color-text-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-yellow) 45%, transparent); }
+    .prail__step.is-cur .prail__n { color: var(--color-text-primary); }
+    .prail__step.is-done .prail__k { background: var(--brand-yellow); border-color: var(--brand-yellow); color: var(--brand-black); }
+    .prail__step:hover .prail__k { border-color: var(--color-text-primary); }
+
+    .phase { padding-top: var(--space-6); margin-top: var(--space-6); border-top: 1px dashed var(--color-border); scroll-margin-top: 84px; }
+    .phase:first-of-type { border-top: none; margin-top: var(--space-2); padding-top: 0; }
+    .phase__hd { display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-3); }
+    .phase__k { width: 44px; height: 44px; flex: none; border-radius: var(--radius-md); background: var(--brand-black); color: var(--brand-yellow); display: grid; place-items: center; font-family: var(--font-heading); font-weight: 700; font-size: 15px; }
+    :root[data-theme="dark"] .phase__k { background: var(--brand-yellow); color: var(--brand-black); }
+    .phase__name { font-size: 1.4rem; margin: 0; }
+    .phase__q { margin: 2px 0 0; color: var(--color-text-secondary); font-size: 14px; }
+
+    .calib { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
+    .calib__b { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: var(--space-3); border: 1.5px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface); cursor: pointer; font-family: var(--font-body); transition: border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard); }
+    .calib__b span { font-family: var(--font-heading); font-weight: 700; font-size: 18px; color: var(--color-text-primary); }
+    .calib__b small { font-size: 12px; color: var(--color-text-secondary); text-align: center; }
+    .calib__b:hover { border-color: var(--color-text-primary); }
+    .calib__b.is-sel { border-color: var(--brand-yellow); background: color-mix(in srgb, var(--brand-yellow) 14%, var(--color-surface)); }
+
+    .softgate { margin-top: var(--space-4); }
+    .softgate__l { display: block; font-size: 14px; font-weight: 600; margin-bottom: var(--space-2); }
+    .softgate__opt { font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 2px 8px; margin-left: 6px; }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
@@ -1402,7 +1432,7 @@
   function blankState() {
     const m = {};
     COURSE.modules.forEach(function (mod) {
-      m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false) };
+      m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false), phase: { calibrate: null, ground: "", engage: "", stress: "", commit: "" } };
     });
     return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] } };
   }
@@ -1417,6 +1447,10 @@
         bm.quizBest = (typeof sm.quizBest === "number") ? sm.quizBest : null;
         bm.quizPassed = !!sm.quizPassed;
         if (Array.isArray(sm.project)) bm.project.forEach(function (_, i) { bm.project[i] = !!sm.project[i]; });
+        if (sm.phase && typeof sm.phase === "object") {
+          bm.phase.calibrate = (typeof sm.phase.calibrate === "number") ? sm.phase.calibrate : null;
+          ["ground", "engage", "stress", "commit"].forEach(function (k) { if (typeof sm.phase[k] === "string") bm.phase[k] = sm.phase[k]; });
+        }
       }
     });
     if (s.baseline && typeof s.baseline === "object") {
@@ -1885,6 +1919,67 @@
      ============================================================ */
   let justPassed = null; // module id that was passed this session moment, for the map hint
 
+  /* ---- Universal Learning Backbone: per-module mini-arc ---- */
+  const PHASES = [
+    { k: "P0", name: "Calibrate", q: "Where are you now?" },
+    { k: "P1", name: "Orient", q: "What is this, and how do people speak it?" },
+    { k: "P2", name: "Ground", q: "What’s actually true?" },
+    { k: "P3", name: "Construct", q: "Can you build something useful?" },
+    { k: "P4", name: "Engage", q: "What does the real world say?" },
+    { k: "P5", name: "Stress", q: "What if you’re wrong?" },
+    { k: "P6", name: "Commit", q: "Will you stand behind it?" },
+    { k: "PP", name: "Persist", q: "What do you carry forward?" }
+  ];
+  function phaseDone(id) {
+    const sm = state.modules[id], ph = sm.phase;
+    return {
+      P0: ph.calibrate != null,
+      P1: sm.quizBest != null || !!(ph.ground || "").trim() || projectDone(id),
+      P2: !!(ph.ground || "").trim(),
+      P3: projectDone(id),
+      P4: !!(ph.engage || "").trim(),
+      P5: sm.quizPassed,
+      P6: !!(ph.commit || "").trim(),
+      PP: sm.quizPassed && projectDone(id)
+    };
+  }
+  function phaseRailHTML(id) {
+    const d = phaseDone(id);
+    let curIdx = PHASES.findIndex(function (p) { return !d[p.k]; });
+    if (curIdx < 0) curIdx = PHASES.length - 1;
+    let h = '<div class="prail">';
+    PHASES.forEach(function (p, i) {
+      const done = d[p.k], cur = i === curIdx && !done;
+      h += '<button type="button" class="prail__step' + (done ? " is-done" : "") + (cur ? " is-cur" : "") + '" data-goto="phase-' + p.k + '" title="' + p.name + ' — ' + esc(p.q) + '">' +
+        '<span class="prail__k">' + (done ? icon("check") : p.k) + '</span><span class="prail__n">' + p.name + '</span></button>';
+    });
+    h += '</div>';
+    return h;
+  }
+  // Rebuild the phase rail in place (called when any phase's state changes).
+  function refreshPhaseRail() {
+    const w = document.getElementById("prailWrap");
+    const h = location.hash || "";
+    if (!w || h.indexOf("#/module/") !== 0) return;
+    const id = h.slice("#/module/".length);
+    if (!moduleById(id)) return;
+    w.innerHTML = phaseRailHTML(id);
+    w.querySelectorAll("[data-goto]").forEach(function (b) {
+      b.addEventListener("click", function () { const t = document.getElementById(b.getAttribute("data-goto")); if (t) t.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" }); });
+    });
+  }
+  function phaseHead(k, name, q) { return '<div class="phase__hd"><span class="phase__k">' + k + '</span><div><h2 class="phase__name">' + name + '</h2><p class="phase__q">' + esc(q) + '</p></div></div>'; }
+  function softGate(id, label, ph, val) {
+    return '<div class="softgate"><label class="softgate__l" for="' + id + '">' + esc(label) + ' <span class="softgate__opt">not graded</span></label>' +
+      '<textarea class="textarea" id="' + id + '" rows="3" placeholder="' + esc(ph) + '">' + esc(val || "") + '</textarea></div>';
+  }
+  function calibHTML(sel) {
+    const labels = ["", "No idea", "A little", "Some", "Pretty good", "Could teach it"];
+    let h = "";
+    for (let i = 1; i <= 5; i++) h += '<button type="button" class="calib__b' + (sel === i ? " is-sel" : "") + '" data-cal="' + i + '"><span>' + i + '</span><small>' + labels[i] + '</small></button>';
+    return h;
+  }
+
   function renderModule(id) {
     const mod = moduleById(id);
     if (!mod) { location.hash = "#/map"; return; }
@@ -1928,6 +2023,10 @@
     const nextHref = nextMod ? ("#/module/" + nextMod.id) : "#/capstone";
     const nextLabel = nextMod ? ("Next: Module " + nextMod.n) : "On to the capstone";
 
+    const quizIntro = mod.quiz.length + ' questions. Clear ' + Math.ceil(mod.quiz.length * 0.7) + ' to advance your traveller. Retry as many times as you like.';
+    const projIntro = mod.week === "Reference" ? "Optional, but this is where it sticks." : "This is where it sticks — do it on your own product.";
+    const topic = mod.title.charAt(0).toLowerCase() + mod.title.slice(1);
+
     main.innerHTML =
       '<section class="view"><div class="container">' +
         '<div class="crumbs"><a href="#/map">' + icon("arrowL") + ' The map</a></div>' +
@@ -1938,18 +2037,49 @@
           (projectDone(id) ? '<span class="badge badge--done">' + icon("check", "badge__i") + ' Project done</span>' : '') +
         '</div>' +
         '<h1 style="margin-bottom:var(--space-2)">' + mod.title + '</h1>' +
-        '<p class="muted" style="font-size:1.05rem;margin-bottom:var(--space-6)">' + mod.tag + '</p>' +
-        outs +
-        '<div class="section"><h2><span class="section__ic">' + icon("why") + '</span>Why this matters</h2><p class="reading" style="font-size:1.05rem">' + mod.why + '</p></div>' +
-        watch +
-        concepts + callout +
-        apply +
-        '<div class="section"><h2><span class="section__ic">' + icon("quiz") + '</span>Quick quiz</h2>' +
-          '<p class="muted">' + mod.quiz.length + ' questions. Clear ' + Math.ceil(mod.quiz.length * 0.7) + ' to advance your traveller. You can retry as many times as you like.</p>' +
-          '<div id="quiz"></div></div>' +
-        '<div class="section"><h2><span class="section__ic">' + icon("project") + '</span>Mini-project</h2>' +
-          '<p class="muted">' + (mod.week === "Reference" ? "Optional, but this is where it sticks." : "This is where it sticks — do it on your own product.") + '</p>' +
-          '<div id="project"></div></div>' +
+        '<p class="muted" style="font-size:1.05rem;margin-bottom:var(--space-5)">' + mod.tag + '</p>' +
+        '<div id="prailWrap">' + phaseRailHTML(id) + '</div>' +
+
+        '<section class="phase" id="phase-P0">' + phaseHead("P0", "Calibrate", "Where are you now?") +
+          '<p class="muted reading">Before we start — how well could you explain <b>' + esc(mod.title) + '</b> to a colleague right now? There’s no wrong answer; it just marks your starting point so you can see how far you move.</p>' +
+          '<div class="calib" id="calib"></div>' +
+        '</section>' +
+
+        '<section class="phase" id="phase-P1">' + phaseHead("P1", "Orient", "What is this, and how do people speak it?") +
+          outs +
+          '<div class="section"><h2><span class="section__ic">' + icon("why") + '</span>Why this matters</h2><p class="reading" style="font-size:1.05rem">' + mod.why + '</p></div>' +
+          watch + concepts + callout +
+        '</section>' +
+
+        '<section class="phase" id="phase-P2">' + phaseHead("P2", "Ground", "What’s actually true? Tie it to something real.") +
+          apply +
+          softGate("ph-ground", "Ground it in your own product", "Name one real feature, example, or source this idea applies to in a product you know. Writing it down is what makes it stick.", sm.phase.ground) +
+        '</section>' +
+
+        '<section class="phase" id="phase-P3">' + phaseHead("P3", "Construct", "Can you build something useful?") +
+          '<div class="section"><h2><span class="section__ic">' + icon("project") + '</span>Mini-project</h2><p class="muted">' + projIntro + '</p><div id="project"></div></div>' +
+        '</section>' +
+
+        '<section class="phase" id="phase-P4">' + phaseHead("P4", "Engage", "Take it to someone who actually cares.") +
+          '<p class="muted reading">Show what you made to a real person — a colleague, a developer, a user — <b>while it can still change</b>. Then capture what they said. Real contact beats a perfect draft nobody has seen.</p>' +
+          '<div style="margin:var(--space-3) 0"><a class="btn btn--secondary btn--sm" href="#/showcase">' + icon("post", "btn__icon") + ' Share it on the Showcase</a></div>' +
+          softGate("ph-engage", "Their reaction", "Paste one honest reaction you got. What surprised them — or you?", sm.phase.engage) +
+        '</section>' +
+
+        '<section class="phase" id="phase-P5">' + phaseHead("P5", "Stress", "What happens if you’re wrong?") +
+          '<div class="section"><h2><span class="section__ic">' + icon("quiz") + '</span>Quick quiz</h2><p class="muted">' + quizIntro + '</p><div id="quiz"></div></div>' +
+          softGate("ph-stress", "Break your own work", "Before reality does it for you: where is your project weakest? What would fail first, and who’d notice?", sm.phase.stress) +
+        '</section>' +
+
+        '<section class="phase" id="phase-P6">' + phaseHead("P6", "Commit", "Will you stand behind it?") +
+          softGate("ph-commit", "Your one-line position", "In one sentence, what do you now believe about " + esc(topic) + "? Write the line you’d defend.", sm.phase.commit) +
+        '</section>' +
+
+        '<section class="phase" id="phase-PP">' + phaseHead("PP", "Persist", "What do you carry forward?") +
+          '<div class="note" style="border-left:4px solid var(--brand-yellow)">' + icon("trophy") + '<span>Everything you just made — your grounding, your project, the reaction, and your position — is saved to your <b>Portfolio</b>. That’s the evidence you did the work, not just watched it.</span></div>' +
+          '<div style="margin-top:var(--space-4)"><a class="btn" href="#/profile">See your skills &amp; portfolio' + icon("arrowR", "btn__icon") + '</a></div>' +
+        '</section>' +
+
         '<div class="mod-foot">' +
           '<a class="btn btn--secondary" href="#/map">' + icon("map", "btn__icon") + ' Back to map</a>' +
           '<a class="btn" href="' + nextHref + '">' + nextLabel + icon("arrowR", "btn__icon") + '</a>' +
@@ -1958,6 +2088,26 @@
 
     renderQuiz(mod);
     renderProject(mod);
+
+    // calibrate (P0)
+    const calibEl = document.getElementById("calib");
+    function paintCalib() {
+      calibEl.innerHTML = calibHTML(state.modules[id].phase.calibrate);
+      calibEl.querySelectorAll("[data-cal]").forEach(function (btn) {
+        btn.addEventListener("click", function () { state.modules[id].phase.calibrate = parseInt(btn.getAttribute("data-cal"), 10); save(); paintCalib(); refreshPhaseRail(); });
+      });
+    }
+    paintCalib();
+
+    // soft-gate textareas (P2/P4/P5/P6) — persisted, never blocking
+    [["ph-ground", "ground"], ["ph-engage", "engage"], ["ph-stress", "stress"], ["ph-commit", "commit"]].forEach(function (pair) {
+      const el = document.getElementById(pair[0]); if (!el) return;
+      let t = null;
+      el.addEventListener("input", function () { state.modules[id].phase[pair[1]] = el.value; clearTimeout(t); t = setTimeout(function () { save(); refreshPhaseRail(); }, 500); });
+    });
+
+    refreshPhaseRail();  // wire the rail's scroll-to buttons
+
     setNav(null);
     window.scrollTo(0, 0);
   }
@@ -2023,6 +2173,7 @@
     sm.quizBest = (sm.quizBest === null) ? pct : Math.max(sm.quizBest, pct);
     if (passed) sm.quizPassed = true;
     save();
+    refreshPhaseRail();  // P5 (Stress) may now be complete
 
     const newlyPassed = passed && !wasPassed;
     const r = document.getElementById("quizResult");
@@ -2074,6 +2225,7 @@
         state.modules[mod.id].project[parseInt(cb.getAttribute("data-i"), 10)] = cb.checked;
         save();
         updateProjFoot(mod);
+        refreshPhaseRail();  // P3 (Construct) completion may have changed
       });
     });
   }
