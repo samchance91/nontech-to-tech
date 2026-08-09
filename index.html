@@ -169,7 +169,16 @@
     }
     .nav__link:hover { color: var(--color-text-primary); background: var(--color-surface-subtle); }
     .nav__link[aria-current="page"] { color: var(--color-text-primary); font-weight: 600; }
-    @media (min-width: 768px) { .nav__link { display: inline-flex; } }
+    @media (min-width: 1024px) { .nav__link { display: inline-flex; } }
+    .navmenu-btn { display: inline-flex; }
+    @media (min-width: 1024px) { .navmenu-btn { display: none; } }
+    #navMenu { width: min(340px, 92vw); }
+    #navMenu h3 { margin-bottom: var(--space-3); }
+    .navmenu__list { display: flex; flex-direction: column; gap: 2px; }
+    .navmenu__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-primary); font-weight: 600; }
+    .navmenu__item:hover { background: var(--color-surface-subtle); }
+    .navmenu__item[aria-current="page"] { background: color-mix(in srgb, var(--brand-yellow) 16%, var(--color-surface)); }
+    .navmenu__item svg { width: 19px; height: 19px; color: var(--color-text-secondary); flex: none; }
 
     /* =========================================================
        Buttons
@@ -703,10 +712,47 @@
     .bbchip__arw { flex: 0 0 auto; color: var(--color-text-secondary); }
     .bbchip__arw svg { width: 16px; height: 16px; }
 
+    /* Flashcards */
+    .fc-grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+    @media (min-width: 640px) { .fc-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 960px) { .fc-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .fc-mod { display: block; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); text-decoration: none; color: inherit; box-shadow: var(--shadow-card); transition: transform var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+    .fc-mod:hover:not(.is-locked) { transform: translateY(-2px); border-color: var(--color-border-strong); }
+    .fc-mod.is-locked { opacity: 0.7; }
+    .fc-mod__hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+    .fc-mod__hd svg { width: 16px; height: 16px; color: var(--color-text-secondary); }
+    .fc-mod__k { font-size: 12px; font-family: var(--font-mono); color: var(--color-text-secondary); }
+    .fc-mod__t { font-family: var(--font-heading); font-weight: 600; font-size: 1.05rem; }
+    .fc-mod .blbar { height: 8px; }
+    .fc-mod__go { font-size: 13px; font-weight: 600; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; margin-top: var(--space-2); }
+    .fc-mod__go svg { width: 15px; height: 15px; }
+    .fc-mod__go.muted { color: var(--color-text-secondary); font-weight: 400; }
+
+    .fc-bar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); font-size: 13px; }
+    .fc-bar__act { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .fc-focus { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+    .fc-focus input { width: 18px; height: 18px; accent-color: var(--brand-black); }
+    :root[data-theme="dark"] .fc-focus input { accent-color: var(--brand-yellow); }
+
+    .fcard { perspective: 1200px; cursor: pointer; margin: 0 auto; max-width: 560px; }
+    .fcard__inner { position: relative; width: 100%; min-height: 260px; transition: transform 500ms var(--ease-standard); transform-style: preserve-3d; }
+    .fcard.is-flipped .fcard__inner { transform: rotateY(180deg); }
+    .fcard__face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--space-8) var(--space-6); border-radius: var(--radius-lg); border: 1px solid var(--color-border); box-shadow: var(--shadow-card); }
+    .fcard__front { background: var(--color-surface); }
+    .fcard__back { background: var(--brand-black); color: var(--brand-white); transform: rotateY(180deg); }
+    :root[data-theme="dark"] .fcard__back { background: var(--color-surface-elevated); color: var(--color-text-primary); border-color: var(--brand-yellow); }
+    .fcard__tag { position: absolute; top: var(--space-4); left: var(--space-4); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--color-text-secondary); }
+    .fcard__back .fcard__tag { color: var(--brand-yellow); }
+    .fcard__txt { font-family: var(--font-heading); font-weight: 600; font-size: 1.3rem; line-height: 1.35; }
+    .fcard__back .fcard__txt { font-family: var(--font-body); font-weight: 500; font-size: 1.15rem; }
+    .fcard__hint { position: absolute; bottom: var(--space-4); font-size: 12px; color: var(--color-text-secondary); }
+    .fc-controls { display: flex; gap: var(--space-3); justify-content: center; align-items: center; margin-top: var(--space-4); flex-wrap: wrap; }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
       .bl-timer--warn { animation: none; }
+      .fcard__inner { transition: none; }
     }
   </style>
 </head>
@@ -721,9 +767,11 @@
       <a class="nav__link" href="#/baseline" data-nav="baseline">Baseline</a>
       <a class="nav__link" href="#/map" data-nav="map">Journey</a>
       <a class="nav__link" href="#/profile" data-nav="profile">Profile</a>
+      <a class="nav__link" href="#/flashcards" data-nav="flashcards">Flashcards</a>
       <a class="nav__link" href="#/showcase" data-nav="showcase">Showcase</a>
       <a class="nav__link" href="#/reference" data-nav="reference">Reference</a>
       <span class="nav__spacer"></span>
+      <button class="iconbtn navmenu-btn" id="navMenuBtn" type="button" aria-label="Menu" title="Menu"></button>
       <button class="iconbtn" id="adminBtn" type="button" aria-label="Admin mode" title="Admin"></button>
       <button class="iconbtn" id="themeToggle" type="button" aria-label="Switch theme"></button>
       <button class="profilechip" id="profileBtn" type="button" aria-label="Your profile"></button>
@@ -787,6 +835,11 @@
       <button class="btn btn--danger" id="pmReset" type="button">Reset my progress</button>
       <button class="btn btn--ghost" id="pmClose" type="button" style="justify-content:center">Close</button>
     </div>
+  </dialog>
+
+  <dialog id="navMenu">
+    <h3>Go to</h3>
+    <div class="navmenu__list" id="navMenuList"></div>
   </dialog>
 
   <dialog id="adminDialog">
@@ -1413,6 +1466,140 @@
   BASELINE.techMod = ["m1", "m0", "m5", "m1", "m0", "m1", "m0", "m1", "m1", "m0", "m2", "m2", "m2", "m2", "m2", "m3", "m3", "m3", "m3", "m3", "m4", "m4", "m4", "m5", "m4", "m6", "m6", "m6", "m6", "m7"];
 
   /* ============================================================
+     FLASHCARDS  (per module — unlocked once the module's quiz is cleared)
+     f = front (the cue you try to recall), b = back (the answer)
+     ============================================================ */
+  const FLASHCARDS = {
+    m0: [
+      { f: "The four layers every product has, from the user inward?", b: "Client (frontend) → API → Backend (server) → Database." },
+      { f: "What is the client / frontend responsible for?", b: "What the user sees and touches — the browser or mobile app." },
+      { f: "What is the backend / server responsible for?", b: "The logic and the rules. Users never touch it directly." },
+      { f: "The API, in one line?", b: "The contract between client and server: “send me this, I’ll send you back that.”" },
+      { f: "Where does data actually live?", b: "In the database." },
+      { f: "The five actions every feature is made of?", b: "Read, Write, Update, Delete, Trigger." },
+      { f: "“Show me my orders” is which action?", b: "Read." },
+      { f: "“Sign up a new user” is which action?", b: "Write (create)." },
+      { f: "“Change my email address” is which action?", b: "Update." },
+      { f: "“Charge the card / send the email” is which action?", b: "Trigger — it fires something else off." },
+      { f: "The button looks wrong but the data is fine — which layer?", b: "The client (frontend)." },
+      { f: "Why learn this pipeline before anything else?", b: "Every feature you’ll ever spec is a move through client → API → backend → database." }
+    ],
+    m1: [
+      { f: "What happens first when you hit Enter on a web address?", b: "DNS translates the name into an IP address so the browser can find the server." },
+      { f: "Request vs response?", b: "The client asks a question (request); the server sends an answer (response)." },
+      { f: "GET / POST / PUT / DELETE map to…?", b: "Read / Create / Update / Delete." },
+      { f: "200 · 404 · 500 mean…?", b: "200 OK · 404 Not Found · 500 Server error." },
+      { f: "401 vs 403?", b: "401 = not logged in. 403 = logged in but not allowed." },
+      { f: "What does DNS do?", b: "Turns a domain name into a machine (IP) address." },
+      { f: "What does a CDN do?", b: "Keeps copies of your files near users so things load fast." },
+      { f: "Latency is…?", b: "How long the round trip takes. Users feel this directly." },
+      { f: "A cache is…?", b: "A saved copy so you don’t ask again — and the cause of half your “stale data” bugs." },
+      { f: "What does HTTPS actually protect?", b: "It encrypts data in transit. It does NOT prove the site is safe or bug-free." },
+      { f: "Quick test for client-side vs server-side?", b: "If it runs in the browser (the HTML/CSS/JS you downloaded), it’s client-side." },
+      { f: "A payload is…?", b: "The actual data inside a request or response." }
+    ],
+    m2: [
+      { f: "An API is…?", b: "A contract: “send me this, I’ll send you back that.”" },
+      { f: "An endpoint is…?", b: "One specific address (URL) in that contract, e.g. /users/123/orders." },
+      { f: "The usual format API data arrives in?", b: "JSON — nested labels and values." },
+      { f: "REST vs GraphQL, one line?", b: "REST = fixed endpoints. GraphQL = the client asks for exactly the fields it wants." },
+      { f: "GET vs POST?", b: "GET reads data; POST sends/creates data." },
+      { f: "What’s an auth token / API key for?", b: "It proves who’s calling — sent in the request headers." },
+      { f: "A rate limit is…?", b: "A cap on how many requests you can make in a period, to prevent overload/abuse." },
+      { f: "Pagination is…?", b: "Returning big result sets in pages/chunks instead of all at once." },
+      { f: "A webhook is…?", b: "The reverse of an API call — the server calls YOU when something happens." },
+      { f: "How do you read an unfamiliar API?", b: "Its docs: find the endpoint, the method, the required inputs, and the response shape." },
+      { f: "Why are APIs the highest-value thing to understand?", b: "Almost every integration and “can we connect X to Y?” is an API question." }
+    ],
+    m3: [
+      { f: "A relational database organises data into…?", b: "Tables of rows and columns." },
+      { f: "A primary key is…?", b: "A unique identifier for each row (like id)." },
+      { f: "A foreign key is…?", b: "A column pointing to another table’s primary key — how tables relate." },
+      { f: "One-to-many example?", b: "One customer → many orders." },
+      { f: "Many-to-many example?", b: "Students ↔ courses — needs a join table in between." },
+      { f: "SQL is used to…?", b: "Query and change data in a relational database." },
+      { f: "SELECT … WHERE does…?", b: "Fetches only the rows that match a condition." },
+      { f: "A JOIN does…?", b: "Combines rows from two tables on a related column." },
+      { f: "Why is “just add a field” sometimes expensive?", b: "It can need a migration, a backfill, and touch many queries and screens." },
+      { f: "Store vs derive — when do you store?", b: "Store facts; derive anything you can recompute, to avoid stale duplicates." },
+      { f: "An index is…?", b: "A lookup structure that makes reads fast (at a small cost to writes)." }
+    ],
+    m4: [
+      { f: "Local vs staging vs production?", b: "Local = your machine. Staging = a test copy. Production = the live site real users use." },
+      { f: "Deploying means…?", b: "Releasing a new version of the software to an environment." },
+      { f: "A rollback is…?", b: "Reverting to the last working version after a bad release." },
+      { f: "CI/CD is broadly…?", b: "Automatically building, testing, and releasing code." },
+      { f: "A feature flag lets you…?", b: "Turn a feature on/off (or for some users) without a new deploy." },
+      { f: "Environment variables are…?", b: "Per-environment settings/secrets kept out of the code (API keys, DB URLs)." },
+      { f: "Why does “works on my machine” happen?", b: "The local environment differs from staging/production — data, config, versions." },
+      { f: "Why deploy to staging first?", b: "To catch breakage before real users ever see it." },
+      { f: "What is “the cloud”, practically?", b: "Someone else’s servers you rent, scaled on demand (AWS, GCP, Azure)." },
+      { f: "Canary / gradual release means…?", b: "Rolling a change out to a few users first, so you can stop if it breaks." }
+    ],
+    m5: [
+      { f: "Authentication vs authorization?", b: "Authentication = who you are. Authorization = what you’re allowed to do." },
+      { f: "RBAC is…?", b: "Role-Based Access Control — permissions granted through roles (admin, editor, viewer)." },
+      { f: "The multi-tenant nightmare?", b: "One customer seeing another customer’s data — an authorization bug." },
+      { f: "A token / JWT is…?", b: "A signed proof of who you are, sent with each request after you log in." },
+      { f: "What must never live in the frontend?", b: "Secrets (API keys, passwords) — anything the browser holds is public." },
+      { f: "What does HTTPS/encryption in transit do?", b: "Stops others reading data as it travels between client and server." },
+      { f: "Hashing a password means…?", b: "Storing a one-way scramble, never the password itself." },
+      { f: "Principle of least privilege?", b: "Give each user/service the minimum access it needs — nothing more." },
+      { f: "A permission matrix is…?", b: "A grid of roles × actions showing exactly who can do what." },
+      { f: "Why is security a product concern, not just engineering?", b: "Most breaches are authorization mistakes baked into the product’s rules." }
+    ],
+    m6: [
+      { f: "A sprint is…?", b: "A fixed short period (often 1–2 weeks) to deliver an agreed set of work." },
+      { f: "A standup is for…?", b: "A quick daily sync: progress, plan, and blockers." },
+      { f: "A blocker is…?", b: "Something stopping a task from progressing until it’s resolved." },
+      { f: "The backlog is…?", b: "The prioritised list of everything not yet done." },
+      { f: "Epic vs story vs task?", b: "Epic = big goal · Story = a user-facing slice · Task = one piece of work." },
+      { f: "Story points estimate…?", b: "Relative effort/complexity — not hours." },
+      { f: "Velocity is…?", b: "How much work a team completes per sprint, on average." },
+      { f: "A retro is for…?", b: "Reflecting on how to work better next sprint." },
+      { f: "Technical debt is…?", b: "Shortcuts in the code that cost more time to fix later." },
+      { f: "“Definition of done” is…?", b: "The shared checklist a task must meet to count as finished." }
+    ],
+    m7: [
+      { f: "A PRD is…?", b: "A Product Requirements Document — what to build and why, for whom." },
+      { f: "Acceptance criteria are…?", b: "Testable conditions that define when a feature is correctly done." },
+      { f: "The user-story format?", b: "As a [user], I want [goal], so that [benefit]." },
+      { f: "PRD vs ticket?", b: "A PRD frames the whole feature and reasoning; a ticket is one buildable piece of it." },
+      { f: "Why do specs bounce back?", b: "Ambiguity — missing acceptance criteria, edge cases, or the “why”." },
+      { f: "Non-functional requirements are…?", b: "Speed, security, scale, accessibility — how well, not just what." },
+      { f: "Edge cases are…?", b: "The unusual inputs/states (empty, huge, offline, duplicate) that break naive builds." },
+      { f: "“Definition of done” vs acceptance criteria?", b: "Acceptance = this feature works; Done = tested, reviewed, shipped." },
+      { f: "The single best way to cut spec back-and-forth?", b: "Write clear, testable acceptance criteria." },
+      { f: "Who should tear your PRD apart before build?", b: "A real engineer — early, while it can still change." }
+    ],
+    m8: [
+      { f: "A repository (repo) is…?", b: "The project plus its full history of changes." },
+      { f: "A commit is…?", b: "A saved snapshot of changes, with a message." },
+      { f: "A branch is…?", b: "A parallel line of work you can develop without touching main." },
+      { f: "main / master is…?", b: "The primary branch — usually what gets deployed." },
+      { f: "A pull request (PR) is…?", b: "A proposal to merge one branch into another, reviewed before it lands." },
+      { f: "A merge conflict is…?", b: "When two branches changed the same lines and a human must decide." },
+      { f: "A revert is…?", b: "Undoing a change by adding a new commit that reverses it." },
+      { f: "Push vs pull?", b: "Push = send your commits up; Pull = get others’ commits down." },
+      { f: "Why review PRs?", b: "Catch bugs, share knowledge, and keep quality before code ships." },
+      { f: "Why does version control matter to a PM?", b: "It’s how work is reviewed, released, and rolled back — the words are everywhere." }
+    ],
+    m9: [
+      { f: "An LLM is…?", b: "A large language model — it predicts the next token to generate text." },
+      { f: "Prompt vs system prompt?", b: "Prompt = the user’s input; system prompt = the standing instructions that shape behaviour." },
+      { f: "A token is…?", b: "A chunk of text (~¾ of a word) — models read and write in tokens." },
+      { f: "The context window is…?", b: "How much text the model can consider at once." },
+      { f: "A hallucination is…?", b: "Confident, made-up output — which is why verification matters." },
+      { f: "RAG is…?", b: "Retrieval-Augmented Generation — fetch real documents and feed them in so answers are grounded." },
+      { f: "Embeddings are…?", b: "Numeric representations of meaning, used for search and similarity." },
+      { f: "Fine-tuning vs prompting — which first?", b: "Prompting and RAG first; fine-tuning is a costly last resort." },
+      { f: "An AI “agent” is…?", b: "An LLM that can use tools and take actions in a loop, not just chat." },
+      { f: "The two numbers that decide if an AI feature survives at scale?", b: "Inference cost per session, and latency." },
+      { f: "Where must a human stay accountable?", b: "For the decision, the evidence, and the outcome — AI assists, it doesn’t own it." }
+    ]
+  };
+
+  /* ============================================================
      STORAGE LAYER
      ------------------------------------------------------------
      All persistence goes through DB. Today it is backed by this
@@ -1462,7 +1649,7 @@
     COURSE.modules.forEach(function (mod) {
       m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false), phase: { calibrate: null, ground: "", engage: "", stress: "", commit: "" } };
     });
-    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] }, streak: { last: null, count: 0 } };
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] }, streak: { last: null, count: 0 }, flashcards: {} };
   }
   function mergeState(s) {
     const base = blankState();
@@ -1488,6 +1675,9 @@
     }
     if (s.skills && Array.isArray(s.skills.snapshots)) base.skills.snapshots = s.skills.snapshots;
     if (s.streak && typeof s.streak === "object") { base.streak.last = s.streak.last || null; base.streak.count = (typeof s.streak.count === "number") ? s.streak.count : 0; }
+    if (s.flashcards && typeof s.flashcards === "object") {
+      Object.keys(FLASHCARDS).forEach(function (mid) { if (s.flashcards[mid] && typeof s.flashcards[mid] === "object") base.flashcards[mid] = s.flashcards[mid]; });
+    }
     return base;
   }
   function loadProgress(email) { return mergeState(DB.getProgress(email)); }
@@ -2153,8 +2343,8 @@
         '</section>' +
 
         '<section class="phase" id="phase-PP">' + phaseHead("PP", "Persist", "What do you carry forward?") +
-          '<div class="note" style="border-left:4px solid var(--brand-yellow)">' + icon("trophy") + '<span>Everything you just made — your grounding, your project, the reaction, and your position — is saved to your <b>Portfolio</b>. That’s the evidence you did the work, not just watched it.</span></div>' +
-          '<div style="margin-top:var(--space-4)"><a class="btn" href="#/profile">See your skills &amp; portfolio' + icon("arrowR", "btn__icon") + '</a></div>' +
+          '<div class="note" style="border-left:4px solid var(--brand-yellow)">' + icon("trophy") + '<span>Everything you just made — your grounding, your project, the reaction, and your position — is saved to your <b>Portfolio</b>. That’s the evidence you did the work, not just watched it.' + (sm.quizPassed ? ' You’ve also unlocked this module’s <b>flashcards</b> to lock the vocabulary in.' : "") + '</span></div>' +
+          '<div style="margin-top:var(--space-4);display:flex;gap:var(--space-3);flex-wrap:wrap"><a class="btn" href="#/profile">See your skills &amp; portfolio' + icon("arrowR", "btn__icon") + '</a>' + (sm.quizPassed ? '<a class="btn btn--secondary" href="#/flashcards/' + id + '">Study the flashcards</a>' : "") + '</div>' +
         '</section>' +
 
         '<div class="mod-foot">' +
@@ -3107,6 +3297,108 @@
   }
 
   /* ============================================================
+     VIEW: FLASHCARDS  (per-module decks, unlocked when the quiz is cleared)
+     ============================================================ */
+  let fcKeyHandler = null;
+  function deckKnown(mid) { if (!state.flashcards[mid] || typeof state.flashcards[mid] !== "object") state.flashcards[mid] = {}; return state.flashcards[mid]; }
+  function knownCount(mid) { const k = state.flashcards[mid] || {}; return Object.keys(k).filter(function (i) { return k[i]; }).length; }
+  function flashUnlocked(mid) { return isAdmin() || state.modules[mid].quizPassed; }
+
+  function renderFlashcards() {
+    setNav("flashcards");
+    const cardsHTML = COURSE.modules.map(function (m) {
+      const deck = FLASHCARDS[m.id] || [];
+      const known = knownCount(m.id);
+      if (flashUnlocked(m.id)) {
+        return '<a class="fc-mod" href="#/flashcards/' + m.id + '">' +
+          '<div class="fc-mod__hd"><span class="badge badge--accent">Module ' + m.n + '</span><span class="fc-mod__k">' + known + ' / ' + deck.length + ' known</span></div>' +
+          '<div class="fc-mod__t">' + esc(m.title) + '</div>' +
+          '<div class="blbar" style="margin:var(--space-2) 0"><i style="width:' + (deck.length ? Math.round(known / deck.length * 100) : 0) + '%"></i></div>' +
+          '<div class="fc-mod__go">' + deck.length + ' cards · Study ' + icon("arrowR") + '</div></a>';
+      }
+      return '<div class="fc-mod is-locked">' +
+        '<div class="fc-mod__hd"><span class="badge">Module ' + m.n + '</span>' + icon("lock") + '</div>' +
+        '<div class="fc-mod__t">' + esc(m.title) + '</div>' +
+        '<div class="fc-mod__go muted">Clear this module’s quiz to unlock its ' + deck.length + ' flashcards</div></div>';
+    }).join("");
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Memory</p><h1 style="margin-bottom:var(--space-2)">Flashcards</h1>' +
+      '<p class="muted reading">Quick recall for the concepts that are easy to nod along to and hard to remember. Each module’s deck unlocks the moment you clear its quiz — study it to make the vocabulary automatic.</p>' +
+      '<div class="fc-grid" style="margin-top:var(--space-5)">' + cardsHTML + '</div>' +
+      '</div></section>';
+    window.scrollTo(0, 0);
+  }
+
+  function renderDeck(mid) {
+    const mod = moduleById(mid);
+    if (!mod || !FLASHCARDS[mid]) { location.hash = "#/flashcards"; return; }
+    if (!flashUnlocked(mid)) { location.hash = "#/flashcards"; return; }
+    setNav("flashcards");
+    const deck = FLASHCARDS[mid];
+    let focus = false, order = deck.map(function (_, i) { return i; }), pos = 0, flipped = false;
+    function activeOrder() { return focus ? order.filter(function (i) { return !deckKnown(mid)[i]; }) : order; }
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<div class="crumbs"><a href="#/flashcards">' + icon("arrowL") + ' All decks</a></div>' +
+      '<div class="mod-badges" style="margin-bottom:var(--space-2)"><span class="badge badge--accent">Module ' + mod.n + '</span></div>' +
+      '<h1 style="margin-bottom:var(--space-3)">' + esc(mod.title) + ' — flashcards</h1>' +
+      '<div class="fc-bar"><span id="fcProg" class="mono"></span><div class="fc-bar__act">' +
+        '<label class="fc-focus"><input type="checkbox" id="fcFocus" /> Only cards I don’t know</label>' +
+        '<button class="btn btn--ghost btn--sm" id="fcShuffle" type="button">' + icon("reset", "btn__icon") + ' Shuffle</button>' +
+      '</div></div>' +
+      '<div id="fcStage"></div>' +
+      '<p class="muted" style="text-align:center;font-size:13px;margin-top:var(--space-4)">Tip: use <b>Space</b> to flip, <b>←</b>/<b>→</b> to move, <b>K</b> to mark known.</p>' +
+      '</div></section>';
+    const stage = document.getElementById("fcStage");
+
+    function update() {
+      const ord = activeOrder();
+      if (!ord.length) {
+        stage.innerHTML = '<div class="card empty">' + icon("trophy") + '<h3>All caught up!</h3><p>You’ve marked every card in this deck as known. Come back to keep it sharp.</p>' +
+          '<div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap;margin-top:var(--space-4)"><button class="btn btn--secondary" id="fcReset" type="button">Study them all again</button><a class="btn" href="#/flashcards">Back to decks</a></div></div>';
+        document.getElementById("fcProg").textContent = knownCount(mid) + " / " + deck.length + " known";
+        document.getElementById("fcReset").addEventListener("click", function () { state.flashcards[mid] = {}; save(); focus = false; document.getElementById("fcFocus").checked = false; pos = 0; flipped = false; update(); });
+        return;
+      }
+      if (pos >= ord.length) pos = ord.length - 1;
+      if (pos < 0) pos = 0;
+      const idx = ord[pos], c = deck[idx], isKnown = !!deckKnown(mid)[idx];
+      document.getElementById("fcProg").textContent = "Card " + (pos + 1) + " of " + ord.length + " · " + knownCount(mid) + " / " + deck.length + " known";
+      stage.innerHTML =
+        '<div class="fcard' + (flipped ? " is-flipped" : "") + '" id="fcard" tabindex="0" role="button" aria-label="Flashcard — activate to flip">' +
+          '<div class="fcard__inner">' +
+            '<div class="fcard__face fcard__front"><span class="fcard__tag">Recall</span><div class="fcard__txt">' + esc(c.f) + '</div><span class="fcard__hint">Tap to reveal</span></div>' +
+            '<div class="fcard__face fcard__back"><span class="fcard__tag">Answer</span><div class="fcard__txt">' + esc(c.b) + '</div></div>' +
+          '</div></div>' +
+        '<div class="fc-controls">' +
+          '<button class="btn btn--ghost" id="fcPrev" type="button">' + icon("arrowL") + ' Prev</button>' +
+          '<button class="btn' + (isKnown ? " btn--secondary" : "") + '" id="fcKnow" type="button">' + (isKnown ? "Known — unmark" : icon("check", "btn__icon") + " Got it") + '</button>' +
+          '<button class="btn btn--ghost" id="fcNext" type="button">Next ' + icon("arrowR") + '</button>' +
+        '</div>';
+      const cardEl = document.getElementById("fcard");
+      cardEl.addEventListener("click", function () { flipped = !flipped; cardEl.classList.toggle("is-flipped", flipped); });
+      document.getElementById("fcPrev").addEventListener("click", function (e) { e.stopPropagation(); if (pos > 0) { pos--; flipped = false; update(); } });
+      document.getElementById("fcNext").addEventListener("click", function (e) { e.stopPropagation(); if (pos < ord.length - 1) { pos++; flipped = false; update(); } });
+      document.getElementById("fcKnow").addEventListener("click", function (e) {
+        e.stopPropagation(); const k = deckKnown(mid); if (k[idx]) delete k[idx]; else k[idx] = true; save();
+        flipped = false; if (!focus && pos < ord.length - 1) pos++; update();
+      });
+    }
+
+    document.getElementById("fcFocus").addEventListener("change", function () { focus = this.checked; pos = 0; flipped = false; update(); });
+    document.getElementById("fcShuffle").addEventListener("click", function () { for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = order[i]; order[i] = order[j]; order[j] = t; } pos = 0; flipped = false; update(); });
+    fcKeyHandler = function (e) {
+      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      if (e.key === " " || e.key === "Enter") { const el = document.getElementById("fcard"); if (el) { e.preventDefault(); flipped = !flipped; el.classList.toggle("is-flipped", flipped); } }
+      else if (e.key === "ArrowRight") { const n = document.getElementById("fcNext"); if (n) n.click(); }
+      else if (e.key === "ArrowLeft") { const pv = document.getElementById("fcPrev"); if (pv) pv.click(); }
+      else if (e.key.toLowerCase() === "k") { const kk = document.getElementById("fcKnow"); if (kk) kk.click(); }
+    };
+    update();
+    window.scrollTo(0, 0);
+  }
+
+  /* ============================================================
      ROUTER + CHROME
      ============================================================ */
   function setNav(active) {
@@ -3128,6 +3420,7 @@
     updateChrome();
     stopBaselineTimer();
     touchStreak();
+    fcKeyHandler = null;
     const h = location.hash || "#/";
     if (h.indexOf("#/module/") === 0) {
       if (!requireProfile(h)) return;
@@ -3153,6 +3446,12 @@
     } else if (h === "#/profile") {
       if (!requireProfile(h)) return;
       renderProfile();
+    } else if (h === "#/flashcards") {
+      if (!requireProfile(h)) return;
+      renderFlashcards();
+    } else if (h.indexOf("#/flashcards/") === 0) {
+      if (!requireProfile(h)) return;
+      renderDeck(h.slice("#/flashcards/".length));
     } else if (h === "#/showcase") {
       renderShowcase();
     } else if (h === "#/admin") {
@@ -3181,6 +3480,7 @@
 
   /* ---- wire chrome + dialogs ---- */
   function initChrome() {
+    document.addEventListener("keydown", function (e) { if (fcKeyHandler) fcKeyHandler(e); });
     document.getElementById("themeToggle").addEventListener("click", function () {
       const cur = document.documentElement.getAttribute("data-theme");
       setTheme(cur === "dark" ? "light" : "dark", true);
@@ -3191,6 +3491,21 @@
       if (isSignedIn()) openProfileMenu(); else openProfileDialog("#/map");
     });
     document.getElementById("adminBtn").addEventListener("click", function () { openAdminGate(); });
+
+    // compact nav menu (shown below 1024px; gives mobile real navigation)
+    document.getElementById("navMenuBtn").innerHTML = icon("list");
+    const navItems = [
+      { h: "#/map", n: "map", ic: "map", t: "Journey" },
+      { h: "#/baseline", n: "baseline", ic: "target", t: "Baseline" },
+      { h: "#/profile", n: "profile", ic: "user", t: "Profile" },
+      { h: "#/flashcards", n: "flashcards", ic: "book", t: "Flashcards" },
+      { h: "#/showcase", n: "showcase", ic: "post", t: "Showcase" },
+      { h: "#/reference", n: "reference", ic: "list", t: "Reference" }
+    ];
+    document.getElementById("navMenuList").innerHTML = navItems.map(function (it) { return '<a class="navmenu__item" href="' + it.h + '" data-nav="' + it.n + '">' + icon(it.ic) + '<span>' + it.t + '</span></a>'; }).join("");
+    const navMenu = document.getElementById("navMenu");
+    document.getElementById("navMenuBtn").addEventListener("click", function () { if (navMenu.showModal) navMenu.showModal(); });
+    navMenu.querySelectorAll(".navmenu__item").forEach(function (a) { a.addEventListener("click", function () { navMenu.close(); }); });
 
     document.getElementById("profileForm").addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -3244,7 +3559,7 @@
     });
     document.getElementById("adminCancel").addEventListener("click", function () { document.getElementById("adminDialog").close(); });
 
-    ["resetDialog", "profileDialog", "profileMenu", "adminDialog"].forEach(function (id) {
+    ["resetDialog", "profileDialog", "profileMenu", "adminDialog", "navMenu"].forEach(function (id) {
       const d = document.getElementById(id);
       d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
     });
