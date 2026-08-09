@@ -609,6 +609,10 @@
     .bl-review.is-no .bl-review__a svg { color: var(--color-error); }
     .bl-review__ok svg { color: var(--color-success); }
     .bl-review__why { font-size: 13px; color: var(--color-text-secondary); margin-top: 6px; }
+    .bl-review__mod { display: inline-flex; align-items: center; gap: 8px; margin-top: var(--space-3); font-size: 13px; font-weight: 600; color: var(--color-text-primary); text-decoration: none; background: var(--color-surface-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 6px 12px; transition: border-color var(--duration-fast) var(--ease-standard); }
+    .bl-review__mod:hover { border-color: var(--color-text-primary); }
+    .bl-review__mod svg { width: 15px; height: 15px; flex: none; color: var(--color-text-secondary); }
+    .bl-review__mod .bl-review__marw { margin-left: -2px; }
 
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
@@ -752,7 +756,8 @@
     post: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
     trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
     link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
-    send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>'
+    send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>'
   };
   function icon(name, cls) {
     return '<svg class="'+(cls||'')+'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[name]||'')+'</svg>';
@@ -1314,6 +1319,8 @@
       { dim: "collaboration", q: "I actively look for feedback on my work." }
     ]
   };
+  // Which module teaches each technical question, in the same order as BASELINE.tech.
+  BASELINE.techMod = ["m1", "m0", "m5", "m1", "m0", "m1", "m0", "m1", "m1", "m0", "m2", "m2", "m2", "m2", "m2", "m3", "m3", "m3", "m3", "m3", "m4", "m4", "m4", "m5", "m4", "m6", "m6", "m6", "m6", "m7"];
 
   /* ============================================================
      STORAGE LAYER
@@ -2482,17 +2489,27 @@
   function showTechResults() {
     setNav("baseline");
     const t = state.baseline.tech;
+    const areaMods = {};
+    BASELINE.tech.forEach(function (q, i) { const mm = moduleById(BASELINE.techMod[i]); if (mm) (areaMods[q.area] = areaMods[q.area] || {})[mm.n] = true; });
     let bars = "";
-    Object.keys(t.byArea).forEach(function (a) { const ar = t.byArea[a]; bars += blbar(a, Math.round(ar.c / ar.n * 100), ar.c + " of " + ar.n + " right"); });
+    Object.keys(t.byArea).forEach(function (a) {
+      const ar = t.byArea[a];
+      const nums = Object.keys(areaMods[a] || {}).map(Number).sort(function (x, y) { return x - y; });
+      const modText = nums.length ? " · " + (nums.length === 1 ? "Module " : "Modules ") + nums.join(", ") : "";
+      bars += blbar(a, Math.round(ar.c / ar.n * 100), ar.c + " of " + ar.n + " right" + modText);
+    });
     let review = "";
     BASELINE.tech.forEach(function (q, i) {
       const chosen = (t.answers && (i in t.answers)) ? t.answers[i] : null;
       const ok = chosen === q.a;
+      const mod = moduleById(BASELINE.techMod[i]);
       review += '<div class="bl-review ' + (ok ? "is-ok" : "is-no") + '">' +
         '<div class="bl-review__q">' + (i + 1) + '. ' + esc(q.q) + '</div>' +
-        '<div class="bl-review__a">' + icon(ok ? "check" : "info") + '<span>' + (chosen == null ? "Not answered" : ("You chose: " + esc(q.opts[chosen]))) + '</span></div>' +
-        (ok ? '' : '<div class="bl-review__ok">' + icon("check") + '<span>Answer: ' + esc(q.opts[q.a]) + '</span></div>') +
-        '<div class="bl-review__why">' + esc(q.why) + '</div></div>';
+        '<div class="bl-review__a">' + (chosen == null ? icon("info") + '<span>You didn’t answer this one.</span>' : icon(ok ? "check" : "x") + '<span>Your answer: ' + esc(q.opts[chosen]) + '</span>') + '</div>' +
+        '<div class="bl-review__ok">' + icon("check") + '<span>Correct answer: ' + esc(q.opts[q.a]) + '</span></div>' +
+        '<div class="bl-review__why">' + esc(q.why) + '</div>' +
+        (mod ? '<a class="bl-review__mod" href="#/module/' + mod.id + '">' + icon("book") + '<span>Covered in Module ' + mod.n + ' — ' + esc(mod.title) + '</span>' + icon("arrowR", "bl-review__marw") + '</a>' : '') +
+        '</div>';
     });
     const psychDone = !!state.baseline.psych;
     main.innerHTML = '<section class="view"><div class="container">' +
@@ -2503,7 +2520,7 @@
       '<div class="muted">' + t.correct + ' of ' + t.total + ' correct</div></div>' +
       '<div class="note" style="margin:var(--space-4) 0">' + icon("spark") + '<span>This is a starting line, not a verdict. The areas with lower bars are exactly what the modules build — begin the journey and watch them grow.</span></div>' +
       '<div class="card"><h2 style="font-size:1.15rem">By area</h2><div class="bl-bars">' + bars + '</div></div>' +
-      '<details style="margin-top:var(--space-4)"><summary>Review all 30 answers &amp; explanations</summary><div class="bl-reviews">' + review + '</div></details>' +
+      '<details style="margin-top:var(--space-4)" open><summary>Review all 30 — your answer, the correct answer, and where each is covered</summary><div class="bl-reviews">' + review + '</div></details>' +
       '<div style="margin-top:var(--space-6);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
         (psychDone ? '<a class="btn" href="#/baseline">See my full baseline' + icon("arrowR", "btn__icon") + '</a>' : '<a class="btn" href="#/baseline/psych">Next: the profile check' + icon("arrowR", "btn__icon") + '</a>') +
         '<button class="btn btn--ghost" id="blTechRetake" type="button">Retake</button>' +
