@@ -614,6 +614,37 @@
     .bl-review__mod svg { width: 15px; height: 15px; flex: none; color: var(--color-text-secondary); }
     .bl-review__mod .bl-review__marw { margin-left: -2px; }
 
+    /* Profile charts + portfolio */
+    .pf-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; }
+    @media (min-width: 820px) { .pf-grid { grid-template-columns: 1fr 1fr; } }
+    .radar { width: 100%; max-width: 360px; height: auto; display: block; margin: var(--space-2) auto 0; }
+    .radar-grid { fill: none; stroke: var(--color-border); stroke-width: 1; }
+    .radar-axis { stroke: var(--color-border); stroke-width: 1; }
+    .radar-lbl { fill: var(--color-text-secondary); font-family: var(--font-body); font-size: 10px; font-weight: 600; }
+    .radar-base { fill: none; stroke: var(--color-text-secondary); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: 0.75; }
+    .radar-cur { fill: color-mix(in srgb, var(--brand-yellow) 40%, transparent); stroke: var(--color-text-primary); stroke-width: 2; stroke-linejoin: round; }
+    :root[data-theme="dark"] .radar-cur { stroke: var(--brand-yellow); fill: color-mix(in srgb, var(--brand-yellow) 26%, transparent); }
+    .radar-dot { fill: var(--color-text-primary); }
+    :root[data-theme="dark"] .radar-dot { fill: var(--brand-yellow); }
+    .radar-legend { display: flex; gap: var(--space-4); justify-content: center; margin-top: var(--space-3); font-size: 13px; color: var(--color-text-secondary); }
+    .radar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .radar-legend i { width: 16px; display: inline-block; border-top: 3px solid var(--color-text-primary); }
+    :root[data-theme="dark"] .radar-legend .lg-cur { border-color: var(--brand-yellow); }
+    .radar-legend .lg-base { border-top-style: dashed; border-top-color: var(--color-text-secondary); }
+    .trend { width: 100%; max-width: 440px; height: auto; display: block; margin-top: var(--space-2); }
+    .trend-grid { stroke: var(--color-border); stroke-width: 1; }
+    .trend-yl, .trend-xl { fill: var(--color-text-secondary); font-family: var(--font-mono); font-size: 8px; }
+    .trend-area { fill: color-mix(in srgb, var(--brand-yellow) 16%, transparent); stroke: none; }
+    .trend-line { fill: none; stroke: var(--brand-yellow); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .trend-dot { fill: var(--color-text-primary); stroke: var(--color-surface); stroke-width: 1.5; }
+    :root[data-theme="dark"] .trend-dot { fill: var(--brand-yellow); }
+    .pf-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .pf-item { display: flex; gap: var(--space-3); align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+    .pf-ic { width: 34px; height: 34px; flex: none; border-radius: var(--radius-sm); background: var(--color-surface-subtle); display: grid; place-items: center; color: var(--color-text-secondary); }
+    .pf-ic svg { width: 17px; height: 17px; }
+    .pf-t { font-weight: 600; font-size: 14px; }
+    .pf-d { font-size: 13px; color: var(--color-text-secondary); font-family: var(--font-mono); }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
       .avatar__bob { animation: none; }
@@ -631,6 +662,7 @@
       </a>
       <a class="nav__link" href="#/baseline" data-nav="baseline">Baseline</a>
       <a class="nav__link" href="#/map" data-nav="map">Journey</a>
+      <a class="nav__link" href="#/profile" data-nav="profile">Profile</a>
       <a class="nav__link" href="#/showcase" data-nav="showcase">Showcase</a>
       <a class="nav__link" href="#/reference" data-nav="reference">Reference</a>
       <span class="nav__spacer"></span>
@@ -1372,7 +1404,7 @@
     COURSE.modules.forEach(function (mod) {
       m[mod.id] = { quizBest: null, quizPassed: false, project: new Array(mod.project.checklist.length).fill(false) };
     });
-    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null } };
+    return { modules: m, capstone: new Array(COURSE.capstone.checklist.length).fill(false), started: false, baseline: { tech: null, psych: null, techAttempt: null }, skills: { snapshots: [] } };
   }
   function mergeState(s) {
     const base = blankState();
@@ -1392,6 +1424,7 @@
       base.baseline.psych = s.baseline.psych || null;
       base.baseline.techAttempt = s.baseline.techAttempt || null;
     }
+    if (s.skills && Array.isArray(s.skills.snapshots)) base.skills.snapshots = s.skills.snapshots;
     return base;
   }
   function loadProgress(email) { return mergeState(DB.getProgress(email)); }
@@ -1466,6 +1499,79 @@
     return Math.round((done / total) * 100);
   }
   function isAdmin() { return !!session.admin; }
+
+  /* ============================================================
+     SKILL ONTOLOGY ENGINE  (the backend — see docs/ontology-and-backbone.md)
+     Skills are scored from observable evidence in the progress state.
+     Each skill has N binary parameters, split into categories credited
+     by different milestones. Parameters only ever rise (never decay).
+     ============================================================ */
+  const SKILLS = [
+    { id: "T1", name: "Systems & Mental Models", short: "Systems", kind: "tech", modules: ["m0"], seedArea: "Frontend", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T2", name: "Web & Networks", short: "Web", kind: "tech", modules: ["m1"], seedArea: "Web & internet", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T3", name: "APIs & Integration", short: "APIs", kind: "tech", modules: ["m2"], seedArea: "APIs", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T4", name: "Data & Databases", short: "Data", kind: "tech", modules: ["m3"], seedArea: "Data & databases", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T5", name: "Delivery & Security", short: "Delivery", kind: "tech", modules: ["m4", "m5"], seedArea: "Delivery & security", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T6", name: "Engineering Collaboration", short: "Collab", kind: "tech", modules: ["m6", "m7", "m8"], seedArea: "Working with engineers", n: 12, seed: 3, know: 6, apply: 3 },
+    { id: "T7", name: "AI Fluency", short: "AI", kind: "tech", modules: ["m9"], seedArea: null, n: 12, seed: 0, know: 8, apply: 4 },
+    { id: "S1", name: "Growth Mindset", short: "Growth", kind: "soft", dim: "growth", signal: "overall", n: 10, seed: 4, behavior: 6 },
+    { id: "S2", name: "Curiosity", short: "Curiosity", kind: "soft", dim: "curiosity", signal: "quizzes", n: 10, seed: 4, behavior: 6 },
+    { id: "S3", name: "Structured Thinking & Rigour", short: "Rigour", kind: "soft", dim: "rigour", signal: "projects", n: 10, seed: 4, behavior: 6 },
+    { id: "S4", name: "Resilience", short: "Resilience", kind: "soft", dim: "resilience", signal: "quizzes", n: 10, seed: 4, behavior: 6 },
+    { id: "S5", name: "Communication & Collaboration", short: "Comms", kind: "soft", dim: "collaboration", signal: "commit", n: 10, seed: 4, behavior: 6 }
+  ];
+  function moduleQuizPct(st, mid) { const m = st.modules[mid]; return (m && typeof m.quizBest === "number") ? m.quizBest : 0; }
+  function moduleProjFrac(st, mid) { const m = st.modules[mid]; if (!m || !m.project.length) return 0; return m.project.filter(Boolean).length / m.project.length; }
+  function softSignal(st, key) {
+    switch (key) {
+      case "quizzes": return quizzesPassed(st) / N_MODULES;
+      case "projects": return projectsDone(st) / N_MODULES;
+      case "commit": return (capstoneDone(st) ? 0.5 : 0) + 0.5 * (projectsDone(st) / N_MODULES);
+      default: return overallPercent(st) / 100;
+    }
+  }
+  // Compute every skill's score (0-100) and met/total parameters from a progress state.
+  function computeSkills(st) {
+    st = st || state;
+    const out = {};
+    SKILLS.forEach(function (sk) {
+      let met = 0;
+      if (sk.kind === "tech") {
+        const areaPct = (sk.seedArea && st.baseline.tech && st.baseline.tech.byArea[sk.seedArea])
+          ? (st.baseline.tech.byArea[sk.seedArea].c / st.baseline.tech.byArea[sk.seedArea].n) : 0;
+        met += Math.round(areaPct * sk.seed);
+        let qSum = 0, pSum = 0;
+        sk.modules.forEach(function (mid) { qSum += moduleQuizPct(st, mid) / 100; pSum += moduleProjFrac(st, mid); });
+        met += Math.round((qSum / sk.modules.length) * sk.know);
+        met += Math.round((pSum / sk.modules.length) * sk.apply);
+      } else {
+        const dimPct = (st.baseline.psych && typeof st.baseline.psych.dims[sk.dim] === "number") ? st.baseline.psych.dims[sk.dim] / 100 : 0;
+        met += Math.round(dimPct * sk.seed);
+        met += Math.round(softSignal(st, sk.signal) * sk.behavior);
+      }
+      if (met > sk.n) met = sk.n;
+      out[sk.id] = { met: met, n: sk.n, score: Math.round(met / sk.n * 100) };
+    });
+    return out;
+  }
+  function techSkillIds() { return SKILLS.filter(function (s) { return s.kind === "tech"; }).map(function (s) { return s.id; }); }
+  function avgScore(scores, ids) { if (!ids.length) return 0; return Math.round(ids.reduce(function (a, id) { return a + (scores[id] ? scores[id].score : 0); }, 0) / ids.length); }
+  function techMastery(st) { const sc = computeSkills(st); return avgScore(sc, techSkillIds()); }
+  function softStrength(st) { const sc = computeSkills(st); return avgScore(sc, SKILLS.filter(function (s) { return s.kind === "soft"; }).map(function (s) { return s.id; })); }
+  function skillsOverall(st) { return Math.round(0.7 * techMastery(st) + 0.3 * softStrength(st)); }
+  // Append a snapshot of the current skill scores (drives the trajectory + baseline ring).
+  function writeSkillSnapshot(trigger) {
+    const scores = computeSkills(state);
+    const flat = {}; Object.keys(scores).forEach(function (id) { flat[id] = scores[id].score; });
+    const snap = { at: Date.now(), trigger: trigger, tech: avgScore(scores, techSkillIds()), scores: flat };
+    const arr = state.skills.snapshots;
+    const last = arr[arr.length - 1];
+    if (last && last.trigger === trigger) arr[arr.length - 1] = snap;  // replace same-trigger snapshot
+    else arr.push(snap);
+    if (arr.length > 60) arr.shift();
+    save();
+  }
+  function baselineSnapshot() { return state.skills.snapshots.find(function (s) { return s.trigger === "baseline"; }) || null; }
 
   const reduceMotion = function () { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; };
 
@@ -1934,8 +2040,10 @@
     if (newlyPassed) {
       justPassed = mod.id;
       lastRenderedStop = currentStopBefore(mod.id); // so the map animates from the old spot
-      // add a "go see the map" nudge
-      r.innerHTML += '<div style="margin-top:var(--space-4)"><a class="btn" href="#/map">See your traveller move' + icon("arrowR", "btn__icon") + '</a></div>';
+      writeSkillSnapshot(mod.id);                    // record the skill jump for the trajectory
+      r.innerHTML += '<div style="margin-top:var(--space-4);display:flex;gap:var(--space-3);flex-wrap:wrap">' +
+        '<a class="btn" href="#/profile">See your skills grow' + icon("arrowR", "btn__icon") + '</a>' +
+        '<a class="btn btn--secondary" href="#/map">See your traveller move</a></div>';
     }
     r.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "nearest" });
   }
@@ -2029,8 +2137,10 @@
     updateCapFoot();
     main.querySelectorAll('.checklist input[type="checkbox"]').forEach(function (cb) {
       cb.addEventListener("change", function () {
+        const wasDone = capstoneDone();
         state.capstone[parseInt(cb.getAttribute("data-i"), 10)] = cb.checked;
         save(); updateCapFoot();
+        if (!wasDone && capstoneDone()) writeSkillSnapshot("capstone");
       });
     });
     setNav(null); window.scrollTo(0, 0);
@@ -2484,6 +2594,7 @@
     b.tech = { pct: Math.round(correct / total * 100), correct: correct, total: total, byArea: byArea, answers: answers, takenAt: Date.now(), auto: !!auto };
     b.techAttempt = null;
     save();
+    if (state.baseline.psych && !baselineSnapshot()) writeSkillSnapshot("baseline");
     if ((location.hash || "") !== "#/baseline/tech") location.hash = "#/baseline/tech"; else showTechResults();
   }
   function showTechResults() {
@@ -2578,6 +2689,7 @@
     BASELINE.psychDims.forEach(function (d) { const min = counts[d.key], max = counts[d.key] * 5; dims[d.key] = Math.round((sums[d.key] - min) / (max - min) * 100); });
     state.baseline.psych = { dims: dims, takenAt: Date.now() };
     save();
+    if (state.baseline.tech && !baselineSnapshot()) writeSkillSnapshot("baseline");
     if ((location.hash || "") !== "#/baseline/psych") location.hash = "#/baseline/psych"; else showPsychResults();
   }
   function showPsychResults() {
@@ -2600,6 +2712,99 @@
         '<a class="btn btn--ghost" href="#/baseline">Back to baseline</a>' +
       '</div></div></section>';
     document.getElementById("blPsychRetake").addEventListener("click", function () { if (!confirm("Retake the profile check?")) return; state.baseline.psych = null; save(); renderBaselinePsych(); });
+    window.scrollTo(0, 0);
+  }
+
+  /* ============================================================
+     VIEW: PROFILE  (living skill dashboard — radar, trend, bars, portfolio)
+     ============================================================ */
+  function radarSVG(items, cur, base) {
+    const N = items.length, R = 86, cx = 150, cy = 120, LR = 104, W = 300, H = 250;
+    function pt(val, i, r) { const ang = -Math.PI / 2 + i * 2 * Math.PI / N; const rr = (r != null ? r : R * (val / 100)); return [cx + rr * Math.cos(ang), cy + rr * Math.sin(ang)]; }
+    function poly(vals) { return items.map(function (it, i) { const p = pt(vals[it.id] || 0, i); return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "); }
+    let g = "";
+    [25, 50, 75, 100].forEach(function (rv) { const pts = items.map(function (it, i) { const p = pt(0, i, R * rv / 100); return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "); g += '<polygon class="radar-grid" points="' + pts + '"/>'; });
+    items.forEach(function (it, i) {
+      const p = pt(0, i, R); g += '<line class="radar-axis" x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/>';
+      const lp = pt(0, i, LR); const dx = lp[0] - cx; const anchor = Math.abs(dx) < 10 ? "middle" : (dx > 0 ? "start" : "end");
+      g += '<text class="radar-lbl" x="' + lp[0].toFixed(1) + '" y="' + lp[1].toFixed(1) + '" text-anchor="' + anchor + '" dominant-baseline="middle">' + esc(it.label) + '</text>';
+    });
+    if (base) g += '<polygon class="radar-base" points="' + poly(base) + '"/>';
+    g += '<polygon class="radar-cur" points="' + poly(cur) + '"/>';
+    items.forEach(function (it, i) { const p = pt(cur[it.id] || 0, i); g += '<circle class="radar-dot" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="2.6"/>'; });
+    return '<svg viewBox="0 0 ' + W + " " + H + '" class="radar" role="img" aria-label="Skill radar chart">' + g + "</svg>";
+  }
+  function trendSVG(points) {
+    const W = 340, H = 150, pL = 10, pR = 10, pT = 12, pB = 26, n = points.length;
+    if (n < 2) return "";
+    const x = function (i) { return pL + (W - pL - pR) * (i / (n - 1)); };
+    const y = function (v) { return pT + (H - pT - pB) * (1 - v / 100); };
+    let grid = "";
+    [0, 50, 100].forEach(function (v) { grid += '<line class="trend-grid" x1="' + pL + '" y1="' + y(v).toFixed(1) + '" x2="' + (W - pR) + '" y2="' + y(v).toFixed(1) + '"/>' + '<text class="trend-yl" x="' + pL + '" y="' + (y(v) - 2).toFixed(1) + '">' + v + '%</text>'; });
+    const line = points.map(function (p, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.val).toFixed(1); }).join(" ");
+    const area = "M" + x(0).toFixed(1) + " " + y(0).toFixed(1) + " " + points.map(function (p, i) { return "L" + x(i).toFixed(1) + " " + y(p.val).toFixed(1); }).join(" ") + " L" + x(n - 1).toFixed(1) + " " + y(0).toFixed(1) + " Z";
+    let dots = "", labels = "";
+    points.forEach(function (p, i) {
+      dots += '<circle class="trend-dot" cx="' + x(i).toFixed(1) + '" cy="' + y(p.val).toFixed(1) + '" r="3"/>';
+      if (n <= 8 || i === 0 || i === n - 1 || i % 2 === 0) labels += '<text class="trend-xl" x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(p.label) + "</text>";
+    });
+    return '<svg viewBox="0 0 ' + W + " " + H + '" class="trend" role="img" aria-label="Progress over time">' + grid + '<path class="trend-area" d="' + area + '"/><path class="trend-line" d="' + line + '"/>' + dots + labels + "</svg>";
+  }
+  function snapLabel(trig) { if (trig === "baseline") return "Start"; if (trig === "capstone") return "PRD"; const m = moduleById(trig); return m ? ("M" + m.n) : trig; }
+
+  function renderProfile() {
+    setNav("profile");
+    const cur = computeSkills(state);
+    const curFlat = {}; SKILLS.forEach(function (s) { curFlat[s.id] = cur[s.id].score; });
+    const base = baselineSnapshot();
+    const tech = SKILLS.filter(function (s) { return s.kind === "tech"; });
+    const soft = SKILLS.filter(function (s) { return s.kind === "soft"; });
+    const tm = techMastery(state), ss = softStrength(state), ov = skillsOverall(state);
+    const started = tm > 0 || ss > 0 || state.baseline.tech || state.baseline.psych;
+
+    if (!started) {
+      main.innerHTML = '<section class="view"><div class="container">' +
+        '<p class="eyebrow">Your profile</p><h1 style="margin-bottom:var(--space-2)">Your skills, as they grow</h1>' +
+        '<div class="card empty">' + icon("spark") + '<h3>Your profile is waiting to come alive</h3>' +
+        '<p>Take the baseline check and clear your first module — then this page fills with a skill web that grows every time you learn something.</p>' +
+        '<div style="display:flex;gap:var(--space-3);flex-wrap:wrap;justify-content:center;margin-top:var(--space-4)"><a class="btn" href="#/baseline">Start the baseline check</a><a class="btn btn--secondary" href="#/map">Go to the journey</a></div></div>' +
+        '</div></section>';
+      window.scrollTo(0, 0); return;
+    }
+
+    const radar = radarSVG(tech.map(function (s) { return { id: s.id, label: s.short }; }), curFlat, base ? base.scores : null);
+    const snaps = state.skills.snapshots;
+    const trendPts = snaps.map(function (sn) { return { label: snapLabel(sn.trigger), val: sn.tech }; });
+    const trend = trendPts.length >= 2 ? trendSVG(trendPts) : "";
+
+    function barRows(list) { return '<div class="bl-bars">' + list.map(function (s) { return blbar(s.name, cur[s.id].score, cur[s.id].met + " of " + cur[s.id].n + " checkpoints"); }).join("") + "</div>"; }
+
+    // portfolio
+    const pf = [];
+    if (state.baseline.tech) pf.push({ ic: "target", t: "Technical baseline", d: state.baseline.tech.pct + "% — " + new Date(state.baseline.tech.takenAt).toLocaleDateString() });
+    if (state.baseline.psych) pf.push({ ic: "user", t: "Learner profile", d: "completed" });
+    COURSE.modules.forEach(function (m) { if (state.modules[m.id].quizPassed) pf.push({ ic: "quiz", t: "Cleared: Module " + m.n + " — " + m.title, d: "quiz " + (state.modules[m.id].quizBest || 0) + "%" + (projectDone(m.id) ? " · project done" : "") }); });
+    if (capstoneDone()) pf.push({ ic: "trophy", t: "Capstone PRD", d: "defended" });
+    let pfHTML = pf.length ? '<div class="pf-list">' + pf.map(function (x) { return '<div class="pf-item"><span class="pf-ic">' + icon(x.ic) + '</span><div><div class="pf-t">' + esc(x.t) + '</div><div class="pf-d">' + esc(x.d) + '</div></div></div>'; }).join("") + "</div>" : '<p class="muted">Your portfolio fills as you complete work.</p>';
+
+    main.innerHTML = '<section class="view"><div class="container">' +
+      '<p class="eyebrow">Your profile</p>' +
+      '<h1 style="margin-bottom:var(--space-3)">Your skills, as they grow</h1>' +
+      '<div class="admin-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:var(--space-6)">' +
+        '<div class="astat"><div class="astat__n">' + tm + '%</div><div class="astat__l">Technical mastery</div></div>' +
+        '<div class="astat"><div class="astat__n">' + ss + '%</div><div class="astat__l">Profile strength</div></div>' +
+        '<div class="astat"><div class="astat__n">' + ov + '%</div><div class="astat__l">Overall</div></div>' +
+      '</div>' +
+      '<div class="pf-grid">' +
+        '<div class="card"><h2 style="font-size:1.15rem">Your skill web</h2><p class="muted" style="margin-top:0;font-size:14px">Seven technical skills. ' + (base ? 'The dashed ring is where you started; the solid shape is now.' : 'Take the baseline check to see your starting ring.') + '</p>' + radar +
+          '<div class="radar-legend"><span><i class="lg-cur"></i>Now</span>' + (base ? '<span><i class="lg-base"></i>Start</span>' : '') + '</div></div>' +
+        '<div class="card"><h2 style="font-size:1.15rem">Your trajectory</h2><p class="muted" style="margin-top:0;font-size:14px">Technical mastery each time you hit a milestone.</p>' +
+          (trend || '<div class="empty" style="padding:var(--space-6)">' + icon("map") + '<p>Clear a module to start your trend line.</p></div>') + '</div>' +
+      '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("layers") + '</span>Technical skills</h2>' + barRows(tech) + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("spark") + '</span>How you learn</h2><p class="muted">Seeded by your profile check, then confirmed by what you actually do.</p>' + barRows(soft) + '</div>' +
+      '<div class="section"><h2><span class="section__ic">' + icon("trophy") + '</span>Your portfolio</h2><p class="muted">The evidence you carry forward — what you actually did.</p>' + pfHTML + '</div>' +
+      '</div></section>';
     window.scrollTo(0, 0);
   }
 
@@ -2646,6 +2851,9 @@
     } else if (h === "#/baseline/psych") {
       if (!requireProfile(h)) return;
       renderBaselinePsych();
+    } else if (h === "#/profile") {
+      if (!requireProfile(h)) return;
+      renderProfile();
     } else if (h === "#/showcase") {
       renderShowcase();
     } else if (h === "#/admin") {
