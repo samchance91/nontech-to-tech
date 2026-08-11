@@ -164,6 +164,25 @@ h3, .t-h3 { font-size: 1.25rem; font-weight: 600; }
 .row { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; }
 .between { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); flex-wrap: wrap; }
 
+/* ---- Baseline flow (Part 4) ---- */
+.bl2 { max-width: 640px; margin: 0 auto; }
+.bl-top { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); margin-bottom: var(--s4); }
+.bl-dots { display: flex; gap: 6px; }
+.bl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.bl-dot.is-done { background: var(--ink); }
+.bl-dot.is-cur { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+.bl-q { font-size: clamp(1.4rem, 3.5vw, 1.9rem); line-height: 1.2; margin-bottom: var(--s5); }
+.bl-opts { display: grid; gap: var(--s2); }
+.bl-opt { display: flex; align-items: center; gap: var(--s3); text-align: left; min-height: 56px; padding: var(--s3) var(--s4); border: 1px solid var(--line-strong); border-radius: var(--r-ctl); background: var(--surface-2); color: var(--ink); font-family: var(--font-body); font-size: 1.0625rem; cursor: pointer; transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease), background var(--fast) var(--ease); }
+.bl-opt:hover { border-color: var(--ink); }
+.bl-opt:active, .bl-opt.is-picked { transform: scale(.99); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface-2)); }
+.bl-opt__k { width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 7px; background: var(--surface); border: 1px solid var(--line); font-family: var(--font-data); font-size: 13px; color: var(--ink-2); }
+.bl-segs { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.bl-seg { display: inline-flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s3); border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); font-family: var(--font-data); font-size: 13px; text-transform: uppercase; letter-spacing: .02em; cursor: pointer; }
+.bl-seg .tierchip__fill { width: 14px; height: 14px; }
+.bl-seg:hover { border-color: var(--ink); }
+.bl-seg.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }

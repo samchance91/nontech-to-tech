@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>Baseline check — Propelr</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="container" style="padding:var(--s5) var(--s4) 0">
+    <div class="between">
+      <p class="data">Propelr · baseline · part 4</p>
+      <button class="btn btn--secondary btn--sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+    </div>
+  </header>
+  <main id="baseline" class="container" style="padding:var(--s7) var(--s4) var(--s9)"></main>
+
+  <script src="assets/app.js"></script>
+  <script src="assets/baseline.js"></script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      document.getElementById("themeBtn").addEventListener("click", function () {
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      });
+    })();
+    PX.Baseline("#baseline", {
+      onDone: function (tier) {
+        // In the full app this enters the Atlas at the chosen tier.
+        PX.toast("Starting at " + tier.label + " — the Atlas would open here.", { duration: 3500 });
+        document.getElementById("baseline").innerHTML =
+          '<div class="bl2" style="text-align:center"><p class="data">saved</p>' +
+          '<h1 class="t-h1" style="margin-top:var(--s2)">You’re set to ' + tier.label + '.</h1>' +
+          '<p class="muted reading" style="margin:var(--s3) auto 0">Next: the Atlas opens at this tier. Your tier stays visible and changeable on every screen — this is stored as <code class="data">px_baseline</code> and re-evaluated from your behaviour (Part 5).</p>' +
+          '<div class="row" style="justify-content:center;margin-top:var(--s5)"><button class="btn" onclick="location.reload()" type="button">Run it again</button></div></div>';
+      }
+    });
+  </script>
+</body>
+</html>

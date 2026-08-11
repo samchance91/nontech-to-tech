@@ -155,5 +155,11 @@
     return { masterOne: masterOne, state: function () { return { mastered: totalMastered(), total: totalAll() }; } };
   }
 
-  global.PX = { toast: toast, evaluate: evaluate, miniAtlas: miniAtlas, icon: icon, reduced: reduced };
+  /* ---------- tiny local store (becomes IndexedDB-backed in Part 5) ---------- */
+  var store = {
+    get: function (k, fb) { try { var v = JSON.parse(localStorage.getItem("px_" + k)); return v == null ? fb : v; } catch (e) { return fb; } },
+    set: function (k, v) { try { localStorage.setItem("px_" + k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  global.PX = { toast: toast, evaluate: evaluate, miniAtlas: miniAtlas, icon: icon, reduced: reduced, store: store };
 })(window);
