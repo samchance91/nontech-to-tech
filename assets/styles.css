@@ -183,6 +183,23 @@ h3, .t-h3 { font-size: 1.25rem; font-weight: 600; }
 .bl-seg:hover { border-color: var(--ink); }
 .bl-seg.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
 
+/* ---- Adaptation directives + debug (Part 5) ---- */
+.tierbar { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.directive { border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); margin-top: var(--s3); background: var(--surface-2); }
+.directive--up { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: color-mix(in srgb, var(--accent) 8%, var(--surface-2)); }
+.directive--rem { border-left: 4px solid var(--pos); }
+.directive--alt { border-left: 4px solid var(--ink-2); }
+.directive--recall { border-left: 4px solid var(--warn); }
+.directive__h { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: var(--s2); }
+.directive__b { margin-top: var(--s2); color: var(--ink-2); }
+.directive .row { margin-top: var(--s3); }
+
+.debug-toggle { position: fixed; right: var(--s3); bottom: var(--s3); z-index: 71; }
+.debug-panel { position: fixed; right: var(--s3); bottom: calc(var(--s3) + 52px); width: min(400px, 92vw); max-height: 66vh; overflow: auto; background: var(--ink); color: #F7F7F7; border-radius: var(--r-card); padding: var(--s4); box-shadow: var(--shadow); z-index: 70; }
+:root[data-theme="dark"] .debug-panel, :root:not([data-theme="light"]) .debug-panel { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.debug-panel h4 { font-family: var(--font-data); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: var(--s2); }
+.debug-panel pre { font-family: var(--font-data); font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; margin: 0; }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
 }

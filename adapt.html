@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>Adaptation engine — Propelr</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="container" style="padding:var(--s5) var(--s4) 0">
+    <div class="between">
+      <div><p class="data">Propelr · adaptation · part 5</p><h1 class="t-h1" style="margin-top:6px">Adaptation engine</h1></div>
+      <button class="btn btn--secondary btn--sm" id="themeBtn" type="button">Theme</button>
+    </div>
+    <p class="reading muted" style="margin-top:var(--s2)">Continuous, per-concept. Fire the signals below and watch the rules react. Nothing is forced — step-up is an offer; remediation is injected quietly. Your tier is always visible and overridable, top-right.</p>
+  </header>
+
+  <main class="container" style="padding:var(--s5) var(--s4) var(--s9)">
+    <!-- Always-visible tier control -->
+    <div class="card" style="margin-bottom:var(--s5)">
+      <div class="between">
+        <div>
+          <p class="data" style="margin-bottom:var(--s2)">your tier — change it anytime</p>
+          <div class="bl-segs" id="tierbar" role="group" aria-label="Your tier"></div>
+        </div>
+        <p class="instrument" id="instr"></p>
+      </div>
+    </div>
+
+    <div id="recallSlot"></div>
+
+    <!-- Concept unit -->
+    <section class="card">
+      <p class="data">concept</p>
+      <h2>What is an API?</h2>
+
+      <div style="margin-top:var(--s3)">
+        <div style="aspect-ratio:16/9;background:var(--ink);border-radius:var(--r-card);display:grid;place-items:center;color:#F7F7F7">▶ video (mock)</div>
+        <div class="row" style="margin-top:var(--s2)">
+          <button class="btn btn--secondary btn--sm" id="simRewatch" type="button">Rewatch this segment</button>
+          <span class="data muted">rewatch a 3rd time → a text/diagram alternative appears</span>
+        </div>
+        <div id="altSlot"></div>
+      </div>
+
+      <div class="section">
+        <p class="data" style="margin-bottom:var(--s2)">simulate practice signals</p>
+        <div class="row">
+          <button class="btn btn--sm" id="simRight" type="button">Answer: correct &amp; fast</button>
+          <button class="btn btn--sm btn--secondary" id="simWrong" type="button">Answer: incorrect</button>
+          <button class="btn btn--sm btn--ghost" id="simHint" type="button">Reveal a hint</button>
+          <button class="btn btn--sm btn--ghost" id="simNewUnit" type="button">New unit (reset)</button>
+        </div>
+        <p class="data muted" style="margin-top:var(--s2)">2 clean first-tries → step-up offer · 2 wrong or 3 hints → remediation</p>
+      </div>
+
+      <div id="directives" aria-live="polite"></div>
+    </section>
+
+    <section class="section">
+      <div class="row">
+        <button class="btn btn--secondary btn--sm" id="simGap" type="button">Simulate a 4-day gap → new session</button>
+        <span class="data muted">long gap → a 30-second recall check</span>
+      </div>
+    </section>
+  </main>
+
+  <button class="btn btn--sm debug-toggle" id="dbgToggle" type="button" aria-expanded="false">Debug</button>
+  <div class="debug-panel" id="dbg" hidden><h4>Signals · live</h4><pre id="dbgPre"></pre></div>
+
+  <script src="assets/app.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/adapt.js"></script>
+  <script>
+    var CID = "apis-what";
+    (function () {
+      var root = document.documentElement;
+      document.getElementById("themeBtn").addEventListener("click", function () {
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      });
+    })();
+
+    PXStore.init().then(function () {
+      var s = Adapt.startSession();
+      renderTierbar(); renderInstr(s.streak);
+
+      function renderTierbar() {
+        var cur = Adapt.tier();
+        document.getElementById("tierbar").innerHTML = Adapt.TIERS.map(function (k, i) {
+          return '<button class="bl-seg' + (k === cur ? " is-on" : "") + '" data-tier="' + k + '" type="button" aria-pressed="' + (k === cur) + '">' +
+            '<span class="tierchip__fill" style="--lvl:' + ((i + 1) * 25) + '%"></span>' + Adapt.LABEL[k] + '</button>';
+        }).join("");
+        document.querySelectorAll("#tierbar .bl-seg").forEach(function (b) {
+          b.addEventListener("click", function () { Adapt.setTier(b.getAttribute("data-tier"), { overridden: true }); });
+        });
+      }
+      function renderInstr(streak) {
+        document.getElementById("instr").innerHTML = "tier <b>" + Adapt.tierLabel() + "</b> · median <b>" + Math.round(Adapt.median() / 1000) + "s</b> · streak <b>" + (streak != null ? streak : Adapt.snapshot().session.streak) + "</b>";
+      }
+
+      // ---- directive rendering ----
+      function card(cls, title, body, actionsHTML) {
+        var d = document.createElement("div");
+        d.className = "directive " + cls;
+        d.innerHTML = '<div class="directive__h">' + title + '</div>' + (body ? '<div class="directive__b">' + body + '</div>' : '') + (actionsHTML ? '<div class="row">' + actionsHTML + '</div>' : '');
+        return d;
+      }
+      Adapt.on(function (d) {
+        if (d.type === "tierChanged") { renderTierbar(); renderInstr(); PX.toast("Tier: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (accepted step-up)"), { duration: 2200 }); }
+        if (d.type === "offerStepUp") {
+          var el = card("directive--up", PX.icon("spark") + " You're flying — ready for harder?",
+            "Two clean answers in a row. Step up to <b>" + Adapt.LABEL[d.to] + "</b> for less scaffolding and tougher transfer tasks. You can drop back anytime.",
+            '<button class="btn btn--sm" data-accept type="button">Step up to ' + Adapt.LABEL[d.to] + '</button><button class="btn btn--ghost btn--sm" data-dismiss type="button">Not yet</button>');
+          el.querySelector("[data-accept]").addEventListener("click", function () { Adapt.acceptStepUp(d.to); el.remove(); });
+          el.querySelector("[data-dismiss]").addEventListener("click", function () { el.remove(); });
+          document.getElementById("directives").appendChild(el);
+        }
+        if (d.type === "remediation") {
+          // NB: never says "remedial" or "demotion" — just quietly builds it up.
+          var r = card("directive--rem", PX.icon("check") + " Let's build that up a step",
+            "Here's the same idea, broken down smaller — a quick worked example from the ground up, then we'll try again.", "");
+          document.getElementById("directives").appendChild(r);
+        }
+        if (d.type === "surfaceAlt") {
+          document.getElementById("altSlot").innerHTML = "";
+          document.getElementById("altSlot").appendChild(card("directive--alt", "Prefer to read it?",
+            "Watched that part a few times — here it is as text: <b>An API is a contract</b> — one system says “send me this, I'll send back that.” No video needed.", ""));
+        }
+        if (d.type === "recallCheck") {
+          document.getElementById("recallSlot").innerHTML = "";
+          document.getElementById("recallSlot").appendChild(card("directive--recall", "Welcome back",
+            "It's been " + d.gapDays + " days. Want a 30-second refresher before we carry on? (No pressure — jump straight in if you'd rather.)",
+            '<button class="btn btn--sm" type="button">Quick refresher</button><button class="btn btn--ghost btn--sm" data-skip type="button">Skip</button>'));
+          var sk = document.querySelector("#recallSlot [data-skip]"); if (sk) sk.addEventListener("click", function () { document.getElementById("recallSlot").innerHTML = ""; });
+        }
+        refreshDbg();
+      });
+
+      // ---- signal buttons ----
+      document.getElementById("simRight").addEventListener("click", function () { Adapt.answer(CID, { firstAttempt: true, correct: true, ms: Adapt.median() - 8000 }); refreshDbg(); });
+      document.getElementById("simWrong").addEventListener("click", function () { Adapt.answer(CID, { firstAttempt: true, correct: false, ms: Adapt.median() + 8000 }); refreshDbg(); });
+      document.getElementById("simHint").addEventListener("click", function () { Adapt.hint(CID); refreshDbg(); });
+      document.getElementById("simNewUnit").addEventListener("click", function () { Adapt.newUnit(CID); document.getElementById("directives").innerHTML = ""; refreshDbg(); });
+      document.getElementById("simRewatch").addEventListener("click", function () { Adapt.videoRewatch(CID, "intro"); refreshDbg(); });
+      document.getElementById("simGap").addEventListener("click", function () {
+        PXStore.state.session.lastSeen = Date.now() - 4 * 864e5; PXStore.state.session.lastDay = new Date(Date.now() - 4 * 864e5).toDateString(); PXStore.save();
+        var r = Adapt.startSession(); renderInstr(r.streak); refreshDbg();
+      });
+
+      // ---- debug view ----
+      var dbgOpen = false;
+      function refreshDbg() { document.getElementById("dbgPre").textContent = JSON.stringify(Adapt.snapshot(), null, 2); }
+      document.getElementById("dbgToggle").addEventListener("click", function () {
+        dbgOpen = !dbgOpen;
+        document.getElementById("dbg").hidden = !dbgOpen;
+        this.setAttribute("aria-expanded", dbgOpen);
+        if (dbgOpen) refreshDbg();
+      });
+      refreshDbg();
+    });
+  </script>
+</body>
+</html>
