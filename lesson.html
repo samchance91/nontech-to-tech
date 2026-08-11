@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>Content model — one tree, four tiers · Propelr</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="container" style="padding:var(--s5) var(--s4) 0">
+    <div class="between">
+      <div><p class="data">Propelr · content model · part 6</p><h1 class="t-h1" style="margin-top:6px">One tagged tree, four tiers</h1></div>
+      <button class="btn btn--secondary btn--sm" id="themeBtn" type="button">Theme</button>
+    </div>
+    <p class="reading muted" style="margin-top:var(--s2)">Every concept is authored <b>once</b> as a list of tagged blocks — no duplicated courses. The tier reshapes the same tree: it reorders the blocks, decides how much scaffolding to show, paces them one-at-a-time or all-at-once, and expands or tucks away the enrichment. Switch tiers and watch the <em>same</em> concept change.</p>
+  </header>
+
+  <main class="container" style="padding:var(--s5) var(--s4) var(--s9)">
+    <!-- Controls -->
+    <div class="card" style="margin-bottom:var(--s5)">
+      <div class="stack">
+        <div class="between">
+          <div>
+            <p class="data" style="margin-bottom:var(--s2)">tier — reshapes the tree live</p>
+            <div class="bl-segs" id="tierbar" role="group" aria-label="Tier"></div>
+          </div>
+          <div>
+            <p class="data" style="margin-bottom:var(--s2)">concept</p>
+            <div class="bl-segs" id="conceptbar" role="group" aria-label="Concept"></div>
+          </div>
+        </div>
+        <hr class="rule" style="margin:var(--s3) 0" />
+        <div class="plan-readout instrument" id="readout" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- The rendered lesson -->
+    <section class="card" id="lessonCard">
+      <p class="data" id="areaTag">concept</p>
+      <h2 id="lessonTitle" style="margin-top:4px">—</h2>
+      <div id="lessonMount" style="margin-top:var(--s4)"></div>
+    </section>
+  </main>
+
+  <button class="btn btn--sm debug-toggle" id="dbgToggle" type="button" aria-expanded="false">Signals</button>
+  <div class="debug-panel" id="dbg" hidden><h4>Adapt signals · live</h4><pre id="dbgPre"></pre></div>
+
+  <script src="assets/app.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/adapt.js"></script>
+  <script src="assets/content.js"></script>
+  <script src="assets/lesson.js"></script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      document.getElementById("themeBtn").addEventListener("click", function () {
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      });
+    })();
+
+    var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
+    var CONCEPT_IDS = ["apis", "web", "data"];
+    var curTier = 1;        // start Beginner
+    var curConcept = "apis";
+
+    PXStore.init().then(function () {
+      Adapt.startSession();
+      Adapt.setTier(TIER_KEYS[curTier], { overridden: true });
+      renderTierbar(); renderConceptbar(); mount();
+    });
+
+    function renderTierbar() {
+      var bar = document.getElementById("tierbar");
+      bar.innerHTML = TIER_KEYS.map(function (k, i) {
+        return '<button class="bl-seg' + (i === curTier ? " is-on" : "") + '" data-tier="' + i + '" type="button" aria-pressed="' + (i === curTier) + '">' +
+          '<span class="tierchip__fill" style="--lvl:' + ((i + 1) * 25) + '%"></span>' + Adapt.LABEL[k] + "</button>";
+      }).join("");
+      bar.querySelectorAll(".bl-seg").forEach(function (b) {
+        b.addEventListener("click", function () {
+          curTier = +b.getAttribute("data-tier");
+          Adapt.setTier(TIER_KEYS[curTier], { overridden: true });
+          renderTierbar(); mount();
+        });
+      });
+    }
+    function renderConceptbar() {
+      var bar = document.getElementById("conceptbar");
+      bar.innerHTML = CONCEPT_IDS.map(function (id) {
+        return '<button class="bl-seg' + (id === curConcept ? " is-on" : "") + '" data-c="' + id + '" type="button" aria-pressed="' + (id === curConcept) + '">' +
+          PXContent.CONCEPTS[id].area + "</button>";
+      }).join("");
+      bar.querySelectorAll(".bl-seg").forEach(function (b) {
+        b.addEventListener("click", function () {
+          curConcept = b.getAttribute("data-c");
+          renderConceptbar(); mount();
+        });
+      });
+    }
+
+    function mount() {
+      var c = PXContent.CONCEPTS[curConcept];
+      document.getElementById("areaTag").textContent = c.area;
+      document.getElementById("lessonTitle").textContent = c.title;
+      var plan = PXLesson.render("#lessonMount", curConcept, curTier, { onSignal: refreshDbg });
+      renderReadout(plan);
+      refreshDbg();
+    }
+
+    function renderReadout(p) {
+      var authored = PXContent.CONCEPTS[curConcept].blocks.length;
+      var order = p.core.map(function (b) { return b.role === "video" ? "video" : b.role; }).join(" → ");
+      function kv(label, value, note) {
+        return '<div class="kv"><span>' + label + '</span><b>' + value + '</b>' +
+          (note ? ' <span class="muted">' + note + '</span>' : '') + '</div>';
+      }
+      var scNote = p.scaffold === "shown" ? "(hints shown inline)" : p.scaffold === "onRequest" ? "(hints on request)" : "(hints hidden)";
+      var paNote = p.pacing === "stepped" ? "(one block at a time)" : "(whole concept at once)";
+      var enNote = p.enrichOpen ? "expanded by default" : "tucked into disclosures";
+      document.getElementById("readout").innerHTML =
+        kv("sequencing", order, "") +
+        kv("scaffolding", p.scaffold, scNote) +
+        kv("pacing", p.pacing, paNote) +
+        kv("enrichment", p.enrich.length + " blocks", enNote) +
+        kv("source", authored + " authored · 0 duplicated", "one tree, tier-shaped");
+    }
+
+    // ---- signals panel ----
+    var dbgOpen = false;
+    function refreshDbg() {
+      var cid = curConcept;
+      var s = Adapt.snapshot();
+      document.getElementById("dbgPre").textContent = JSON.stringify({
+        tier: s.tier, overridden: s.overridden,
+        concept: cid, signals: s.concepts[cid] || "(no signals fired yet)"
+      }, null, 2);
+    }
+    document.getElementById("dbgToggle").addEventListener("click", function () {
+      dbgOpen = !dbgOpen;
+      document.getElementById("dbg").hidden = !dbgOpen;
+      this.setAttribute("aria-expanded", dbgOpen);
+      if (dbgOpen) refreshDbg();
+    });
+  </script>
+</body>
+</html>
