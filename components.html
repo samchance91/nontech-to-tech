@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>Propelr — Component Library (Part 3)</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <a href="#main" class="btn btn--sm" style="position:absolute;left:-999px">Skip to content</a>
+  <header class="container" style="padding-top:var(--s6);padding-bottom:var(--s4)">
+    <div class="between">
+      <div>
+        <p class="data">Propelr · design system · part 3</p>
+        <h1 class="t-display">Component library</h1>
+      </div>
+      <button class="btn btn--secondary btn--sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+    </div>
+    <p class="reading t-body-lg muted" style="margin-top:var(--s3)">The four feedback registers, built and demonstrable. Every control names exactly what it does; every action returns a response; motion has a static fallback under reduced-motion.</p>
+  </header>
+
+  <main id="main" class="container stack" style="padding-bottom:var(--s9)">
+
+    <!-- Foundations -->
+    <section class="section">
+      <p class="data">foundations</p>
+      <h2>Tokens &amp; type</h2>
+      <div class="card stack" style="margin-top:var(--s3)">
+        <div class="swatch-row" aria-label="Palette">
+          <div class="swatch"><div class="swatch__chip" style="background:var(--surface)"></div><div class="data swatch__l">surface</div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:var(--surface-2)"></div><div class="data swatch__l">raised</div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:var(--ink)"></div><div class="data swatch__l">ink</div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:var(--accent)"></div><div class="data swatch__l">accent</div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:var(--pos)"></div><div class="data swatch__l">positive</div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:var(--warn)"></div><div class="data swatch__l">attention</div></div>
+        </div>
+        <hr class="rule" />
+        <div>
+          <div class="t-display">Turning ideas into momentum</div>
+          <p class="t-body-lg" style="margin-top:var(--s2)">Body copy in Inter. Calm, readable, restrained — the surface is quiet so the one yellow thing carries meaning.</p>
+          <p class="instrument" style="margin-top:var(--s2)"><b>12 / 47</b> concepts mastered · tier <b>intermediate</b> · frontier: <span class="hot">what is an api?</span></p>
+        </div>
+        <hr class="rule" />
+        <div>
+          <p class="data" style="margin-bottom:var(--s2)">tier ramp — monochrome elevation, never colour alone</p>
+          <div class="tier-ramp">
+            <span class="tierchip"><span class="tierchip__fill" style="--lvl:25%"></span><span class="tierchip__l">Novice</span></span>
+            <span class="tierchip"><span class="tierchip__fill" style="--lvl:50%"></span><span class="tierchip__l">Beginner</span></span>
+            <span class="tierchip"><span class="tierchip__fill" style="--lvl:75%"></span><span class="tierchip__l">Intermediate</span></span>
+            <span class="tierchip"><span class="tierchip__fill" style="--lvl:100%"></span><span class="tierchip__l">Advanced</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Register 1 -->
+    <section class="section">
+      <p class="data">register 1 · 0–100ms</p>
+      <h2>Instant</h2>
+      <p class="muted reading">Press, hover, focus. Purely visual, no logic. Tab through these — every control shows a yellow focus ring; press shows a state.</p>
+      <div class="card row" style="margin-top:var(--s3)">
+        <button class="btn" type="button">Primary action</button>
+        <button class="btn btn--secondary" type="button">Secondary</button>
+        <button class="btn btn--ghost" type="button">Ghost</button>
+      </div>
+    </section>
+
+    <!-- Register 2 -->
+    <section class="section">
+      <p class="data">register 2 · 100–400ms</p>
+      <h2>Confirmation</h2>
+      <p class="muted reading">The action already happened (optimistic). It's reversible — a toast confirms and offers undo, and pauses its own timer while you hover or focus it.</p>
+      <div class="card row" style="margin-top:var(--s3)">
+        <button class="btn" id="btnKnown" type="button">Mark known</button>
+        <button class="btn btn--secondary" id="btnDelete" type="button">Delete post</button>
+      </div>
+    </section>
+
+    <!-- Register 3 -->
+    <section class="section">
+      <p class="data">register 3</p>
+      <h2>Evaluative</h2>
+      <p class="muted reading">The answer response — never a bare "Wrong." Always what happened, why, and one next step. A correct answer gets an equally specific response.</p>
+      <div class="card" style="margin-top:var(--s3)">
+        <fieldset style="border:0;padding:0">
+          <legend style="font-weight:600;margin-bottom:var(--s2)">Which layer holds the business logic and the rules?</legend>
+          <div class="stack" id="qOpts">
+            <label class="row"><input type="radio" name="q" value="frontend" /> <span>Frontend / client</span></label>
+            <label class="row"><input type="radio" name="q" value="database" /> <span>The database</span></label>
+            <label class="row"><input type="radio" name="q" value="backend" /> <span>Backend / server</span></label>
+            <label class="row"><input type="radio" name="q" value="cdn" /> <span>The CDN</span></label>
+          </div>
+        </fieldset>
+        <div class="row" style="margin-top:var(--s4)">
+          <button class="btn" id="btnCheck" type="button">Check answer</button>
+        </div>
+        <div id="evalSlot" style="margin-top:var(--s4)"></div>
+      </div>
+    </section>
+
+    <!-- Register 4 -->
+    <section class="section">
+      <p class="data">register 4</p>
+      <h2>Progressive</h2>
+      <p class="muted reading">Journey-level. Progress updates <em>at the moment of the action</em>, not on next load — the node fills, the avatar walks, the instrument line moves. This is a preview of the signature element, the Atlas.</p>
+      <div class="card" style="margin-top:var(--s3)">
+        <div id="atlas"></div>
+        <div class="row" style="margin-top:var(--s4)">
+          <button class="btn" id="btnMaster" type="button">Master a checkpoint</button>
+          <span class="muted t-caption">Watch the hexagon fill and the avatar move to the frontier.</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    // theme toggle
+    (function () {
+      var root = document.documentElement, btn = document.getElementById("themeBtn");
+      btn.addEventListener("click", function () {
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      });
+    })();
+
+    // Register 2 · Confirmation
+    document.getElementById("btnKnown").addEventListener("click", function () {
+      PX.toast("Marked as known.", { undo: function () { PX.toast("Restored — back to review.", { duration: 2500 }); } });
+    });
+    document.getElementById("btnDelete").addEventListener("click", function () {
+      PX.toast("Post deleted.", { undo: function () { PX.toast("Post restored.", { duration: 2500 }); } });
+    });
+
+    // Register 3 · Evaluative
+    document.getElementById("btnCheck").addEventListener("click", function () {
+      var picked = document.querySelector('input[name="q"]:checked');
+      var slot = document.getElementById("evalSlot");
+      if (!picked) { slot.innerHTML = '<p class="data" style="color:var(--warn)">Choose an option first.</p>'; return; }
+      var v = picked.value;
+      if (v === "backend") {
+        PX.evaluate(slot, {
+          correct: true,
+          what: "You named the backend — exactly right.",
+          why: "The backend/server holds the logic and the rules; the client only shows things and the database only stores them.",
+          next: { label: "Next concept", onClick: function () { slot.innerHTML = ""; } }
+        });
+      } else {
+        var whatMap = { frontend: "The frontend only shows things — the user never touches the logic.", database: "The database stores data; it doesn't decide the rules.", cdn: "A CDN just serves files fast; it holds no logic." };
+        PX.evaluate(slot, {
+          correct: false,
+          what: "You chose “" + picked.parentNode.textContent.trim() + "”. " + whatMap[v],
+          why: "Business logic lives on the backend/server. That's the one place the rules are enforced.",
+          next: { label: "Try again", onClick: function () { slot.innerHTML = ""; picked.checked = false; document.querySelector('input[name="q"]').focus(); } }
+        });
+      }
+    });
+
+    // Register 4 · Progressive
+    var atlas = PX.miniAtlas("#atlas");
+    document.getElementById("atlas").addEventListener("px:mastery", function (e) {
+      if (e.detail.mastered === e.detail.total) PX.toast("Region complete — the whole map just filled in.", { duration: 3000 });
+    });
+    document.getElementById("btnMaster").addEventListener("click", function () { atlas.masterOne(); });
+  </script>
+</body>
+</html>
