@@ -38,7 +38,12 @@
       catch (e) { res(null); }
     });
   }
-  function idbPut(v) { try { if (db) db.transaction(STORE, "readwrite").objectStore(STORE).put(v, KEY); } catch (e) {} }
+  function idbPut(v) {
+    return new Promise(function (res) {
+      try { if (!db) return res(); var t = db.transaction(STORE, "readwrite"); t.objectStore(STORE).put(v, KEY); t.oncomplete = res; t.onerror = res; t.onabort = res; }
+      catch (e) { res(); }
+    });
+  }
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
 
   var Store = {
@@ -64,6 +69,14 @@
       try { localStorage.setItem(LS, JSON.stringify(mem)); } catch (e) {}
       clearTimeout(saveTimer);
       saveTimer = setTimeout(function () { idbPut(mem); }, 200);
+    },
+    // Persist immediately (localStorage + committed IndexedDB write). Use before
+    // a navigation/reload where a debounced write could otherwise be lost — e.g. logout.
+    flush: function () {
+      mem.updatedAt = Date.now();
+      try { localStorage.setItem(LS, JSON.stringify(mem)); } catch (e) {}
+      clearTimeout(saveTimer);
+      return idbPut(mem);
     },
     reset: function () { mem = blank(); this.save(); }
   };

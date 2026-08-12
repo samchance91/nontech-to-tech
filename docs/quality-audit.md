@@ -15,19 +15,20 @@ session's scratchpad and are reproducible.
 
 | Metric | Floor | Result | |
 |---|---|---|---|
-| Performance | ≥ 90 | **93** | ✅ |
+| Performance | ≥ 90 | **99** | ✅ |
 | Accessibility | 100 | **100** | ✅ |
 | Best Practices | ≥ 95 | **100** | ✅ |
 | SEO | — | **100** | ✅ |
-| LCP | < 2.5 s | **2.4 s** | ✅ |
+| LCP | < 2.5 s | **2.3 s** | ✅ |
 | CLS | < 0.05 | **0** | ✅ |
-| INP (TBT proxy, lab) | < 200 ms | **0 ms** | ✅ |
+| INP (TBT proxy, lab) | < 200 ms | **30 ms** | ✅ |
 | WCAG 2.1 AA (axe via Lighthouse) | 0 violations | **0** | ✅ |
 | 320 px, no horizontal scroll | required | **0 px overflow** | ✅ |
 | PWA installable | required | **manifest + 512/maskable icons + SW** | ✅ |
 
-Supporting lab metrics: FCP 2.4 s · Speed Index 4.1 s · zero failing
-accessibility, best-practices or SEO audits.
+Supporting lab metrics: FCP 0.9 s · Speed Index 0.9 s · zero failing
+accessibility, best-practices or SEO audits. (Entry is the invite-only login
+gate; the authed app carries the same design system.)
 
 > Lighthouse 12 removed the dedicated **PWA category**, so installability is
 > asserted directly instead: a valid `manifest.json` (name, `start_url`,

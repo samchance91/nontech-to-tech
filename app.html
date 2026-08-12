@@ -18,9 +18,10 @@
       <a class="wordmark" href="#/" aria-label="Propelr home"><span class="wordmark__dot" aria-hidden="true"></span>Propelr</a>
       <div class="appbar__actions">
         <span class="offline-pill" role="status">● offline</span>
-        <label class="vspeed" style="gap:6px"><span class="data">level</span>
+        <label class="vspeed needs-auth" style="gap:6px"><span class="data">level</span>
           <select id="tierSel" class="vspeed__sel" aria-label="Your level — change anytime"></select>
         </label>
+        <button class="profilebtn needs-auth" id="profileBtn" type="button" aria-label="Your profile"></button>
         <button class="btn btn--secondary btn--sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
       </div>
     </div>
@@ -34,6 +35,7 @@
 
   <script src="assets/app.js"></script>
   <script src="assets/store.js"></script>
+  <script src="assets/auth.js"></script>
   <script src="assets/adapt.js"></script>
   <script src="assets/baseline.js"></script>
   <script src="assets/content.js"></script>
@@ -43,6 +45,9 @@
   <script>
     var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
     var CONCEPTS = ["apis", "web", "data"];
+    // Where "request access" emails go. Propelr is invite-only — change this to your preferred address.
+    var CONTACT_EMAIL = "shubham.0604@gmail.com";
+    var appWired = false;
 
     // ---- theme ----
     (function () {
@@ -58,17 +63,31 @@
     })();
 
     PXStore.init().then(function () {
-      PXPWA.init();
-      Adapt.startSession();                       // streak + long-gap recall check
       setOffline(!navigator.onLine);
       window.addEventListener("online", function () { setOffline(false); });
       window.addEventListener("offline", function () { setOffline(true); });
+      document.getElementById("profileBtn").addEventListener("click", function () { location.hash = "#/profile"; });
 
-      renderTierSel();
-      Adapt.on(onDirective);
-      window.addEventListener("hashchange", route);
-      route();
+      if (!PXAuth.session()) { renderLogin(); return; }   // invite-only gate
+      startApp();
     });
+
+    function startApp() {
+      document.body.classList.add("authed");
+      refreshProfileButton();
+      PXPWA.init();
+      Adapt.startSession();                       // streak + long-gap recall check
+      renderTierSel();
+      if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
+      if (location.hash === "#/login" || !location.hash) location.hash = "#/";
+      route();
+    }
+
+    function refreshProfileButton() {
+      var s = PXAuth.session(); if (!s) return;
+      var av = s.avatar ? '<img class="avatar__img" src="' + s.avatar + '" alt="">' : PXAuth.initials();
+      document.getElementById("profileBtn").innerHTML = '<span class="avatar" aria-hidden="true">' + av + '</span><span>' + (s.name || s.email) + '</span>';
+    }
 
     function setOffline(v) { document.body.classList.toggle("is-offline", !!v); }
     function tierIdx() { return Math.max(0, TIER_KEYS.indexOf(Adapt.tier())); }
@@ -120,8 +139,10 @@
 
     // ---- router ----
     function route() {
+      if (!PXAuth.session()) return renderLogin();
       var h = location.hash || "#/";
       var m = h.match(/^#\/c\/(\w+)/);
+      if (h === "#/profile") return renderProfile();
       if (h === "#/baseline") return renderBaseline();
       if (m && CONCEPTS.indexOf(m[1]) >= 0) return renderConcept(m[1]);
       return renderHome();
@@ -209,6 +230,119 @@
       var foot = document.createElement("div"); foot.className = "section";
       var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to the map" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
       foot.appendChild(back); v.appendChild(foot);
+      focusView();
+    }
+
+    // ---- auth screens ----
+    function escapeHtml(x) { return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+    function renderLogin() {
+      document.body.classList.remove("authed");
+      var r = document.getElementById("recall"); if (r) r.innerHTML = "";
+      var host = document.getElementById("px-install"); if (host) host.innerHTML = "";
+      var v = view();
+      var wrap = document.createElement("div"); wrap.className = "authwrap";
+      wrap.innerHTML =
+        '<p class="data">welcome</p>' +
+        '<h1 class="t-h1" style="margin:4px 0 var(--s2)">Log in to Propelr</h1>' +
+        '<p class="reading muted">Propelr is invite-only. Log in with the details you were given.</p>' +
+        '<form class="authcard" id="loginForm" novalidate style="margin-top:var(--s4)">' +
+          '<label class="field"><span class="field__l">Email</span><input class="input" id="loginEmail" type="email" autocomplete="email" inputmode="email" required></label>' +
+          '<label class="field"><span class="field__l">Password</span><input class="input" id="loginPw" type="password" autocomplete="current-password" required></label>' +
+          '<p class="auth-err" id="loginErr" role="alert"></p>' +
+          '<button class="btn" id="loginBtn" type="submit" style="margin-top:var(--s4);width:100%;justify-content:center">Log in</button>' +
+          '<div class="auth-invite">' + (PX.icon ? PX.icon("spark") : "") + '<p>No account yet? Propelr is invite-only — email <a href="mailto:' + CONTACT_EMAIL + '?subject=Propelr%20access%20request&body=Hi%2C%20I%27d%20like%20access%20to%20Propelr.">' + CONTACT_EMAIL + '</a> to request an invite.</p></div>' +
+        '</form>';
+      v.appendChild(wrap);
+      document.getElementById("loginForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var btn = document.getElementById("loginBtn"), err = document.getElementById("loginErr");
+        err.textContent = ""; btn.disabled = true; btn.textContent = "Logging in…";
+        PXAuth.login(document.getElementById("loginEmail").value, document.getElementById("loginPw").value).then(function (res) {
+          if (res && res.ok) { (PXAuth.pullProgress ? PXAuth.pullProgress() : Promise.resolve()).then(startApp); }
+          else { err.textContent = (res && res.error) || "Login failed."; btn.disabled = false; btn.textContent = "Log in"; }
+        });
+      });
+      document.getElementById("loginEmail").focus();
+      focusView();
+    }
+
+    function paintAvatar(el, s) { el.innerHTML = (s && s.avatar) ? '<img class="avatar__img" src="' + s.avatar + '" alt="Your avatar">' : PXAuth.initials(); }
+    function resizeImage(file, max, cb) {
+      if (!file || !/^image\//.test(file.type)) return;
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var scale = Math.min(1, max / Math.max(img.width, img.height));
+        var cw = Math.round(img.width * scale), ch = Math.round(img.height * scale);
+        var c = document.createElement("canvas"); c.width = cw; c.height = ch;
+        c.getContext("2d").drawImage(img, 0, 0, cw, ch);
+        URL.revokeObjectURL(url);
+        try { cb(c.toDataURL("image/jpeg", 0.85)); } catch (e) {}
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); };
+      img.src = url;
+    }
+    function fileInput(multiple, cb) {
+      var inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.className = "visually-hidden"; if (multiple) inp.multiple = true;
+      inp.addEventListener("change", function () {
+        Array.prototype.slice.call(inp.files || []).forEach(function (f) { resizeImage(f, 512, cb); });
+        inp.value = "";
+      });
+      return inp;
+    }
+    function renderGallery(gallery) {
+      var s = PXAuth.session(); var pics = (s && s.pictures) || [];
+      gallery.innerHTML = "";
+      pics.forEach(function (src, i) {
+        var item = document.createElement("div"); item.className = "gallery__item";
+        item.innerHTML = '<img src="' + src + '" alt="Profile picture ' + (i + 1) + '">';
+        var rm = document.createElement("button"); rm.className = "gallery__rm"; rm.type = "button"; rm.setAttribute("aria-label", "Remove picture " + (i + 1)); rm.textContent = "×";
+        rm.addEventListener("click", function () { var cur = (PXAuth.session().pictures || []).slice(); cur.splice(i, 1); PXAuth.saveProfile({ pictures: cur }).then(function () { renderGallery(gallery); }); });
+        item.appendChild(rm); gallery.appendChild(item);
+      });
+      if (pics.length < 8) {
+        var add = document.createElement("button"); add.className = "gallery__add"; add.type = "button"; add.textContent = "+ Add";
+        var inp = fileInput(true, function (url) { var cur = (PXAuth.session().pictures || []).slice(); cur.push(url); PXAuth.saveProfile({ pictures: cur }).then(function () { renderGallery(gallery); }); });
+        add.addEventListener("click", function () { inp.click(); });
+        gallery.appendChild(add); gallery.appendChild(inp);
+      }
+    }
+    function renderProfile() {
+      var s = PXAuth.session(); if (!s) return renderLogin();
+      var v = view();
+      var bar = document.createElement("div"); bar.className = "between";
+      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="#/">← Map</a><span class="data">profile</span>';
+      v.appendChild(bar);
+
+      var head = document.createElement("div"); head.className = "profile-head"; head.style.marginTop = "var(--s4)";
+      var avatar = document.createElement("div"); avatar.className = "avatar avatar--lg"; paintAvatar(avatar, s);
+      var col = document.createElement("div");
+      col.innerHTML = '<h1 class="t-h1" style="margin:0" id="pfTitle">' + escapeHtml(s.name || s.email.split("@")[0]) + '</h1><p class="data muted" style="margin-top:4px">' + escapeHtml(s.email) + '</p>';
+      var changeBtn = document.createElement("button"); changeBtn.className = "btn btn--secondary btn--sm"; changeBtn.type = "button"; changeBtn.style.marginTop = "var(--s2)"; changeBtn.textContent = s.avatar ? "Change photo" : "Add photo";
+      var avInput = fileInput(false, function (dataUrl) { PXAuth.saveProfile({ avatar: dataUrl }).then(function () { paintAvatar(avatar, PXAuth.session()); changeBtn.textContent = "Change photo"; refreshProfileButton(); if (PX.toast) PX.toast("Photo updated", { duration: 1800 }); }); });
+      changeBtn.addEventListener("click", function () { avInput.click(); });
+      col.appendChild(changeBtn); col.appendChild(avInput);
+      head.appendChild(avatar); head.appendChild(col); v.appendChild(head);
+
+      var card = document.createElement("div"); card.className = "card"; card.style.marginTop = "var(--s5)";
+      card.innerHTML = '<label class="field"><span class="field__l">Display name</span><input class="input" id="pfName" type="text" value="' + escapeHtml(s.name || "") + '" maxlength="60"></label>';
+      var save = document.createElement("button"); save.className = "btn btn--sm"; save.type = "button"; save.style.marginTop = "var(--s3)"; save.textContent = "Save name";
+      save.addEventListener("click", function () {
+        var name = document.getElementById("pfName").value.trim(); if (!name) return;
+        save.disabled = true; save.textContent = "Saving…";
+        PXAuth.saveProfile({ name: name }).then(function () { save.disabled = false; save.textContent = "Save name"; refreshProfileButton(); var t = document.getElementById("pfTitle"); if (t) t.textContent = name; if (PX.toast) PX.toast("Name saved", { duration: 1800 }); });
+      });
+      card.appendChild(save); v.appendChild(card);
+
+      var gcard = document.createElement("div"); gcard.className = "card"; gcard.style.marginTop = "var(--s4)";
+      gcard.innerHTML = '<p class="data">your pictures</p><p class="reading muted" style="margin-top:4px">Add a few images to your profile. They stay on this device.</p>';
+      var gallery = document.createElement("div"); gallery.className = "gallery"; gcard.appendChild(gallery); v.appendChild(gcard);
+      renderGallery(gallery);
+
+      var out = document.createElement("div"); out.className = "section";
+      var logout = document.createElement("button"); logout.className = "btn btn--secondary"; logout.type = "button"; logout.textContent = "Log out";
+      logout.addEventListener("click", function () { logout.disabled = true; PXAuth.logout().then(function () { document.body.classList.remove("authed"); renderLogin(); }); });
+      out.appendChild(logout); v.appendChild(out);
       focusView();
     }
   </script>
