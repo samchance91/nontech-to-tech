@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#2C2C2C" media="(prefers-color-scheme: dark)" />
+  <meta name="description" content="Learn how software really works — adaptive, hands-on, at your level. Works offline." />
+  <title>Propelr — Tech for Non-Tech People</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar__in">
+      <a class="wordmark" href="#/" aria-label="Propelr home"><span class="wordmark__dot" aria-hidden="true"></span>Propelr</a>
+      <div class="appbar__actions">
+        <span class="offline-pill" role="status">● offline</span>
+        <label class="vspeed" style="gap:6px"><span class="data">level</span>
+          <select id="tierSel" class="vspeed__sel" aria-label="Your level — change anytime"></select>
+        </label>
+        <button class="btn btn--secondary btn--sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="recall" class="container" style="padding:0 var(--s4)"></div>
+  <main id="view" class="container" style="padding:var(--s5) var(--s4) var(--s9)" tabindex="-1"></main>
+  <div id="px-install" class="install-dock"></div>
+
+  <noscript><p style="padding:24px;font-family:sans-serif">Propelr needs JavaScript. The full course text is also in <a href="index.html">the classic version</a>.</p></noscript>
+
+  <script src="assets/app.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/adapt.js"></script>
+  <script src="assets/baseline.js"></script>
+  <script src="assets/content.js"></script>
+  <script src="assets/video.js"></script>
+  <script src="assets/lesson.js"></script>
+  <script src="assets/pwa.js"></script>
+  <script>
+    var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
+    var CONCEPTS = ["apis", "web", "data"];
+
+    // ---- theme ----
+    (function () {
+      var saved = null; try { saved = localStorage.getItem("px_theme"); } catch (e) {}
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+      document.getElementById("themeBtn").addEventListener("click", function () {
+        var root = document.documentElement;
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        var next = cur === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("px_theme", next); } catch (e) {}
+      });
+    })();
+
+    PXStore.init().then(function () {
+      PXPWA.init();
+      Adapt.startSession();                       // streak + long-gap recall check
+      setOffline(!navigator.onLine);
+      window.addEventListener("online", function () { setOffline(false); });
+      window.addEventListener("offline", function () { setOffline(true); });
+
+      renderTierSel();
+      Adapt.on(onDirective);
+      window.addEventListener("hashchange", route);
+      route();
+    });
+
+    function setOffline(v) { document.body.classList.toggle("is-offline", !!v); }
+    function tierIdx() { return Math.max(0, TIER_KEYS.indexOf(Adapt.tier())); }
+
+    function renderTierSel() {
+      var sel = document.getElementById("tierSel");
+      sel.innerHTML = TIER_KEYS.map(function (k) {
+        return '<option value="' + k + '"' + (k === Adapt.tier() ? " selected" : "") + ">" + Adapt.LABEL[k] + "</option>";
+      }).join("");
+      sel.onchange = function () { Adapt.setTier(sel.value, { overridden: true }); route(); };
+    }
+
+    // ---- global directive handling (fires from Adapt across screens) ----
+    function card(cls, title, body, actions) {
+      var d = document.createElement("div"); d.className = "directive " + cls;
+      d.innerHTML = '<div class="directive__h">' + title + '</div>' + (body ? '<div class="directive__b">' + body + '</div>' : '') + (actions ? '<div class="row">' + actions + '</div>' : '');
+      return d;
+    }
+    function onDirective(d) {
+      if (d.type === "tierChanged") { renderTierSel(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 }); }
+      if (d.type === "recallCheck") {
+        var r = document.getElementById("recall"); if (!r) return;
+        r.innerHTML = "";
+        var el = card("directive--recall", "Welcome back", "It’s been " + d.gapDays + " days. Want a 30-second refresher before you carry on? No pressure — jump straight in if you’d rather.",
+          '<button class="btn btn--sm" data-skip type="button">Sounds good</button><button class="btn btn--ghost btn--sm" data-skip type="button">Skip</button>');
+        el.style.margin = "var(--s3) 0";
+        r.appendChild(el);
+        r.querySelectorAll("[data-skip]").forEach(function (b) { b.addEventListener("click", function () { r.innerHTML = ""; }); });
+      }
+      if (d.type === "offerStepUp") {
+        var slot = document.getElementById("directives"); if (!slot) return;
+        var up = card("directive--up", (PX.icon ? PX.icon("spark") : "") + " You’re flying — ready for harder?",
+          "Two clean answers in a row. Step up to <b>" + Adapt.LABEL[d.to] + "</b> for less scaffolding and tougher transfer tasks. Drop back anytime.",
+          '<button class="btn btn--sm" data-accept type="button">Step up</button><button class="btn btn--ghost btn--sm" data-no type="button">Not yet</button>');
+        up.querySelector("[data-accept]").addEventListener("click", function () { Adapt.acceptStepUp(d.to); up.remove(); route(); });
+        up.querySelector("[data-no]").addEventListener("click", function () { up.remove(); });
+        slot.appendChild(up);
+      }
+      if (d.type === "remediation") {
+        var s2 = document.getElementById("directives"); if (!s2) return;
+        s2.appendChild(card("directive--rem", (PX.icon ? PX.icon("check") : "") + " Let’s build that up a step",
+          "Here’s the same idea broken smaller — a quick worked example from the ground up, then we’ll try again.", ""));
+      }
+      if (d.type === "surfaceAlt") {
+        var a = document.getElementById("altSlot"); if (!a) return;
+        a.innerHTML = ""; a.appendChild(card("directive--alt", "Prefer to read it?", "You’ve replayed that part a few times — here’s the same idea in text, no video needed.", ""));
+      }
+    }
+
+    // ---- router ----
+    function route() {
+      var h = location.hash || "#/";
+      var m = h.match(/^#\/c\/(\w+)/);
+      if (h === "#/baseline") return renderBaseline();
+      if (m && CONCEPTS.indexOf(m[1]) >= 0) return renderConcept(m[1]);
+      return renderHome();
+    }
+    function view() { var v = document.getElementById("view"); v.innerHTML = ""; return v; }
+    function focusView() { var v = document.getElementById("view"); try { v.focus({ preventScroll: true }); } catch (e) {} }
+
+    // mastery: 0–2 per concept (watched ≥50% ·+ a correct first-try answer)
+    function mastery(id) {
+      var c = (Adapt.snapshot().concepts[id]) || {};
+      var m = 0;
+      if (c.video && c.video.watchedPct >= 50) m++;
+      if (c.firstTry && c.firstTry.some(function (x) { return x; })) m++;
+      return m;
+    }
+
+    function renderHome() {
+      var v = view();
+      var done = !!PXStore.state.baseline;
+      var head = document.createElement("div");
+      head.className = "stack";
+      head.innerHTML =
+        '<p class="data">your map</p>' +
+        '<h1 class="t-h1" style="margin:4px 0 0">' + (done ? "Pick up where you left off" : "Welcome — let’s find your level") + '</h1>' +
+        '<p class="reading muted" style="margin-top:var(--s2)">Level <b>' + Adapt.tierLabel() + '</b> · streak <b>' + (Adapt.snapshot().session.streak || 0) + '</b> day(s). Change your level any time up top — the lessons reshape to match.</p>';
+      v.appendChild(head);
+
+      if (!done) {
+        var cal = document.createElement("div"); cal.className = "card"; cal.style.marginTop = "var(--s5)";
+        cal.innerHTML = '<p class="data">2 minutes</p><h2 style="margin:4px 0 var(--s2)">Find your level</h2><p class="reading muted">Six quick questions calibrate the starting point. No score, no pass/fail — it just sets how much we scaffold.</p>';
+        var go = document.createElement("a"); go.className = "btn"; go.href = "#/baseline"; go.style.marginTop = "var(--s3)"; go.innerHTML = "Find my level" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
+        cal.appendChild(go); v.appendChild(cal);
+      }
+
+      var atlas = document.createElement("div"); atlas.className = "card"; atlas.style.marginTop = "var(--s5)";
+      atlas.innerHTML = '<p class="data" style="margin-bottom:var(--s2)">how far you’ve travelled</p>';
+      var mount = document.createElement("div"); atlas.appendChild(mount); v.appendChild(atlas);
+      PX.miniAtlas(mount, { nodes: CONCEPTS.map(function (id) { return { label: PXContent.CONCEPTS[id].area.split(" ")[0], total: 2, filled: mastery(id) }; }) });
+
+      var grid = document.createElement("div"); grid.className = "conceptgrid";
+      CONCEPTS.forEach(function (id) {
+        var c = PXContent.CONCEPTS[id]; var p = Math.round(mastery(id) / 2 * 100);
+        var b = document.createElement("button"); b.className = "concept-card"; b.type = "button";
+        b.innerHTML =
+          '<p class="data concept-card__area">' + c.area + '</p>' +
+          '<h3 style="margin:0">' + c.title + '</h3>' +
+          '<div class="concept-card__meta"><span class="concept-card__bar"><span class="concept-card__fill" style="--p:' + p + '%"></span></span>' +
+          '<span class="data">' + (p === 100 ? "done" : p + "%") + '</span></div>';
+        b.addEventListener("click", function () { location.hash = "#/c/" + id; });
+        grid.appendChild(b);
+      });
+      v.appendChild(grid);
+      focusView();
+    }
+
+    function renderBaseline() {
+      var v = view();
+      v.innerHTML = '<p class="data">calibration</p><h1 class="t-h1" style="margin:4px 0 var(--s4)">Find your level</h1>';
+      var mount = document.createElement("div"); v.appendChild(mount);
+      PX.Baseline(mount, { onDone: function (tier) {
+        // bridge baseline result into the live store + engine
+        PXStore.state.baseline = { tier: tier.key, at: Date.now() };
+        Adapt.setTier(tier.key, { overridden: false });
+        PXStore.save();
+        renderTierSel();
+        location.hash = "#/";
+      } });
+      focusView();
+    }
+
+    function renderConcept(id) {
+      var v = view();
+      var c = PXContent.CONCEPTS[id];
+      var bar = document.createElement("div"); bar.className = "between";
+      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="#/">← Map</a><span class="data">' + c.area + '</span>';
+      v.appendChild(bar);
+      var h = document.createElement("h1"); h.className = "t-h1"; h.style.margin = "var(--s3) 0 var(--s2)"; h.textContent = c.title; v.appendChild(h);
+
+      var dir = document.createElement("div"); dir.id = "directives"; dir.setAttribute("aria-live", "polite"); v.appendChild(dir);
+      var alt = document.createElement("div"); alt.id = "altSlot"; v.appendChild(alt);
+
+      var mount = document.createElement("div"); mount.style.marginTop = "var(--s4)"; v.appendChild(mount);
+      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { /* live signals; home reflects them on return */ } });
+
+      var foot = document.createElement("div"); foot.className = "section";
+      var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to the map" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
+      foot.appendChild(back); v.appendChild(foot);
+      focusView();
+    }
+  </script>
+</body>
+</html>
