@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>VideoBlock — facade embeds + adaptive signals · Propelr</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="container" style="padding:var(--s5) var(--s4) 0">
+    <div class="between">
+      <div><p class="data">Propelr · media · part 7</p><h1 class="t-h1" style="margin-top:6px">The VideoBlock</h1></div>
+      <button class="btn btn--secondary btn--sm" id="themeBtn" type="button">Theme</button>
+    </div>
+    <p class="reading muted" style="margin-top:var(--s2)">Every video is a <b>facade</b> — a self-drawn poster in a reserved 16:9 frame. Nothing loads from YouTube until you press play; then it embeds through <span class="instrument">youtube&#8209;nocookie.com</span>, never an outbound link. Chapters seek in place, captions default on, speed is adjustable, and watching feeds the same adaptive signals as everything else. If a video can't load, you get the idea in text — never a dead frame.</p>
+  </header>
+
+  <main class="container" style="padding:var(--s5) var(--s4) var(--s9)">
+    <section class="card">
+      <p class="data">primary · apis</p>
+      <h2 id="t-apis" style="margin-top:4px">—</h2>
+      <div id="v-apis" style="margin-top:var(--s3)"></div>
+    </section>
+
+    <section class="card" style="margin-top:var(--s5)">
+      <p class="data">primary · web &amp; internet</p>
+      <h2 id="t-web" style="margin-top:4px">—</h2>
+      <div id="v-web" style="margin-top:var(--s3)"></div>
+    </section>
+
+    <section class="card" style="margin-top:var(--s5)">
+      <p class="data">enrichment · in-depth (opens on demand)</p>
+      <h2 style="margin-top:4px">Go deeper</h2>
+      <div id="v-deep" style="margin-top:var(--s3)"></div>
+    </section>
+
+    <!-- The sandbox can't reach YouTube, so these fire the SAME internal handlers
+         the IFrame API calls on real play/seek/end — proving the signal wiring. -->
+    <section class="card" style="margin-top:var(--s5)">
+      <p class="data" style="margin-bottom:var(--s2)">what watching sends to the adaptation engine</p>
+      <p class="muted" style="margin-bottom:var(--s3)">On the live site these fire from real player events. Here, drive them by hand:</p>
+      <div class="row">
+        <button class="btn btn--sm" id="simPlay" type="button">▶ Play</button>
+        <button class="btn btn--sm btn--secondary" id="simSeek" type="button">⟲ Seek back to a chapter</button>
+        <button class="btn btn--sm btn--secondary" id="simDrop" type="button">Leave at 40%</button>
+        <button class="btn btn--sm btn--ghost" id="simEnd" type="button">Finish (100%)</button>
+        <button class="btn btn--sm btn--ghost" id="simOffline" type="button">Simulate offline</button>
+      </div>
+      <p class="data muted" style="margin-top:var(--s2)">seek back into one chapter 3× → a text alternative surfaces automatically</p>
+      <div id="altOut" style="margin-top:var(--s3)"></div>
+      <div class="plan-readout instrument" id="sig" style="margin-top:var(--s4)" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/adapt.js"></script>
+  <script src="assets/content.js"></script>
+  <script src="assets/video.js"></script>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      document.getElementById("themeBtn").addEventListener("click", function () {
+        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      });
+    })();
+
+    var apisV;
+    PXStore.init().then(function () {
+      Adapt.startSession();
+      var apis = PXContent.CONCEPTS.apis, web = PXContent.CONCEPTS.web;
+      var vApis = apis.blocks.filter(function (b) { return b.role === "video" && b.kind === "primary"; })[0];
+      var vWeb = web.blocks.filter(function (b) { return b.role === "video" && b.kind === "primary"; })[0];
+      var vDeep = apis.blocks.filter(function (b) { return b.role === "video" && b.kind === "deep"; })[0];
+
+      document.getElementById("t-apis").textContent = apis.title;
+      document.getElementById("t-web").textContent = web.title;
+
+      apisV = PXVideo.render("#v-apis", vApis, { conceptId: "apis", altText: vApis.alt, onSignal: refresh });
+      PXVideo.render("#v-web", vWeb, { conceptId: "web", altText: vWeb.alt, onSignal: refresh });
+      PXVideo.render("#v-deep", vDeep, { conceptId: "apis", altText: vDeep.alt });
+
+      Adapt.on(function (d) {
+        if (d.type === "surfaceAlt") {
+          document.getElementById("altOut").innerHTML =
+            '<div class="vfallback"><p class="data">watched that bit a few times — here it is in text</p><div class="vfallback__idea">' +
+            (vApis.alt || "") + "</div></div>";
+        }
+        refresh();
+      });
+
+      // simulated player events → the exact internal handlers real YT events call
+      var t = 30;
+      document.getElementById("simPlay").addEventListener("click", function () { apisV._state(1); apisV._progress(t = Math.min(t + 20, 165)); refresh(); });
+      document.getElementById("simSeek").addEventListener("click", function () { apisV._progress(60); apisV._progress(20); refresh(); }); // play forward, then jump back into chapter 1
+      document.getElementById("simDrop").addEventListener("click", function () { apisV._progress(72); apisV._state(2); refresh(); }); // ~40% then pause
+      document.getElementById("simEnd").addEventListener("click", function () { apisV._progress(180); apisV._state(0); refresh(); });
+      document.getElementById("simOffline").addEventListener("click", function () { apisV._fallback("offline"); refresh(); });
+      refresh();
+    });
+
+    function refresh() {
+      var v = (Adapt.snapshot().concepts.apis || {});
+      var vid = v.video || { plays: 0, pauses: 0, ended: 0, watchedPct: 0 };
+      var rw = v.rewatch || {};
+      var rwStr = Object.keys(rw).map(function (k) { return k + "×" + rw[k]; }).join(" · ") || "none";
+      function kv(l, val) { return '<div class="kv"><span>' + l + '</span><b>' + val + "</b></div>"; }
+      document.getElementById("sig").innerHTML =
+        kv("plays", vid.plays) +
+        kv("watched", vid.watchedPct + "%") +
+        kv("seek-backs", v.seekBacks || 0) +
+        kv("rewatched", rwStr) +
+        kv("drop-off", v.dropOff != null ? v.dropOff + "%" : "—") +
+        kv("completed", vid.ended ? "yes" : "no");
+    }
+  </script>
+</body>
+</html>

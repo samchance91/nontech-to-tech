@@ -98,6 +98,17 @@
     },
     videoSeekBack: function (id) { var c = concept(id); c.seekBacks++; S.save(); },
     videoDropOff: function (id, pct) { var c = concept(id); c.dropOff = pct; S.save(); },
+    // Generic play/pause/progress/ended sink from the VideoBlock (Part 7).
+    video: function (id, ev, data) {
+      var c = concept(id);
+      c.video = c.video || { plays: 0, pauses: 0, ended: 0, watchedPct: 0, lastEvent: null };
+      c.video.lastEvent = ev;
+      if (ev === "play") c.video.plays++;
+      else if (ev === "pause") c.video.pauses++;
+      else if (ev === "ended") { c.video.ended++; c.video.watchedPct = 100; }
+      else if (ev === "progress" && data && data.pct > c.video.watchedPct) c.video.watchedPct = data.pct;
+      S.save();
+    },
 
     revisit: function (id) { var c = concept(id); c.revisits++; S.save(); },
 

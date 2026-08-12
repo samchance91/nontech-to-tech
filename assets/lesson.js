@@ -23,16 +23,13 @@
   }
   function videoBlock(b, cid, onSignal) {
     var wrap = el("div", "lb lb--video", roleTag("watch first · " + b.mins + " min"));
-    wrap.appendChild(el("div", "lvideo__frame",
-      '<div><span class="data">primary video — embeds in part 7</span>' +
-      '<div class="lvideo__ttl">▶ ' + b.title + '</div></div>'));
-    var meta = el("div", "lvideo__meta");
-    var rew = el("button", "btn btn--secondary btn--sm", "Rewatch this bit");
-    rew.type = "button";
-    rew.addEventListener("click", function () { Adapt.videoRewatch(cid, "intro"); if (onSignal) onSignal("videoRewatch"); });
-    meta.appendChild(rew);
-    meta.appendChild(el("span", "data muted", "watch it 3× → a text alternative appears"));
-    wrap.appendChild(meta);
+    var mount = el("div");
+    wrap.appendChild(mount);
+    if (global.PXVideo) {
+      PXVideo.render(mount, b, { conceptId: cid, onSignal: onSignal, altText: b.alt });
+    } else {
+      mount.appendChild(el("div", "lvideo__frame", '<div class="lvideo__ttl">▶ ' + b.title + "</div></div>"));
+    }
     return wrap;
   }
   function transferBlock(b) {
@@ -106,13 +103,14 @@
   }
 
   // ---- enrichment (disclosures + resources) ---------------------------------
-  function discVideo(b, open) {
+  function discVideo(b, open, cid) {
     var d = el("details", "disc"); if (open) d.open = true;
     var kind = b.kind === "code" ? "learn to code" : "in depth";
     d.appendChild(el("summary", null, "▶ " + b.title + '<span class="disc__tag">' + kind + " · " + b.mins + " min</span>"));
-    d.appendChild(el("div", "disc__body",
-      '<div class="lvideo__frame"><div><span class="data">' + kind + " video — embeds in part 7</span>" +
-      '<div class="lvideo__ttl">▶ ' + b.title + "</div></div></div>"));
+    var body = el("div", "disc__body");
+    d.appendChild(body);
+    if (global.PXVideo) PXVideo.render(body, b, { conceptId: cid, altText: b.alt });
+    else body.appendChild(el("div", "lvideo__frame", '<div class="lvideo__ttl">▶ ' + b.title + "</div></div>"));
     return d;
   }
   function discDeepdive(b, open) {
@@ -181,7 +179,7 @@
       var resources = [];
       p.enrich.forEach(function (b) {
         if (b.role === "resource") { resources.push(b); return; }
-        if (b.role === "video") ex.appendChild(discVideo(b, p.enrichOpen));
+        if (b.role === "video") ex.appendChild(discVideo(b, p.enrichOpen, conceptId));
         else if (b.role === "deepdive") ex.appendChild(discDeepdive(b, p.enrichOpen));
       });
       if (resources.length) ex.appendChild(resourceList(resources));
