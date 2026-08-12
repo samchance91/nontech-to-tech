@@ -52,6 +52,20 @@
       });
     },
 
+    // Request an invite: records the visitor's email in Supabase `invite_requests`
+    // (anon insert). No admin address is ever exposed on the page.
+    requestInvite: function (email) {
+      email = norm(email);
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Promise.resolve({ error: "Enter a valid email address." });
+      return fetch(URL + "/rest/v1/invite_requests", {
+        method: "POST", headers: headers({ Prefer: "return=minimal" }),
+        body: JSON.stringify({ email: email, requested_at: new Date().toISOString() })
+      }).then(function (r) {
+        if (r.ok || r.status === 201 || r.status === 409) return { ok: true };   // 409 = already requested, still fine
+        return { error: "Couldn’t send your request just now. Please try again shortly." };
+      }).catch(function () { return { error: "Can’t reach the server — check your connection and try again.", offline: true }; });
+    },
+
     _getProfile: function (token, id) {
       if (!id) return Promise.resolve(null);
       return fetch(URL + "/rest/v1/profiles?id=eq." + id + "&select=*", { headers: headers({ Authorization: "Bearer " + token }) })

@@ -96,6 +96,20 @@ create policy "delete own or admin" on public.posts for delete using (auth.uid()
 drop policy if exists "admins read" on public.admins;
 create policy "admins read" on public.admins for select using (public.is_admin());
 
+-- ---- invite requests (the login screen's "request access" box) ----
+-- Propelr is invite-only. Logged-out visitors can submit their email here;
+-- only an admin can read the list. No admin address is ever shown on the page.
+create table if not exists public.invite_requests (
+  id           uuid primary key default gen_random_uuid(),
+  email        text not null,
+  requested_at timestamptz not null default now()
+);
+alter table public.invite_requests enable row level security;
+drop policy if exists "anyone can request an invite" on public.invite_requests;
+drop policy if exists "admin reads invite requests"  on public.invite_requests;
+create policy "anyone can request an invite" on public.invite_requests for insert with check (true);
+create policy "admin reads invite requests"  on public.invite_requests for select using (public.is_admin());
+
 -- ============================================================
 -- FINALLY: make yourself an admin. Replace the email, then run:
 --   insert into public.admins (email) values ('you@example.com');

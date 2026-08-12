@@ -22,7 +22,7 @@
           <select id="tierSel" class="vspeed__sel" aria-label="Your level — change anytime"></select>
         </label>
         <button class="profilebtn needs-auth" id="profileBtn" type="button" aria-label="Your profile"></button>
-        <button class="btn btn--secondary btn--sm" id="themeBtn" type="button" aria-label="Toggle theme">Theme</button>
+        <button class="btn btn--secondary btn--sm iconbtn" id="themeBtn" type="button" aria-label="Switch theme"></button>
       </div>
     </div>
   </header>
@@ -45,21 +45,27 @@
   <script>
     var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
     var CONCEPTS = ["apis", "web", "data"];
-    // Where "request access" emails go. Propelr is invite-only — change this to your preferred address.
-    var CONTACT_EMAIL = "shubham.0604@gmail.com";
     var appWired = false;
 
-    // ---- theme ----
+    // ---- theme (sun/moon toggle) ----
     (function () {
+      var root = document.documentElement, btn = document.getElementById("themeBtn");
       var saved = null; try { saved = localStorage.getItem("px_theme"); } catch (e) {}
-      if (saved) document.documentElement.setAttribute("data-theme", saved);
-      document.getElementById("themeBtn").addEventListener("click", function () {
-        var root = document.documentElement;
-        var cur = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        var next = cur === "dark" ? "light" : "dark";
+      if (saved) root.setAttribute("data-theme", saved);
+      function current() { return root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); }
+      function updateThemeBtn() {
+        var isDark = current() === "dark";
+        btn.innerHTML = PX.icon(isDark ? "sun" : "moon");   // show the mode you'll switch TO
+        btn.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+        btn.setAttribute("title", isDark ? "Light mode" : "Dark mode");
+      }
+      btn.addEventListener("click", function () {
+        var next = current() === "dark" ? "light" : "dark";
         root.setAttribute("data-theme", next);
         try { localStorage.setItem("px_theme", next); } catch (e) {}
+        updateThemeBtn();
       });
+      updateThemeBtn();
     })();
 
     PXStore.init().then(function () {
@@ -243,17 +249,28 @@
       var v = view();
       var wrap = document.createElement("div"); wrap.className = "authwrap";
       wrap.innerHTML =
-        '<p class="data">welcome</p>' +
-        '<h1 class="t-h1" style="margin:4px 0 var(--s2)">Log in to Propelr</h1>' +
-        '<p class="reading muted">Propelr is invite-only. Log in with the details you were given.</p>' +
-        '<form class="authcard" id="loginForm" novalidate style="margin-top:var(--s4)">' +
-          '<label class="field"><span class="field__l">Email</span><input class="input" id="loginEmail" type="email" autocomplete="email" inputmode="email" required></label>' +
-          '<label class="field"><span class="field__l">Password</span><input class="input" id="loginPw" type="password" autocomplete="current-password" required></label>' +
-          '<p class="auth-err" id="loginErr" role="alert"></p>' +
-          '<button class="btn" id="loginBtn" type="submit" style="margin-top:var(--s4);width:100%;justify-content:center">Log in</button>' +
-          '<div class="auth-invite">' + (PX.icon ? PX.icon("spark") : "") + '<p>No account yet? Propelr is invite-only — email <a href="mailto:' + CONTACT_EMAIL + '?subject=Propelr%20access%20request&body=Hi%2C%20I%27d%20like%20access%20to%20Propelr.">' + CONTACT_EMAIL + '</a> to request an invite.</p></div>' +
-        '</form>';
+        '<div class="authcard">' +
+          '<p class="data authcard__eyebrow">Propelr · invite-only</p>' +
+          '<h1 class="authcard__title">Welcome back</h1>' +
+          '<p class="authcard__sub">Log in with the details you were given.</p>' +
+          '<form id="loginForm" novalidate>' +
+            '<label class="field"><span class="field__l">Email address</span><input class="input" id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" required></label>' +
+            '<label class="field"><span class="field__l">Password</span><input class="input" id="loginPw" type="password" autocomplete="current-password" placeholder="Your password" required></label>' +
+            '<p class="auth-err" id="loginErr" role="alert"></p>' +
+            '<button class="btn btn--lg btn--block" id="loginBtn" type="submit" style="margin-top:var(--s5)">Log in</button>' +
+          '</form>' +
+        '</div>' +
+        '<div class="authcard authcard--soft">' +
+          '<h2 class="authcard__subtitle">Don’t have an invite?</h2>' +
+          '<p class="authcard__sub">Propelr is invite-only. Leave your email and we’ll reach out when a place opens up.</p>' +
+          '<form id="inviteForm" class="invite-row" novalidate>' +
+            '<input class="input" id="inviteEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" aria-label="Your email address" required>' +
+            '<button class="btn btn--secondary" id="inviteBtn" type="submit">Send invite' + (PX.icon ? PX.icon("send", "btn__i") : "") + '</button>' +
+          '</form>' +
+          '<p class="auth-msg" id="inviteMsg" role="status"></p>' +
+        '</div>';
       v.appendChild(wrap);
+
       document.getElementById("loginForm").addEventListener("submit", function (e) {
         e.preventDefault();
         var btn = document.getElementById("loginBtn"), err = document.getElementById("loginErr");
@@ -263,6 +280,22 @@
           else { err.textContent = (res && res.error) || "Login failed."; btn.disabled = false; btn.textContent = "Log in"; }
         });
       });
+
+      document.getElementById("inviteForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var btn = document.getElementById("inviteBtn"), msg = document.getElementById("inviteMsg"), email = document.getElementById("inviteEmail");
+        msg.textContent = ""; msg.className = "auth-msg"; btn.disabled = true; btn.textContent = "Sending…";
+        PXAuth.requestInvite(email.value).then(function (res) {
+          if (res && res.ok) {
+            msg.textContent = "Thanks — your request is in. We’ll be in touch by email."; msg.className = "auth-msg is-ok";
+            email.value = ""; email.disabled = true; btn.textContent = "Sent ✓";
+          } else {
+            msg.textContent = (res && res.error) || "Couldn’t send that."; msg.className = "auth-msg is-err";
+            btn.disabled = false; btn.innerHTML = "Send invite" + (PX.icon ? PX.icon("send", "btn__i") : "");
+          }
+        });
+      });
+
       document.getElementById("loginEmail").focus();
       focusView();
     }

@@ -14,7 +14,10 @@
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
     arrowR: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
     undo: '<path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/>',
-    spark: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>'
+    spark: '<path d="M12 3v6M12 15v6M3 12h6M15 12h6"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+    send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>'
   };
   function icon(name, cls) {
     return '<svg class="' + (cls || '') + '" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || '') + '</svg>';
