@@ -1,8 +1,8 @@
 # Quality audit — Part 9 (final)
 
-Audited entry: **`app.html`** (the assembled adaptive app). The original
-`index.html` remains the untouched current site; cutover to root is a
-separate, deliberate step.
+Audited entry: **`app.html`** (the assembled adaptive app). The site **root
+`index.html` now redirects to `app.html`**; the original course app is
+preserved at **`classic.html`**.
 
 Methodology: real **Lighthouse 12** (mobile preset, simulated Slow 4G + 4×
 CPU throttle, cold load — the worst case; repeat visits are near-instant off
@@ -56,7 +56,7 @@ accessibility, best-practices or SEO audits.
 
 - **No-JS fallback is a message, not the content.** `app.html` is a
   client-rendered SPA; with JavaScript disabled it shows a `<noscript>`
-  pointing to the classic `index.html`. A true no-JS content render would need
+  pointing to the classic app (`classic.html`). A true no-JS content render would need
   server-side rendering, which is out of scope for a static, offline-first
   client app. The graceful message is the deliverable here.
 - **LCP margin is slim (2.4 s vs 2.5 s)** under the deliberately harsh cold
