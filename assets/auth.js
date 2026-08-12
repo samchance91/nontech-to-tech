@@ -129,7 +129,38 @@
         headers: headers({ Authorization: "Bearer " + a.token, Prefer: "resolution=merge-duplicates,return=minimal" }),
         body: JSON.stringify({ user_id: a.userId, data: Auth._cloudState(), updated_at: new Date().toISOString() })
       }).catch(function () { /* kept locally; retries on next save */ });
-    }
+    },
+
+    // ---- Showcase (shared project wall, Supabase `posts`) ----
+    listPosts: function () {
+      var a = A();
+      return fetch(URL + "/rest/v1/posts?select=*&order=created_at.desc", { headers: headers(a && a.token ? { Authorization: "Bearer " + a.token } : {}) })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rows) { if (rows) { S.state.posts = rows; S.save(); return rows; } return S.state.posts || []; })
+        .catch(function () { return S.state.posts || []; });   // offline: show the local cache
+    },
+    addPost: function (post) {
+      var a = A(); if (!a) return Promise.resolve({ error: "Not signed in." });
+      var row = { user_id: a.userId, name: a.name || a.email, kind: post.kind || "project", title: post.title, body: post.body, link: post.link || null };
+      var local = Object.assign({ id: "local-" + Date.now(), created_at: new Date().toISOString(), _mine: true }, row);
+      S.state.posts = [local].concat(S.state.posts || []); S.save();   // optimistic
+      if (a.token && a.userId) {
+        return fetch(URL + "/rest/v1/posts", { method: "POST", headers: headers({ Authorization: "Bearer " + a.token, Prefer: "return=representation" }), body: JSON.stringify(row) })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (saved) { if (saved && saved[0]) { S.state.posts = (S.state.posts || []).map(function (p) { return p === local ? Object.assign({ _mine: true }, saved[0]) : p; }); S.save(); } return { ok: true }; })
+          .catch(function () { return { ok: true, synced: false }; });
+      }
+      return Promise.resolve({ ok: true });
+    },
+    deletePost: function (id) {
+      var a = A();
+      S.state.posts = (S.state.posts || []).filter(function (p) { return p.id !== id; }); S.save();
+      if (a && a.token && String(id).indexOf("local-") !== 0) {
+        return fetch(URL + "/rest/v1/posts?id=eq." + id, { method: "DELETE", headers: headers({ Authorization: "Bearer " + a.token }) }).catch(function () {});
+      }
+      return Promise.resolve();
+    },
+    mine: function (post) { var a = A(); return post._mine || (a && post.user_id === a.userId); }
   };
 
   // Mirror every local save up to Supabase (debounced) whenever signed in.

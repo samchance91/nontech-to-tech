@@ -103,5 +103,33 @@
     return { concept: c, tier: t, core: core, enrich: enrich, scaffold: SCAFFOLD[t], pacing: PACING[t], enrichOpen: ENRICH_OPEN[t] };
   }
 
-  global.PXContent = { CONCEPTS: CONCEPTS, plan: plan, ORDER: ORDER, SCAFFOLD: SCAFFOLD };
+  // Flashcards per topic — unlocked once the learner completes that topic.
+  var FLASHCARDS = {
+    apis: [
+      { q: "What is an API, in one line?", a: "A contract between two systems — you send a request, you get a response back." },
+      { q: "What is an endpoint?", a: "One specific address (URL) in that contract, e.g. /users/123/orders." },
+      { q: "REST vs GraphQL?", a: "REST exposes fixed endpoints; GraphQL lets the client ask for exactly the fields it wants." },
+      { q: "What is a rate limit?", a: "A cap on how many calls you can make in a period, protecting the service." },
+      { q: "Why do APIs usually return JSON?", a: "It’s a lightweight, standard text format both systems can read and write easily." },
+      { q: "What does pagination mean for an API?", a: "Big lists come back in pages (chunks) instead of all at once." }
+    ],
+    web: [
+      { q: "What happens when you open a web address?", a: "DNS turns the name into an address, your browser requests the page, the server responds, the browser draws it." },
+      { q: "What does a 404 mean?", a: "The address was fine, but the thing you asked for wasn’t found." },
+      { q: "401 vs 403?", a: "401 = you’re not logged in; 403 = you’re logged in but not allowed." },
+      { q: "What is a cache?", a: "A saved copy so you don’t have to ask again — a common cause of ‘stale’ data." },
+      { q: "Client vs server?", a: "The client (your browser) asks; the server answers." },
+      { q: "What is DNS?", a: "The system that turns a human name (site.com) into a numeric address." }
+    ],
+    data: [
+      { q: "What is a database table?", a: "Rows and columns — like a spreadsheet the app reads and writes." },
+      { q: "Primary key vs foreign key?", a: "A primary key uniquely IDs a row; a foreign key points at another table’s key." },
+      { q: "What is a JOIN?", a: "It stitches two tables together on a shared column." },
+      { q: "Store vs derive — the rule?", a: "Store facts; derive anything you can recompute." },
+      { q: "Why can ‘just add a field’ be costly?", a: "It can mean a migration, a backfill, and touching many queries." },
+      { q: "One customer, many orders — how is it modelled?", a: "A customers table and an orders table, each order carrying the customer’s id." }
+    ]
+  };
+
+  global.PXContent = { CONCEPTS: CONCEPTS, plan: plan, ORDER: ORDER, SCAFFOLD: SCAFFOLD, FLASHCARDS: FLASHCARDS };
 })(window);

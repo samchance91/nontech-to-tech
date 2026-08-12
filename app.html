@@ -18,9 +18,10 @@
       <a class="wordmark" href="#/" aria-label="Propelr home"><span class="wordmark__dot" aria-hidden="true"></span>Propelr</a>
       <div class="appbar__actions">
         <span class="offline-pill" role="status">● offline</span>
-        <label class="vspeed needs-auth" style="gap:6px"><span class="data">level</span>
-          <select id="tierSel" class="vspeed__sel" aria-label="Your level — change anytime"></select>
-        </label>
+        <div class="menu needs-auth" id="menuWrap">
+          <button class="btn btn--secondary btn--sm" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">Menu</button>
+          <div class="menu__panel" id="menuPanel" role="menu" aria-label="Menu" hidden></div>
+        </div>
         <button class="profilebtn needs-auth" id="profileBtn" type="button" aria-label="Your profile"></button>
         <button class="btn btn--secondary btn--sm iconbtn" id="themeBtn" type="button" aria-label="Switch theme"></button>
       </div>
@@ -83,7 +84,7 @@
       refreshProfileButton();
       PXPWA.init();
       Adapt.startSession();                       // streak + long-gap recall check
-      renderTierSel();
+      buildMenu();
       if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
       // First thing after login: if you haven't taken the placement test, go straight to it.
       // Returning learners land back where they were.
@@ -101,12 +102,53 @@
     function setOffline(v) { document.body.classList.toggle("is-offline", !!v); }
     function tierIdx() { return Math.max(0, TIER_KEYS.indexOf(Adapt.tier())); }
 
-    function renderTierSel() {
-      var sel = document.getElementById("tierSel");
-      sel.innerHTML = TIER_KEYS.map(function (k) {
-        return '<option value="' + k + '"' + (k === Adapt.tier() ? " selected" : "") + ">" + Adapt.LABEL[k] + "</option>";
+    // ---- Menu dropdown ----
+    var menuBuilt = false, menuOpen = false;
+    var MENU = [
+      ["Explore", null, null, null],
+      ["#/roadmap", "map", "Roadmap", "The whole path, and how far you are"],
+      ["#/how", "book", "How Propelr works", "A one-minute guide"],
+      ["#/flashcards", "cards", "Flashcards", "Quick recall per topic"],
+      ["#/showcase", "share", "Share a project", "Post to the Showcase"],
+      ["You", null, null, null],
+      ["#/profile", "user", "My profile", null],
+      ["#/baseline", "refresh", "Retake placement", null]
+    ];
+    function buildMenu() {
+      if (menuBuilt) { syncMenuTier(); return; }
+      menuBuilt = true;
+      var btn = document.getElementById("menuBtn");
+      btn.innerHTML = PX.icon("menu") + "Menu" + PX.icon("chevron");
+      var panel = document.getElementById("menuPanel");
+      var html = MENU.map(function (it) {
+        if (it[1] === null) return '<p class="menu__label">' + it[0] + '</p>';
+        return '<a class="menu__item" role="menuitem" href="' + it[0] + '">' + PX.icon(it[1]) +
+          '<span><b>' + it[2] + '</b>' + (it[3] ? '<span class="menu__sub">' + it[3] + '</span>' : '') + '</span></a>';
       }).join("");
-      sel.onchange = function () { Adapt.setTier(sel.value, { overridden: true }); route(); };
+      html += '<div class="menu__row"><span class="menu__k">Level</span><select id="menuTier" class="vspeed__sel" aria-label="Your level"></select></div>';
+      html += '<hr class="menu__sep"><button class="menu__item" role="menuitem" id="menuLogout" type="button">' + PX.icon("logout") + '<span><b>Log out</b></span></button>';
+      panel.innerHTML = html;
+      syncMenuTier();
+      document.getElementById("menuTier").addEventListener("change", function () { Adapt.setTier(this.value, { overridden: true }); route(); });
+      panel.querySelectorAll(".menu__item[href]").forEach(function (a) { a.addEventListener("click", closeMenu); });
+      document.getElementById("menuLogout").addEventListener("click", function () { closeMenu(); PXAuth.logout().then(function () { document.body.classList.remove("authed"); renderLogin(); }); });
+      btn.addEventListener("click", function (e) { e.stopPropagation(); menuOpen ? closeMenu() : openMenu(); });
+      document.addEventListener("click", function (e) { if (menuOpen && !document.getElementById("menuWrap").contains(e.target)) closeMenu(); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menuOpen) { closeMenu(); btn.focus(); } });
+    }
+    function openMenu() {
+      menuOpen = true;
+      var panel = document.getElementById("menuPanel"), btn = document.getElementById("menuBtn");
+      panel.hidden = false;
+      // On the mobile full-width sheet, sit just below the (possibly wrapped) app bar.
+      if (window.matchMedia("(max-width: 520px)").matches) panel.style.top = (btn.getBoundingClientRect().bottom + 8) + "px";
+      else panel.style.top = "";
+      btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() { menuOpen = false; var p = document.getElementById("menuPanel"); if (p) p.hidden = true; var b = document.getElementById("menuBtn"); if (b) b.setAttribute("aria-expanded", "false"); }
+    function syncMenuTier() {
+      var s = document.getElementById("menuTier"); if (!s) return;
+      s.innerHTML = TIER_KEYS.map(function (k) { return '<option value="' + k + '"' + (k === Adapt.tier() ? " selected" : "") + ">" + Adapt.LABEL[k] + "</option>"; }).join("");
     }
 
     // ---- global directive handling (fires from Adapt across screens) ----
@@ -116,7 +158,7 @@
       return d;
     }
     function onDirective(d) {
-      if (d.type === "tierChanged") { renderTierSel(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 }); }
+      if (d.type === "tierChanged") { syncMenuTier(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 }); }
       if (d.type === "recallCheck") {
         var r = document.getElementById("recall"); if (!r) return;
         r.innerHTML = "";
@@ -151,8 +193,14 @@
       if (!PXAuth.session()) return renderLogin();
       var h = location.hash || "#/";
       var m = h.match(/^#\/c\/(\w+)/);
+      var fc = h.match(/^#\/fc\/(\w+)/);
       if (h === "#/profile") return renderProfile();
       if (h === "#/baseline") return renderBaseline();
+      if (h === "#/roadmap") return renderRoadmap();
+      if (h === "#/how") return renderHow();
+      if (h === "#/showcase") return renderShowcase();
+      if (h === "#/flashcards") return renderFlashcards();
+      if (fc && CONCEPTS.indexOf(fc[1]) >= 0) return renderFlashcardsFor(fc[1]);
       if (m && CONCEPTS.indexOf(m[1]) >= 0) return renderConcept(m[1]);
       return renderHome();
     }
@@ -206,7 +254,7 @@
         PXStore.state.baseline = { tier: tier.key, at: Date.now() };
         Adapt.setTier(tier.key, { overridden: false });
         PXStore.save();
-        renderTierSel();
+        syncMenuTier();
         location.hash = "#/";
       } });
       focusView();
@@ -370,6 +418,157 @@
       logout.addEventListener("click", function () { logout.disabled = true; PXAuth.logout().then(function () { document.body.classList.remove("authed"); renderLogin(); }); });
       out.appendChild(logout); v.appendChild(out);
       focusView();
+    }
+
+    // ---- Menu destinations ----
+    function crumb(v, label, backHref, backLabel) {
+      var bar = document.createElement("div"); bar.className = "between";
+      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="' + (backHref || "#/") + '">← ' + (backLabel || "Topics") + '</a><span class="data">' + label + '</span>';
+      v.appendChild(bar);
+    }
+    function safeUrl(u) { u = String(u || ""); return /^https?:\/\//i.test(u) ? u : ""; }
+
+    function renderRoadmap() {
+      var v = view(); crumb(v, "roadmap");
+      var h = document.createElement("div");
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Your roadmap</h1>' +
+        '<p class="reading muted">Three foundations to start. Each lesson meets you at your level (right now: <b>' + Adapt.tierLabel() + '</b>) — a short video, a quick check, and something to apply. Finish a topic to unlock its flashcards.</p>';
+      v.appendChild(h);
+      var OUT = { apis: "Explain what an API is and read a simple call.", web: "Trace what happens when a page loads, and read status codes.", data: "Read a table and know when two tables join." };
+      var wrap = document.createElement("div"); wrap.className = "rmap";
+      CONCEPTS.forEach(function (id, i) {
+        var c = PXContent.CONCEPTS[id]; var mv = mastery(id); var pc = Math.round(mv / 2 * 100); var done = mv >= 2;
+        var row = document.createElement("a"); row.className = "rmap__row" + (done ? " is-done" : ""); row.href = "#/c/" + id; row.style.textDecoration = "none"; row.style.color = "var(--ink)";
+        row.innerHTML = '<span class="rmap__n">' + (done ? PX.icon("check") : (i + 1)) + '</span>' +
+          '<span style="flex:1"><span class="data concept-card__area">' + c.area + '</span>' +
+          '<h3 style="margin:2px 0 4px">' + c.title + '</h3>' +
+          '<p class="muted" style="margin:0">You’ll be able to: ' + OUT[id] + '</p>' +
+          '<span class="rmap__bar"><span class="rmap__fill" style="width:' + pc + '%"></span></span></span>' +
+          '<span class="data">' + (done ? "done" : pc ? pc + "%" : "start") + '</span>';
+        wrap.appendChild(row);
+      });
+      v.appendChild(wrap);
+      var more = document.createElement("p"); more.className = "reading muted"; more.style.marginTop = "var(--s5)";
+      more.textContent = "More topics — auth & security, deploys, Git, the AI layer — join the path as these foundations land.";
+      v.appendChild(more);
+      focusView();
+    }
+
+    function renderHow() {
+      var v = view(); crumb(v, "guide");
+      var h = document.createElement("div");
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">How Propelr works</h1><p class="reading muted">The short version.</p>';
+      v.appendChild(h);
+      var items = [
+        ["refresh", "It meets you at your level", "A quick placement sets your starting point. Lessons adjust — more guidance at Novice, problem-first at Advanced. Change your level any time from the Menu."],
+        ["book", "Watch, then try", "Each topic opens with a short video (under ten minutes), then a quick check and a task to apply it to your own work."],
+        ["map", "Go deeper when you want", "In-depth videos, code walkthroughs and source links sit quietly under each lesson — open them only if you want them."],
+        ["cards", "Lock it in with flashcards", "Finish a topic and its flashcards unlock, for fast recall later."],
+        ["share", "Share what you build", "Post projects to the Showcase and see what others are making."],
+        ["user", "Yours, across devices", "Add it to your home screen, use it offline, and your progress syncs when you’re back online."]
+      ];
+      var wrap = document.createElement("div"); wrap.className = "how";
+      items.forEach(function (it) { var d = document.createElement("div"); d.className = "how__item"; d.innerHTML = '<span class="how__ic">' + PX.icon(it[0]) + '</span><div><h3>' + it[1] + '</h3><p>' + it[2] + '</p></div>'; wrap.appendChild(d); });
+      v.appendChild(wrap); focusView();
+    }
+
+    function renderShowcase() {
+      var v = view(); crumb(v, "showcase");
+      var h = document.createElement("div");
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Share a project</h1><p class="reading muted">Show what you’re building or learning. Everyone signed in can see the wall.</p>';
+      v.appendChild(h);
+      var form = document.createElement("form"); form.className = "sc-form"; form.setAttribute("novalidate", "");
+      form.innerHTML =
+        '<label class="field"><span class="field__l">Title</span><input class="input" id="scTitle" type="text" maxlength="120" placeholder="What is it?" required></label>' +
+        '<label class="field"><span class="field__l">A few words</span><textarea id="scBody" maxlength="600" placeholder="What did you make or learn?"></textarea></label>' +
+        '<label class="field"><span class="field__l">Link (optional)</span><input class="input" id="scLink" type="text" inputmode="url" placeholder="https://…"></label>' +
+        '<p class="auth-msg" id="scMsg" role="status"></p>' +
+        '<button class="btn" id="scBtn" type="submit" style="margin-top:var(--s3)">Share' + PX.icon("send", "btn__i") + '</button>';
+      v.appendChild(form);
+      var list = document.createElement("div"); list.className = "sc-list"; v.appendChild(list);
+
+      function paint(posts) {
+        list.innerHTML = "";
+        if (!posts || !posts.length) { list.innerHTML = '<div class="sc-empty">No posts yet — be the first to share something.</div>'; return; }
+        posts.forEach(function (p) {
+          var card = document.createElement("div"); card.className = "sc-post";
+          var u = safeUrl(p.link);
+          var link = u ? '<a class="sc-post__link" href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer">Open link ↗</a>' : '';
+          card.innerHTML = '<div class="sc-post__top"><span class="data sc-post__by">' + escapeHtml(p.name || "Someone") + '</span></div>' +
+            '<h3>' + escapeHtml(p.title || "") + '</h3>' + (p.body ? '<p class="muted" style="margin:0">' + escapeHtml(p.body) + '</p>' : '') + link;
+          if (PXAuth.mine(p)) {
+            var rm = document.createElement("button"); rm.className = "btn btn--ghost btn--sm"; rm.type = "button"; rm.textContent = "Delete"; rm.style.marginTop = "var(--s2)";
+            rm.addEventListener("click", function () { PXAuth.deletePost(p.id).then(load); });
+            card.appendChild(rm);
+          }
+          list.appendChild(card);
+        });
+      }
+      function load() { PXAuth.listPosts().then(paint); }
+      load();
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var title = document.getElementById("scTitle").value.trim(), body = document.getElementById("scBody").value.trim(), link = document.getElementById("scLink").value.trim();
+        var msg = document.getElementById("scMsg"), btn = document.getElementById("scBtn");
+        if (!title) { msg.textContent = "Add a title."; msg.className = "auth-msg is-err"; return; }
+        if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+        btn.disabled = true; btn.textContent = "Sharing…"; msg.textContent = ""; msg.className = "auth-msg";
+        PXAuth.addPost({ title: title, body: body, link: link }).then(function (res) {
+          btn.disabled = false; btn.innerHTML = "Share" + PX.icon("send", "btn__i");
+          form.reset();
+          msg.textContent = res && res.synced === false ? "Shared on this device — it’ll sync when you’re online." : "Shared!"; msg.className = "auth-msg is-ok";
+          load();
+        });
+      });
+      focusView();
+    }
+
+    function renderFlashcards() {
+      var v = view(); crumb(v, "flashcards");
+      var h = document.createElement("div");
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Flashcards</h1><p class="reading muted">Quick recall for each topic. A topic’s cards unlock once you’ve finished that topic.</p>';
+      v.appendChild(h);
+      var grid = document.createElement("div"); grid.className = "fc-grid";
+      CONCEPTS.forEach(function (id) {
+        var c = PXContent.CONCEPTS[id]; var cards = PXContent.FLASHCARDS[id] || []; var unlocked = mastery(id) >= 2;
+        var el = document.createElement("div"); el.className = "fc-topic" + (unlocked ? "" : " is-locked");
+        el.innerHTML = '<span class="data concept-card__area">' + c.area + '</span><h3 style="margin:0">' + c.title + '</h3><p class="muted" style="margin:0">' + cards.length + ' cards</p>';
+        if (unlocked) { var go = document.createElement("a"); go.className = "btn btn--sm"; go.href = "#/fc/" + id; go.style.marginTop = "var(--s2)"; go.textContent = "Study"; el.appendChild(go); }
+        else { var lock = document.createElement("span"); lock.className = "fc-topic__lock"; lock.style.marginTop = "var(--s2)"; lock.innerHTML = PX.icon("lock") + "Finish the topic to unlock"; el.appendChild(lock); }
+        grid.appendChild(el);
+      });
+      v.appendChild(grid); focusView();
+    }
+
+    function renderFlashcardsFor(id) {
+      var cards = PXContent.FLASHCARDS[id] || [];
+      if (!cards.length || mastery(id) < 2) { location.hash = "#/flashcards"; return; }
+      var v = view();
+      crumb(v, PXContent.CONCEPTS[id].area, "#/flashcards", "Flashcards");
+      var h = document.createElement("h1"); h.className = "t-h1"; h.style.margin = "var(--s3) 0 0"; h.textContent = PXContent.CONCEPTS[id].title; v.appendChild(h);
+
+      var i = 0, showBack = false;
+      var card = document.createElement("div"); card.className = "flashcard"; card.setAttribute("role", "button"); card.setAttribute("tabindex", "0"); card.setAttribute("aria-label", "Flashcard — activate to flip");
+      var nav = document.createElement("div"); nav.className = "fc-nav";
+      var prev = document.createElement("button"); prev.className = "btn btn--secondary btn--sm"; prev.type = "button"; prev.textContent = "← Prev";
+      var count = document.createElement("span"); count.className = "fc-count";
+      var next = document.createElement("button"); next.className = "btn btn--sm"; next.type = "button"; next.textContent = "Next →";
+      nav.appendChild(prev); nav.appendChild(count); nav.appendChild(next);
+
+      function paint() {
+        var c = cards[i];
+        card.innerHTML = '<div class="flashcard__side"><span class="data">' + (showBack ? "answer" : "question") + '</span>' + escapeHtml(showBack ? c.a : c.q) + '</div><span class="flashcard__hint">' + (showBack ? "tap for the question" : "tap to reveal the answer") + '</span>';
+        count.textContent = (i + 1) + " / " + cards.length;
+        prev.disabled = i === 0; next.disabled = i === cards.length - 1;
+      }
+      function flip() { showBack = !showBack; paint(); }
+      card.addEventListener("click", flip);
+      card.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+      prev.addEventListener("click", function () { if (i > 0) { i--; showBack = false; paint(); } });
+      next.addEventListener("click", function () { if (i < cards.length - 1) { i++; showBack = false; paint(); } });
+      v.appendChild(card); v.appendChild(nav);
+      paint(); focusView();
     }
   </script>
 </body>
