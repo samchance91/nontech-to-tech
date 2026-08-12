@@ -85,8 +85,11 @@
       Adapt.startSession();                       // streak + long-gap recall check
       renderTierSel();
       if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
-      if (location.hash === "#/login" || !location.hash) location.hash = "#/";
-      route();
+      // First thing after login: if you haven't taken the placement test, go straight to it.
+      // Returning learners land back where they were.
+      var target = !PXStore.state.baseline ? "#/baseline"
+        : (location.hash && location.hash !== "#/login" ? location.hash : "#/");
+      if (location.hash !== target) location.hash = target; else route();
     }
 
     function refreshProfileButton() {
@@ -167,47 +170,37 @@
 
     function renderHome() {
       var v = view();
-      var done = !!PXStore.state.baseline;
       var head = document.createElement("div");
       head.className = "stack";
       head.innerHTML =
-        '<p class="data">your map</p>' +
-        '<h1 class="t-h1" style="margin:4px 0 0">' + (done ? "Pick up where you left off" : "Welcome — let’s find your level") + '</h1>' +
-        '<p class="reading muted" style="margin-top:var(--s2)">Level <b>' + Adapt.tierLabel() + '</b> · streak <b>' + (Adapt.snapshot().session.streak || 0) + '</b> day(s). Change your level any time up top — the lessons reshape to match.</p>';
+        '<p class="data">your topics</p>' +
+        '<h1 class="t-h1" style="margin:4px 0 0">Pick a topic to learn</h1>' +
+        '<p class="reading muted" style="margin-top:var(--s2)">You’re set to <b>' + Adapt.tierLabel() + '</b> — every lesson adjusts to that. Tap a topic to begin.</p>';
       v.appendChild(head);
-
-      if (!done) {
-        var cal = document.createElement("div"); cal.className = "card"; cal.style.marginTop = "var(--s5)";
-        cal.innerHTML = '<p class="data">2 minutes</p><h2 style="margin:4px 0 var(--s2)">Find your level</h2><p class="reading muted">Six quick questions calibrate the starting point. No score, no pass/fail — it just sets how much we scaffold.</p>';
-        var go = document.createElement("a"); go.className = "btn"; go.href = "#/baseline"; go.style.marginTop = "var(--s3)"; go.innerHTML = "Find my level" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
-        cal.appendChild(go); v.appendChild(cal);
-      }
-
-      var atlas = document.createElement("div"); atlas.className = "card"; atlas.style.marginTop = "var(--s5)";
-      atlas.innerHTML = '<p class="data" style="margin-bottom:var(--s2)">how far you’ve travelled</p>';
-      var mount = document.createElement("div"); atlas.appendChild(mount); v.appendChild(atlas);
-      PX.miniAtlas(mount, { nodes: CONCEPTS.map(function (id) { return { label: PXContent.CONCEPTS[id].area.split(" ")[0], total: 2, filled: mastery(id) }; }) });
 
       var grid = document.createElement("div"); grid.className = "conceptgrid";
       CONCEPTS.forEach(function (id) {
-        var c = PXContent.CONCEPTS[id]; var p = Math.round(mastery(id) / 2 * 100);
+        var c = PXContent.CONCEPTS[id]; var pc = Math.round(mastery(id) / 2 * 100);
         var b = document.createElement("button"); b.className = "concept-card"; b.type = "button";
         b.innerHTML =
           '<p class="data concept-card__area">' + c.area + '</p>' +
           '<h3 style="margin:0">' + c.title + '</h3>' +
-          '<div class="concept-card__meta"><span class="concept-card__bar"><span class="concept-card__fill" style="--p:' + p + '%"></span></span>' +
-          '<span class="data">' + (p === 100 ? "done" : p + "%") + '</span></div>';
+          '<div class="concept-card__meta"><span class="concept-card__bar"><span class="concept-card__fill" style="--p:' + pc + '%"></span></span>' +
+          '<span class="data">' + (pc === 100 ? "done" : pc ? pc + "%" : "start") + '</span></div>';
         b.addEventListener("click", function () { location.hash = "#/c/" + id; });
         grid.appendChild(b);
       });
       v.appendChild(grid);
+
+      var foot = document.createElement("p"); foot.className = "reading muted"; foot.style.marginTop = "var(--s6)";
+      foot.innerHTML = 'Want to reset your starting level? <a href="#/baseline">Retake the 2-minute placement</a>.';
+      v.appendChild(foot);
       focusView();
     }
 
     function renderBaseline() {
       var v = view();
-      v.innerHTML = '<p class="data">calibration</p><h1 class="t-h1" style="margin:4px 0 var(--s4)">Find your level</h1>';
-      var mount = document.createElement("div"); v.appendChild(mount);
+      var mount = document.createElement("div"); v.appendChild(mount);   // the baseline renders its own intro — no extra heading
       PX.Baseline(mount, { onDone: function (tier) {
         // bridge baseline result into the live store + engine
         PXStore.state.baseline = { tier: tier.key, at: Date.now() };
@@ -223,7 +216,7 @@
       var v = view();
       var c = PXContent.CONCEPTS[id];
       var bar = document.createElement("div"); bar.className = "between";
-      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="#/">← Map</a><span class="data">' + c.area + '</span>';
+      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="#/">← Topics</a><span class="data">' + c.area + '</span>';
       v.appendChild(bar);
       var h = document.createElement("h1"); h.className = "t-h1"; h.style.margin = "var(--s3) 0 var(--s2)"; h.textContent = c.title; v.appendChild(h);
 
@@ -234,7 +227,7 @@
       PXLesson.render(mount, id, tierIdx(), { onSignal: function () { /* live signals; home reflects them on return */ } });
 
       var foot = document.createElement("div"); foot.className = "section";
-      var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to the map" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
+      var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to topics" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
       foot.appendChild(back); v.appendChild(foot);
       focusView();
     }
