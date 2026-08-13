@@ -45,7 +45,7 @@
   <script src="assets/pwa.js"></script>
   <script>
     var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
-    var CONCEPTS = ["apis", "web", "data"];
+    var CONCEPTS = ["apis", "web", "data", "diagrams", "wireframes", "stories", "agile"];
     var appWired = false;
 
     // ---- theme (sun/moon toggle) ----
@@ -85,6 +85,7 @@
       PXPWA.init();
       Adapt.startSession();                       // streak + long-gap recall check
       buildMenu();
+      evaluateBadges();                           // catch streak / placement / topic badges from prior sessions
       if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
       // First thing after login: if you haven't taken the placement test, go straight to it.
       // Returning learners land back where they were.
@@ -111,6 +112,7 @@
       ["#/flashcards", "cards", "Flashcards", "Quick recall per topic"],
       ["#/showcase", "share", "Share a project", "Post to the Showcase"],
       ["You", null, null, null],
+      ["#/badges", "award", "Badges", "What you’ve earned"],
       ["#/profile", "user", "My profile", null],
       ["#/baseline", "refresh", "Retake placement", null]
     ];
@@ -199,6 +201,7 @@
       if (h === "#/roadmap") return renderRoadmap();
       if (h === "#/how") return renderHow();
       if (h === "#/showcase") return renderShowcase();
+      if (h === "#/badges") return renderBadges();
       if (h === "#/flashcards") return renderFlashcards();
       if (fc && CONCEPTS.indexOf(fc[1]) >= 0) return renderFlashcardsFor(fc[1]);
       if (m && CONCEPTS.indexOf(m[1]) >= 0) return renderConcept(m[1]);
@@ -207,13 +210,47 @@
     function view() { var v = document.getElementById("view"); v.innerHTML = ""; return v; }
     function focusView() { var v = document.getElementById("view"); try { v.focus({ preventScroll: true }); } catch (e) {} }
 
-    // mastery: 0–2 per concept (watched ≥50% ·+ a correct first-try answer)
+    // A topic is complete when its milestones are met: a correct first-try answer,
+    // plus (if the topic has a video) watching at least half of it.
+    function hasPrimaryVideo(id) { return PXContent.CONCEPTS[id].blocks.some(function (b) { return b.role === "video" && b.kind === "primary"; }); }
+    function topicMax(id) { return hasPrimaryVideo(id) ? 2 : 1; }
     function mastery(id) {
       var c = (Adapt.snapshot().concepts[id]) || {};
       var m = 0;
-      if (c.video && c.video.watchedPct >= 50) m++;
+      if (hasPrimaryVideo(id) && c.video && c.video.watchedPct >= 50) m++;
       if (c.firstTry && c.firstTry.some(function (x) { return x; })) m++;
       return m;
+    }
+    function topicDone(id) { return mastery(id) >= topicMax(id); }
+    function topicPct(id) { return Math.round(mastery(id) / topicMax(id) * 100); }
+
+    // ---- Badges ----
+    var BADGES = [
+      { id: "placed", icon: "spark", name: "First steps", desc: "Finished your placement", check: function (s) { return s.placed; } },
+      { id: "vid1", icon: "book", name: "Pressed play", desc: "Finished your first video", check: function (s) { return s.videos >= 1; } },
+      { id: "vid5", icon: "book", name: "Binge learner", desc: "Finished five videos", check: function (s) { return s.videos >= 5; } },
+      { id: "topic1", icon: "check", name: "Topic cleared", desc: "Completed your first topic", check: function (s) { return s.topics >= 1; } },
+      { id: "topic3", icon: "map", name: "Foundations", desc: "Completed three topics", check: function (s) { return s.topics >= 3; } },
+      { id: "topicall", icon: "award", name: "Completionist", desc: "Completed every topic", check: function (s) { return s.topics >= CONCEPTS.length; } },
+      { id: "streak3", icon: "flame", name: "On a roll", desc: "A three-day streak", check: function (s) { return s.streak >= 3; } },
+      { id: "streak7", icon: "flame", name: "Committed", desc: "A seven-day streak", check: function (s) { return s.streak >= 7; } },
+      { id: "clean", icon: "check", name: "Sharp", desc: "Two clean answers in a row", check: function (s) { return s.cleanBest >= 2; } },
+      { id: "share1", icon: "share", name: "Shipped it", desc: "Shared your first project", check: function (s) { return s.posts >= 1; } }
+    ];
+    function badgeStats() {
+      var st = PXStore.state, cs = st.concepts || {};
+      var videos = 0, cleanBest = 0, topics = 0;
+      Object.keys(cs).forEach(function (id) { var c = cs[id]; if (c.video && c.video.ended) videos += c.video.ended; if ((c.consecClean || 0) > cleanBest) cleanBest = c.consecClean; });
+      CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
+      var posts = (st.posts || []).filter(function (p) { return PXAuth.mine(p); }).length;
+      return { placed: !!st.baseline, videos: videos, topics: topics, streak: (st.session && st.session.streak) || 0, cleanBest: cleanBest, posts: posts };
+    }
+    function evaluateBadges() {
+      var st = PXStore.state; st.badges = st.badges || {};
+      var s = badgeStats(), newly = [];
+      BADGES.forEach(function (b) { if (!st.badges[b.id] && b.check(s)) { st.badges[b.id] = Date.now(); newly.push(b); } });
+      if (newly.length) { PXStore.save(); newly.forEach(function (b) { if (PX.toast) PX.toast("🏅 Badge earned — " + b.name, { duration: 3200 }); }); }
+      return newly;
     }
 
     function renderHome() {
@@ -228,7 +265,7 @@
 
       var grid = document.createElement("div"); grid.className = "conceptgrid";
       CONCEPTS.forEach(function (id) {
-        var c = PXContent.CONCEPTS[id]; var pc = Math.round(mastery(id) / 2 * 100);
+        var c = PXContent.CONCEPTS[id]; var pc = topicPct(id);
         var b = document.createElement("button"); b.className = "concept-card"; b.type = "button";
         b.innerHTML =
           '<p class="data concept-card__area">' + c.area + '</p>' +
@@ -255,6 +292,7 @@
         Adapt.setTier(tier.key, { overridden: false });
         PXStore.save();
         syncMenuTier();
+        evaluateBadges();                         // "First steps" for finishing placement
         location.hash = "#/";
       } });
       focusView();
@@ -272,7 +310,7 @@
       var alt = document.createElement("div"); alt.id = "altSlot"; v.appendChild(alt);
 
       var mount = document.createElement("div"); mount.style.marginTop = "var(--s4)"; v.appendChild(mount);
-      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { /* live signals; home reflects them on return */ } });
+      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { evaluateBadges(); } });
 
       var foot = document.createElement("div"); foot.className = "section";
       var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to topics" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
@@ -437,7 +475,7 @@
       var OUT = { apis: "Explain what an API is and read a simple call.", web: "Trace what happens when a page loads, and read status codes.", data: "Read a table and know when two tables join." };
       var wrap = document.createElement("div"); wrap.className = "rmap";
       CONCEPTS.forEach(function (id, i) {
-        var c = PXContent.CONCEPTS[id]; var mv = mastery(id); var pc = Math.round(mv / 2 * 100); var done = mv >= 2;
+        var c = PXContent.CONCEPTS[id]; var pc = topicPct(id); var done = topicDone(id);
         var row = document.createElement("a"); row.className = "rmap__row" + (done ? " is-done" : ""); row.href = "#/c/" + id; row.style.textDecoration = "none"; row.style.color = "var(--ink)";
         row.innerHTML = '<span class="rmap__n">' + (done ? PX.icon("check") : (i + 1)) + '</span>' +
           '<span style="flex:1"><span class="data concept-card__area">' + c.area + '</span>' +
@@ -518,6 +556,7 @@
           btn.disabled = false; btn.innerHTML = "Share" + PX.icon("send", "btn__i");
           form.reset();
           msg.textContent = res && res.synced === false ? "Shared on this device — it’ll sync when you’re online." : "Shared!"; msg.className = "auth-msg is-ok";
+          evaluateBadges();                       // "Shipped it"
           load();
         });
       });
@@ -531,7 +570,7 @@
       v.appendChild(h);
       var grid = document.createElement("div"); grid.className = "fc-grid";
       CONCEPTS.forEach(function (id) {
-        var c = PXContent.CONCEPTS[id]; var cards = PXContent.FLASHCARDS[id] || []; var unlocked = mastery(id) >= 2;
+        var c = PXContent.CONCEPTS[id]; var cards = PXContent.FLASHCARDS[id] || []; var unlocked = topicDone(id);
         var el = document.createElement("div"); el.className = "fc-topic" + (unlocked ? "" : " is-locked");
         el.innerHTML = '<span class="data concept-card__area">' + c.area + '</span><h3 style="margin:0">' + c.title + '</h3><p class="muted" style="margin:0">' + cards.length + ' cards</p>';
         if (unlocked) { var go = document.createElement("a"); go.className = "btn btn--sm"; go.href = "#/fc/" + id; go.style.marginTop = "var(--s2)"; go.textContent = "Study"; el.appendChild(go); }
@@ -543,7 +582,7 @@
 
     function renderFlashcardsFor(id) {
       var cards = PXContent.FLASHCARDS[id] || [];
-      if (!cards.length || mastery(id) < 2) { location.hash = "#/flashcards"; return; }
+      if (!cards.length || !topicDone(id)) { location.hash = "#/flashcards"; return; }
       var v = view();
       crumb(v, PXContent.CONCEPTS[id].area, "#/flashcards", "Flashcards");
       var h = document.createElement("h1"); h.className = "t-h1"; h.style.margin = "var(--s3) 0 0"; h.textContent = PXContent.CONCEPTS[id].title; v.appendChild(h);
@@ -569,6 +608,27 @@
       next.addEventListener("click", function () { if (i < cards.length - 1) { i++; showBack = false; paint(); } });
       v.appendChild(card); v.appendChild(nav);
       paint(); focusView();
+    }
+
+    function renderBadges() {
+      evaluateBadges();
+      var v = view(); crumb(v, "badges");
+      var earned = PXStore.state.badges || {};
+      var got = BADGES.filter(function (b) { return earned[b.id]; }).length;
+      var h = document.createElement("div");
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Your badges</h1>' +
+        '<p class="reading muted"><b>' + got + '</b> of ' + BADGES.length + ' earned. Keep a streak, finish videos, complete topics and share projects to collect the rest.</p>';
+      v.appendChild(h);
+      var grid = document.createElement("div"); grid.className = "badges";
+      BADGES.forEach(function (b) {
+        var on = !!earned[b.id];
+        var el = document.createElement("div"); el.className = "badge " + (on ? "is-earned" : "is-locked");
+        el.innerHTML = '<span class="badge__ic">' + PX.icon(on ? b.icon : "lock") + '</span>' +
+          '<span class="badge__name">' + b.name + '</span><span class="badge__desc">' + b.desc + '</span>';
+        grid.appendChild(el);
+      });
+      v.appendChild(grid);
+      focusView();
     }
   </script>
 </body>

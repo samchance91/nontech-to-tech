@@ -70,6 +70,66 @@
         { id: "dd1", role: "deepdive", tiers: ALL, title: "Store vs derive, and why “just add a field” costs", text: "Store facts; derive anything you can recompute. A new field can mean a migration, a backfill, and touching many queries — rarely “just”." },
         { id: "r1", role: "resource", tiers: ALL, label: "select star — SQL, visually", url: "https://selectstarsql.com/" }
       ]
+    },
+    diagrams: {
+      id: "diagrams", title: "Diagrams & flowcharts", area: "Visual mapping",
+      blocks: [
+        { id: "d1", role: "define", tiers: ALL, term: "Flowchart", def: "A picture of a process — boxes for steps, a diamond for decisions, arrows for the flow." },
+        { id: "d2", role: "define", tiers: [0, 2], term: "The core shapes", def: "Oval = start/end · rectangle = a step · diamond = a decision (yes/no) · parallelogram = data in or out · arrow = the direction of flow." },
+        { id: "v1", role: "video", kind: "primary", tiers: ALL, title: "Flowcharts, explained with the shapes", vid: "odplRrFQVgE", mins: 8,
+          chapters: [{ t: 0, label: "Intro" }, { t: 180, label: "The shapes" }, { t: 360, label: "Wrap-up" }],
+          alt: "A flowchart draws a process: an <b>oval</b> starts and ends it, a <b>rectangle</b> is a step, a <b>diamond</b> is a decision (yes/no), and <b>arrows</b> show which way the flow goes. Anyone can read it — no code required." },
+        { id: "ex1", role: "example", tiers: [0, 1], text: "A signup flow: Start → enter email → (diamond) email valid? → No: show an error and loop back → Yes: create the account → End. A whole feature, readable at a glance." },
+        { id: "p1", role: "practice", tiers: ALL, q: "In a flowchart, a diamond means…", opts: ["A start point", "A decision", "A database", "A finished step"], a: 1, hint: "It’s where the path splits — usually yes/no." },
+        { id: "t1", role: "transfer", tiers: [1, 3], task: "Sketch the flow for one feature in your product — one start, at least one decision diamond, one end. Five boxes is plenty." },
+        { id: "dd1", role: "deepdive", tiers: ALL, title: "Beyond flowcharts: user flows, swimlanes & sequence diagrams", text: "User flows map the screens a person moves through; swimlanes show who does what (customer vs system); sequence diagrams show messages between systems over time. Same idea — a shared picture that removes ambiguity." },
+        { id: "r1", role: "resource", tiers: ALL, label: "Creately — flowchart symbols & meanings", url: "https://creately.com/guides/flowchart-symbols/" }
+      ]
+    },
+    wireframes: {
+      id: "wireframes", title: "Wireframes & prototypes", area: "Design & UX",
+      blocks: [
+        { id: "d1", role: "define", tiers: ALL, term: "Wireframe", def: "A rough, greyscale sketch of a screen — boxes and labels, no colour or real content — to agree the layout before anyone builds it." },
+        { id: "d2", role: "define", tiers: [0, 2], term: "Fidelity", def: "How ‘finished’ a design looks. Low-fi = quick sketches/wireframes; high-fi = pixel-accurate mockups. Start low — it’s cheap to change." },
+        { id: "v1", role: "video", kind: "primary", tiers: ALL, title: "Low-fidelity wireframes & prototypes (Google UX)", vid: "I5u2QOH18W8", mins: 9,
+          chapters: [{ t: 0, label: "Intro" }, { t: 200, label: "Paper first" }, { t: 400, label: "Wrap-up" }],
+          alt: "A wireframe is a rough, greyscale layout — boxes and labels only. <b>Low fidelity</b> means fast and cheap to change; you sketch, test it on paper, move things around, and only then open a design tool." },
+        { id: "ex1", role: "example", tiers: [0, 1], text: "Before building a booking screen you sketch three boxes — a date, a time, a ‘Confirm’ button — on paper, test it with a colleague, move the button, and only then does anyone open a design tool." },
+        { id: "p1", role: "practice", tiers: ALL, q: "Why start with a low-fidelity wireframe?", opts: ["It’s the final design", "It’s quick and cheap to change", "It replaces testing", "It’s only for engineers"], a: 1, hint: "The whole point is speed — change it before it’s expensive." },
+        { id: "t1", role: "transfer", tiers: [1, 3], task: "Wireframe one screen of your product on paper — boxes and labels only. Then write the one user story it serves (‘As a … I want … so that …’)." },
+        { id: "dd1", role: "deepdive", tiers: ALL, title: "Wireframe → prototype → storyboard", text: "A prototype links wireframes so people can click through a flow. A storyboard tells the user’s story frame by frame — the situation, what they do, the outcome — so the team feels the problem, not just the screens." },
+        { id: "r1", role: "resource", tiers: ALL, label: "Skillshare — a guide to low-fidelity wireframes", url: "https://www.skillshare.com/en/blog/low-fidelity-wireframes-a-guide-for-ux-designers/" }
+      ]
+    },
+    stories: {
+      id: "stories", title: "User stories & acceptance criteria", area: "Requirements",
+      blocks: [
+        { id: "d1", role: "define", tiers: ALL, term: "User story", def: "A need in the user’s words: “As a [user], I want [action] so that [benefit].” It captures the why, not the how." },
+        { id: "d2", role: "define", tiers: [0, 2], term: "Acceptance criteria", def: "The pass/fail checklist that says when a story is truly done — often written “Given / When / Then.”" },
+        { id: "v1", role: "video", kind: "primary", tiers: ALL, title: "Stories vs user stories (Atlassian)", vid: "urZLGNWizpc", mins: 6,
+          chapters: [{ t: 0, label: "Intro" }, { t: 120, label: "The format" }, { t: 240, label: "Wrap-up" }],
+          alt: "A user story frames a need — “As a shopper, I want to save items so I can buy them later.” <b>Acceptance criteria</b> are the pass/fail conditions for ‘done’, often written Given / When / Then, so nobody has to guess." },
+        { id: "ex1", role: "example", tiers: [0, 1], text: "Story: “As a shopper, I want to save items so I can buy them later.” Criteria: Given I’m logged in, When I tap the heart, Then the item appears in Saved and stays after I close the app." },
+        { id: "p1", role: "practice", tiers: ALL, q: "What do acceptance criteria define?", opts: ["The visual design", "The pass/fail conditions for ‘done’", "Which server to use", "The sprint length"], a: 1, hint: "They remove ambiguity about what ‘done’ means." },
+        { id: "t1", role: "transfer", tiers: [1, 3], task: "Write one user story for your product in the ‘As a / I want / so that’ format, then add two acceptance criteria in ‘Given / When / Then.’" },
+        { id: "dd1", role: "deepdive", tiers: ALL, title: "INVEST, and why vague criteria cost you", text: "Good stories are INVEST — Independent, Negotiable, Valuable, Estimable, Small, Testable. Vague acceptance criteria are the number-one cause of rework and scope creep: developers end up guessing product decisions." },
+        { id: "r1", role: "resource", tiers: ALL, label: "Atlassian — user stories with examples", url: "https://www.atlassian.com/agile/project-management/user-stories" }
+      ]
+    },
+    agile: {
+      id: "agile", title: "Agile & Scrum", area: "Ways of working",
+      blocks: [
+        { id: "d1", role: "define", tiers: ALL, term: "Agile", def: "Build in small slices, show real work often, and adjust — instead of one giant plan delivered at the very end." },
+        { id: "d2", role: "define", tiers: [0, 2], term: "Scrum words", def: "Sprint = a short fixed work period · Backlog = the ordered to-do list · Standup = a quick daily sync · Retro = what to improve next time." },
+        { id: "v1", role: "video", kind: "primary", tiers: ALL, title: "Scrum in under 10 minutes", vid: "XU0llRltyFM", mins: 9,
+          chapters: [{ t: 0, label: "Intro" }, { t: 200, label: "The sprint" }, { t: 420, label: "Wrap-up" }],
+          alt: "<b>Agile</b> means building in small slices and adjusting as you go. In <b>Scrum</b>: work happens in short <b>sprints</b>, the <b>backlog</b> is the ordered to-do list, a daily <b>standup</b> keeps everyone in sync, and a <b>retro</b> improves the next round." },
+        { id: "ex1", role: "example", tiers: [0, 1], text: "A team works in two-week sprints. Monday they pull the top items off the backlog; each morning they sync for five minutes; Friday they demo what’s done and decide what’s next. Small, visible, repeatable." },
+        { id: "p1", role: "practice", tiers: ALL, q: "In Scrum, a “sprint” is…", opts: ["A bug", "A short, fixed period of work", "A meeting room", "A type of server"], a: 1, hint: "It’s a fixed block of time, usually 1–2 weeks." },
+        { id: "t1", role: "transfer", tiers: [1, 3], task: "Write your product’s next sprint goal in one sentence, and list the three backlog items you’d pull in to hit it." },
+        { id: "dd1", role: "deepdive", tiers: ALL, title: "Roles, ceremonies & why WIP limits matter", text: "A Product Owner orders the backlog; a Scrum Master unblocks the team. ‘Ceremonies’ are just the planning / standup / review / retro rhythm. Limiting work-in-progress (WIP) gets things finished instead of everything half-done." },
+        { id: "r1", role: "resource", tiers: ALL, label: "Atlassian — the Agile & Scrum guide", url: "https://www.atlassian.com/agile/scrum" }
+      ]
     }
   };
 
@@ -128,6 +188,38 @@
       { q: "Store vs derive — the rule?", a: "Store facts; derive anything you can recompute." },
       { q: "Why can ‘just add a field’ be costly?", a: "It can mean a migration, a backfill, and touching many queries." },
       { q: "One customer, many orders — how is it modelled?", a: "A customers table and an orders table, each order carrying the customer’s id." }
+    ],
+    diagrams: [
+      { q: "What does an oval mean in a flowchart?", a: "The start or the end of the process." },
+      { q: "What does a diamond mean?", a: "A decision — the path splits, usually yes/no." },
+      { q: "What does a rectangle mean?", a: "A single step or action in the process." },
+      { q: "What does an arrow show?", a: "The direction the flow moves." },
+      { q: "What’s a swimlane diagram for?", a: "Showing who does what — each lane is a person or system." },
+      { q: "Why draw a flow before building?", a: "It creates a shared, unambiguous picture anyone can read." }
+    ],
+    wireframes: [
+      { q: "What is a wireframe?", a: "A rough, greyscale layout of a screen — boxes and labels, no colour or real content." },
+      { q: "Low vs high fidelity?", a: "Low = quick sketches, cheap to change; high = pixel-accurate mockups." },
+      { q: "Why start low-fidelity?", a: "It’s fast and cheap to change before building gets expensive." },
+      { q: "What is a prototype?", a: "Linked wireframes people can click through to test a flow." },
+      { q: "What is a storyboard?", a: "The user’s story told frame by frame — situation, action, outcome." },
+      { q: "What comes before opening a design tool?", a: "Sketching and testing the layout on paper." }
+    ],
+    stories: [
+      { q: "What’s the user-story format?", a: "As a [user], I want [action] so that [benefit]." },
+      { q: "What are acceptance criteria?", a: "The pass/fail conditions that define ‘done’." },
+      { q: "What’s ‘Given / When / Then’ for?", a: "Writing clear, testable acceptance criteria." },
+      { q: "Story vs acceptance criteria?", a: "The story is the why; the criteria are the what and the ‘done’." },
+      { q: "What does INVEST stand for?", a: "Independent, Negotiable, Valuable, Estimable, Small, Testable." },
+      { q: "The cost of vague criteria?", a: "Rework and scope creep — developers end up guessing product decisions." }
+    ],
+    agile: [
+      { q: "What is Agile, in one line?", a: "Build in small slices, show work often, and adjust." },
+      { q: "What is a sprint?", a: "A short, fixed period of work — usually 1–2 weeks." },
+      { q: "What is the backlog?", a: "The ordered list of things still to do." },
+      { q: "What is a standup?", a: "A quick daily sync on progress and blockers." },
+      { q: "What does a Product Owner do?", a: "Orders the backlog — decides what matters most." },
+      { q: "Why limit work-in-progress?", a: "To finish things instead of leaving everything half-done." }
     ]
   };
 
