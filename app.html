@@ -162,6 +162,7 @@
     function onDirective(d) {
       if (d.type === "tierChanged") { syncMenuTier(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 }); }
       if (d.type === "recallCheck") {
+        var cst = PXStore.state; cst.stats = cst.stats || {}; if (!cst.stats.comeback) { cst.stats.comeback = true; PXStore.save(); } evaluateBadges();
         var r = document.getElementById("recall"); if (!r) return;
         r.innerHTML = "";
         var el = card("directive--recall", "Welcome back", "It’s been " + d.gapDays + " days. Want a 30-second refresher before you carry on? No pressure — jump straight in if you’d rather.",
@@ -224,32 +225,103 @@
     function topicDone(id) { return mastery(id) >= topicMax(id); }
     function topicPct(id) { return Math.round(mastery(id) / topicMax(id) * 100); }
 
-    // ---- Badges ----
-    var BADGES = [
-      { id: "placed", icon: "spark", name: "First steps", desc: "Finished your placement", check: function (s) { return s.placed; } },
-      { id: "vid1", icon: "book", name: "Pressed play", desc: "Finished your first video", check: function (s) { return s.videos >= 1; } },
-      { id: "vid5", icon: "book", name: "Binge learner", desc: "Finished five videos", check: function (s) { return s.videos >= 5; } },
-      { id: "topic1", icon: "check", name: "Topic cleared", desc: "Completed your first topic", check: function (s) { return s.topics >= 1; } },
-      { id: "topic3", icon: "map", name: "Foundations", desc: "Completed three topics", check: function (s) { return s.topics >= 3; } },
-      { id: "topicall", icon: "award", name: "Completionist", desc: "Completed every topic", check: function (s) { return s.topics >= CONCEPTS.length; } },
-      { id: "streak3", icon: "flame", name: "On a roll", desc: "A three-day streak", check: function (s) { return s.streak >= 3; } },
-      { id: "streak7", icon: "flame", name: "Committed", desc: "A seven-day streak", check: function (s) { return s.streak >= 7; } },
-      { id: "clean", icon: "check", name: "Sharp", desc: "Two clean answers in a row", check: function (s) { return s.cleanBest >= 2; } },
-      { id: "share1", icon: "share", name: "Shipped it", desc: "Shared your first project", check: function (s) { return s.posts >= 1; } }
+    // ---- Badges — a perpetual, category-based system (100+ and growing) ----
+    var BADGE_CATS = [
+      { key: "levels", label: "Getting started", icon: "spark" },
+      { key: "videos", label: "Videos", icon: "book" },
+      { key: "topics", label: "Topics", icon: "check" },
+      { key: "cards", label: "Flashcards", icon: "cards" },
+      { key: "practice", label: "Practice", icon: "check" },
+      { key: "streaks", label: "Streaks", icon: "flame" },
+      { key: "projects", label: "Projects", icon: "share" },
+      { key: "explore", label: "Exploration", icon: "map" },
+      { key: "consistency", label: "Consistency", icon: "refresh" },
+      { key: "milestones", label: "Milestones", icon: "award" }
     ];
+    function catIcon(key) { for (var i = 0; i < BADGE_CATS.length; i++) if (BADGE_CATS[i].key === key) return BADGE_CATS[i].icon; return "award"; }
+
+    function buildBadges() {
+      var B = [];
+      function series(metric, cat, defs, fmt) {
+        defs.forEach(function (d) {
+          B.push({ id: metric + "_" + d[0], cat: cat, tier: d[2] || "small", name: d[1], desc: fmt ? fmt(d[0]) : d[0] + "", check: (function (n) { return function (s) { return (s[metric] || 0) >= n; }; })(d[0]) });
+        });
+      }
+      // Levels / getting started
+      B.push({ id: "lvl_placed", cat: "levels", tier: "small", name: "First steps", desc: "Finished your placement", check: function (s) { return s.placed; } });
+      B.push({ id: "lvl_beg", cat: "levels", tier: "small", name: "Beginner", desc: "Reached the Beginner level", check: function (s) { return s.tierRank >= 1; } });
+      B.push({ id: "lvl_int", cat: "levels", tier: "small", name: "Intermediate", desc: "Reached the Intermediate level", check: function (s) { return s.tierRank >= 2; } });
+      B.push({ id: "lvl_adv", cat: "levels", tier: "big", name: "Advanced", desc: "Reached the Advanced level", check: function (s) { return s.tierRank >= 3; } });
+      // Videos
+      series("videos", "videos", [[1, "Pressed play", "small"], [3, "Getting into it", "small"], [5, "Regular viewer", "small"], [10, "Ten under the belt", "small"], [15, "Screen time", "small"], [25, "Binge learner", "big"], [40, "Film buff", "big"], [60, "Marathon watcher", "big"], [80, "Screening room", "big"], [100, "Century of videos", "big"]], function (n) { return n + " videos finished"; });
+      // Topics
+      series("topics", "topics", [[1, "Topic cleared", "small"], [2, "Two down", "small"], [3, "Foundations", "small"], [5, "Well rounded", "big"], [7, "Full sweep", "big"], [10, "Ten topics", "big"], [15, "Encyclopedic", "big"], [20, "Scholar", "big"]], function (n) { return n + " topics completed"; });
+      CONCEPTS.forEach(function (id) { B.push({ id: "topic_" + id, cat: "topics", tier: "small", name: PXContent.CONCEPTS[id].title, desc: "Completed “" + PXContent.CONCEPTS[id].area + "”", check: (function (cid) { return function () { return topicDone(cid); }; })(id) }); });
+      // Flashcards
+      series("cards", "cards", [[10, "Flipper", "small"], [25, "Card sharp", "small"], [50, "Fifty cards", "small"], [100, "Century of cards", "big"], [200, "Card master", "big"], [350, "Recall pro", "big"], [500, "Memory bank", "big"], [750, "Near-total recall", "big"], [1000, "Thousand cards", "big"]], function (n) { return n + " cards reviewed"; });
+      series("decks", "cards", [[1, "First deck", "small"], [3, "Three decks", "small"], [5, "Five decks", "big"], [7, "Deck sweep", "big"], [10, "Deck master", "big"]], function (n) { return n + " decks completed"; });
+      // Practice
+      series("correct", "practice", [[1, "First correct", "small"], [5, "Five right", "small"], [10, "Ten right", "small"], [25, "Sharp shooter", "small"], [50, "Fifty right", "big"], [100, "Sharpshooter", "big"], [200, "Marksman", "big"], [300, "Dead-eye", "big"], [500, "Five hundred right", "big"], [750, "Prolific", "big"]], function (n) { return n + " correct answers"; });
+      series("cleanBest", "practice", [[2, "Clean sweep", "small"], [3, "Three clean", "small"], [5, "Flawless five", "small"], [8, "Eight clean", "big"], [10, "Ten clean", "big"], [15, "Untouchable", "big"]], function (n) { return n + " clean answers in a row"; });
+      // Streaks
+      series("streak", "streaks", [[2, "Back again", "small"], [3, "On a roll", "small"], [5, "Five in a row", "small"], [7, "A full week", "small"], [10, "Ten days", "small"], [14, "Fortnight", "big"], [21, "Habit formed", "big"], [30, "A month straight", "big"], [50, "Unstoppable", "big"], [75, "Iron will", "big"], [100, "Centurion", "big"], [150, "Relentless", "big"], [200, "Devoted", "big"], [365, "A whole year", "big"]], function (n) { return "A " + n + "-day streak"; });
+      // Projects
+      series("posts", "projects", [[1, "Shipped it", "small"], [3, "Builder", "small"], [5, "Prolific maker", "small"], [10, "Ten projects", "big"], [15, "Maker", "big"], [25, "Showcase star", "big"], [50, "Fifty shipped", "big"]], function (n) { return n + " projects shared"; });
+      // Exploration (hints + rewinds)
+      series("hints", "explore", [[1, "Not afraid to ask", "small"], [5, "Curious", "small"], [10, "Inquisitive", "small"], [25, "Question everything", "small"]], function (n) { return n + " hints used"; });
+      series("rewatches", "explore", [[1, "Second look", "small"], [5, "Rewinder", "small"], [10, "Watch again", "small"], [25, "On repeat", "small"]], function (n) { return n + " rewinds"; });
+      // Consistency (visits + time of day)
+      series("visits", "consistency", [[1, "Welcome", "small"], [5, "Making it a habit", "small"], [10, "Ten visits", "small"], [25, "Regular", "big"], [50, "Devotee", "big"], [100, "Hundred visits", "big"]], function (n) { return n + " visits"; });
+      B.push({ id: "time_early", cat: "consistency", tier: "small", name: "Early bird", desc: "Learned before 8am", check: function (s) { return s.early; } });
+      B.push({ id: "time_night", cat: "consistency", tier: "small", name: "Night owl", desc: "Learned after 11pm", check: function (s) { return s.night; } });
+      B.push({ id: "time_weekend", cat: "consistency", tier: "small", name: "Weekend warrior", desc: "Learned on a weekend", check: function (s) { return s.weekend; } });
+      B.push({ id: "time_comeback", cat: "consistency", tier: "small", name: "Comeback", desc: "Returned after a break", check: function (s) { return s.comeback; } });
+      // Milestones (meta — earned badges)
+      series("earnedCount", "milestones", [[5, "Collector", "small"], [10, "Badge hunter", "small"], [25, "Decorated", "big"], [50, "Hall of fame", "big"], [75, "Legendary", "big"], [100, "Completionist", "big"]], function (n) { return n + " badges earned"; });
+      return B;
+    }
+    var BADGES = buildBadges();
+
     function badgeStats() {
       var st = PXStore.state, cs = st.concepts || {};
-      var videos = 0, cleanBest = 0, topics = 0;
-      Object.keys(cs).forEach(function (id) { var c = cs[id]; if (c.video && c.video.ended) videos += c.video.ended; if ((c.consecClean || 0) > cleanBest) cleanBest = c.consecClean; });
+      var videos = 0, cleanBest = 0, topics = 0, correct = 0, hints = 0, rewatches = 0;
+      Object.keys(cs).forEach(function (id) {
+        var c = cs[id];
+        if (c.video && c.video.ended) videos += c.video.ended;
+        if ((c.consecClean || 0) > cleanBest) cleanBest = c.consecClean;
+        if (c.firstTry) correct += c.firstTry.filter(function (x) { return x; }).length;
+        hints += (c.hintsTotal || 0);
+        rewatches += (c.seekBacks || 0);
+      });
       CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
+      var stats = st.stats || {};
       var posts = (st.posts || []).filter(function (p) { return PXAuth.mine(p); }).length;
-      return { placed: !!st.baseline, videos: videos, topics: topics, streak: (st.session && st.session.streak) || 0, cleanBest: cleanBest, posts: posts };
+      var visits = 0; try { visits = parseInt(localStorage.getItem("px_visits") || "0", 10); } catch (e) {}
+      var now = new Date(), hr = now.getHours(), day = now.getDay();
+      var tierRank = TIER_KEYS.indexOf(Adapt.tier()); if (tierRank < 0) tierRank = 1;
+      return {
+        placed: !!st.baseline, videos: videos, topics: topics, streak: (st.session && st.session.streak) || 0,
+        cleanBest: cleanBest, posts: posts, cards: stats.cardsFlipped || 0, decks: stats.decks ? Object.keys(stats.decks).length : 0,
+        correct: correct, hints: hints, rewatches: rewatches, visits: visits, comeback: !!stats.comeback,
+        earnedCount: Object.keys(st.badges || {}).length, tierRank: tierRank,
+        early: hr < 8, night: hr >= 23 || hr < 5, weekend: day === 0 || day === 6
+      };
+    }
+    function playBadgeSound(kind) {
+      if (document.querySelector(".celebrate")) return;   // the session-complete music takes precedence
+      try { var a = new Audio("assets/audio/badge-" + kind + ".mp3"); a.volume = 0.75; a.play().catch(function () {}); } catch (e) {}
     }
     function evaluateBadges() {
       var st = PXStore.state; st.badges = st.badges || {};
       var s = badgeStats(), newly = [];
       BADGES.forEach(function (b) { if (!st.badges[b.id] && b.check(s)) { st.badges[b.id] = Date.now(); newly.push(b); } });
-      if (newly.length) { PXStore.save(); newly.forEach(function (b) { if (PX.toast) PX.toast("🏅 Badge earned — " + b.name, { duration: 3200 }); }); }
+      if (newly.length) {
+        PXStore.save();
+        var big = newly.some(function (b) { return b.tier === "big"; });
+        playBadgeSound(big ? "big" : "small");   // big sound for significant badges, small otherwise
+        newly.slice(0, 3).forEach(function (b) { if (PX.toast) PX.toast((b.tier === "big" ? "🏆" : "🏅") + " Badge earned — " + b.name, { duration: 3200 }); });
+        if (newly.length > 3 && PX.toast) PX.toast("🎉 +" + (newly.length - 3) + " more badges", { duration: 2600 });
+      }
       return newly;
     }
 
@@ -644,11 +716,13 @@
         count.textContent = (i + 1) + " / " + cards.length;
         prev.disabled = i === 0; next.disabled = i === cards.length - 1;
       }
-      function flip() { showBack = !showBack; paint(); }
+      function bumpCard() { var st = PXStore.state; st.stats = st.stats || {}; st.stats.cardsFlipped = (st.stats.cardsFlipped || 0) + 1; PXStore.save(); evaluateBadges(); }
+      function markDeck() { var st = PXStore.state; st.stats = st.stats || {}; st.stats.decks = st.stats.decks || {}; if (!st.stats.decks[id]) { st.stats.decks[id] = Date.now(); PXStore.save(); evaluateBadges(); } }
+      function flip() { showBack = !showBack; if (showBack) bumpCard(); paint(); if (i === cards.length - 1) markDeck(); }
       card.addEventListener("click", flip);
       card.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
       prev.addEventListener("click", function () { if (i > 0) { i--; showBack = false; paint(); } });
-      next.addEventListener("click", function () { if (i < cards.length - 1) { i++; showBack = false; paint(); } });
+      next.addEventListener("click", function () { if (i < cards.length - 1) { i++; showBack = false; paint(); if (i === cards.length - 1) markDeck(); } });
       v.appendChild(card); v.appendChild(nav);
       paint(); focusView();
     }
@@ -660,17 +734,25 @@
       var got = BADGES.filter(function (b) { return earned[b.id]; }).length;
       var h = document.createElement("div");
       h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Your badges</h1>' +
-        '<p class="reading muted"><b>' + got + '</b> of ' + BADGES.length + ' earned. Keep a streak, finish videos, complete topics and share projects to collect the rest.</p>';
+        '<p class="reading muted"><b>' + got + '</b> of ' + BADGES.length + ' earned across ' + BADGE_CATS.length + ' categories. New ones keep unlocking as you go — and as new topics and projects land.</p>';
       v.appendChild(h);
-      var grid = document.createElement("div"); grid.className = "badges";
-      BADGES.forEach(function (b) {
-        var on = !!earned[b.id];
-        var el = document.createElement("div"); el.className = "badge " + (on ? "is-earned" : "is-locked");
-        el.innerHTML = '<span class="badge__ic">' + PX.icon(on ? b.icon : "lock") + '</span>' +
-          '<span class="badge__name">' + b.name + '</span><span class="badge__desc">' + b.desc + '</span>';
-        grid.appendChild(el);
+      BADGE_CATS.forEach(function (cat) {
+        var list = BADGES.filter(function (b) { return b.cat === cat.key; });
+        if (!list.length) return;
+        var ce = list.filter(function (b) { return earned[b.id]; }).length;
+        var head = document.createElement("div"); head.className = "between"; head.style.marginTop = "var(--s6)";
+        head.innerHTML = '<h2 style="font-size:1.1rem;margin:0">' + cat.label + '</h2><span class="data">' + ce + ' / ' + list.length + '</span>';
+        v.appendChild(head);
+        var grid = document.createElement("div"); grid.className = "badges";
+        list.forEach(function (b) {
+          var on = !!earned[b.id];
+          var el = document.createElement("div"); el.className = "badge " + (on ? "is-earned" : "is-locked");
+          el.innerHTML = '<span class="badge__ic">' + PX.icon(on ? catIcon(b.cat) : "lock") + '</span>' +
+            '<span class="badge__name">' + b.name + '</span><span class="badge__desc">' + b.desc + '</span>';
+          grid.appendChild(el);
+        });
+        v.appendChild(grid);
       });
-      v.appendChild(grid);
       focusView();
     }
   </script>

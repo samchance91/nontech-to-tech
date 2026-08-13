@@ -8,7 +8,7 @@
      Background Sync (or an explicit flush) when connectivity returns.
    Bump CACHE to ship a new shell; old caches are cleared on activate.
    ============================================================ */
-var CACHE = "propelr-v7";
+var CACHE = "propelr-v8";
 var SHELL = [
   "./app.html",
   "./manifest.json",
@@ -32,7 +32,9 @@ var SHELL = [
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/icons/maskable-512.png",
-  "./assets/audio/session-complete.mp3"
+  "./assets/audio/session-complete.mp3",
+  "./assets/audio/badge-small.mp3",
+  "./assets/audio/badge-big.mp3"
 ];
 
 self.addEventListener("install", function (e) {
