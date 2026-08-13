@@ -22,6 +22,7 @@
           <button class="btn btn--secondary btn--sm" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel">Menu</button>
           <div class="menu__panel" id="menuPanel" role="menu" aria-label="Menu" hidden></div>
         </div>
+        <button class="levelbadge needs-auth" id="levelBadge" type="button" aria-label="Your level"></button>
         <button class="profilebtn needs-auth" id="profileBtn" type="button" aria-label="Your profile"></button>
         <button class="btn btn--secondary btn--sm iconbtn" id="themeBtn" type="button" aria-label="Switch theme"></button>
       </div>
@@ -74,6 +75,7 @@
       window.addEventListener("online", function () { setOffline(false); });
       window.addEventListener("offline", function () { setOffline(true); });
       document.getElementById("profileBtn").addEventListener("click", function () { location.hash = "#/profile"; });
+      document.getElementById("levelBadge").addEventListener("click", function () { location.hash = "#/levels"; });
 
       if (!PXAuth.session()) { renderLogin(); return; }   // invite-only gate
       startApp();
@@ -112,6 +114,7 @@
       ["#/flashcards", "cards", "Flashcards", "Quick recall per topic"],
       ["#/showcase", "share", "Share a project", "Post to the Showcase"],
       ["You", null, null, null],
+      ["#/levels", "trophy", "Levels", "Your rank & points"],
       ["#/badges", "award", "Badges", "What you’ve earned"],
       ["#/profile", "user", "My profile", null],
       ["#/baseline", "refresh", "Retake placement", null]
@@ -202,6 +205,7 @@
       if (h === "#/roadmap") return renderRoadmap();
       if (h === "#/how") return renderHow();
       if (h === "#/showcase") return renderShowcase();
+      if (h === "#/levels") return renderLevels();
       if (h === "#/badges") return renderBadges();
       if (h === "#/flashcards") return renderFlashcards();
       if (fc && CONCEPTS.indexOf(fc[1]) >= 0) return renderFlashcardsFor(fc[1]);
@@ -308,7 +312,7 @@
       };
     }
     function playBadgeSound(kind) {
-      if (document.querySelector(".celebrate")) return;   // the session-complete music takes precedence
+      if (document.querySelector(".celebrate") || document.querySelector(".levelup")) return;   // celebration/level-up music takes precedence
       try { var a = new Audio("assets/audio/badge-" + kind + ".mp3"); a.volume = 0.75; a.play().catch(function () {}); } catch (e) {}
     }
     function evaluateBadges() {
@@ -322,11 +326,85 @@
         newly.slice(0, 3).forEach(function (b) { if (PX.toast) PX.toast((b.tier === "big" ? "🏆" : "🏅") + " Badge earned — " + b.name, { duration: 3200 }); });
         if (newly.length > 3 && PX.toast) PX.toast("🎉 +" + (newly.length - 3) + " more badges", { duration: 2600 });
       }
+      evaluateLevel();   // badges feed points, so check the level right after
       return newly;
+    }
+
+    // ---- Levels — points-driven, escalating thresholds (Rabbit → Dragon) ----
+    var LEVEL_NAMES = ["Rabbit", "Fox", "Wolf", "Lynx", "Black Panther", "Bear", "Lion", "Tiger", "Rhinoceros", "Woolly Mammoth", "Griffin", "Cerberus", "Kraken", "Phoenix", "Dragon"];
+    var MAX_LEVEL = LEVEL_NAMES.length, L_BASE = 500, L_MULT = 1.4;   // gap grows ×1.4 each level (not surfaced in the UI)
+    function levelName(L) { return LEVEL_NAMES[Math.min(Math.max(L, 1), MAX_LEVEL) - 1] || ("Level " + L); }
+    function levelIconSrc(L) { return "assets/levels/level-" + Math.min(Math.max(L, 1), MAX_LEVEL) + ".png"; }
+    function levelGap(n) { return Math.round(L_BASE * Math.pow(L_MULT, n - 1)); }          // points from level n → n+1
+    function levelThreshold(L) { var t = 0; for (var n = 1; n < L; n++) t += levelGap(n); return t; }  // cumulative points to reach L
+    function pointsTotal() {
+      var st = PXStore.state, cs = st.concepts || {}, stats = st.stats || {};
+      var videos = 0, correct = 0;
+      Object.keys(cs).forEach(function (id) { var c = cs[id]; if (c.video && c.video.ended) videos += c.video.ended; if (c.firstTry) correct += c.firstTry.filter(function (x) { return x; }).length; });
+      var topics = 0; CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
+      var posts = (st.posts || []).filter(function (p) { return PXAuth.mine(p); }).length;
+      var cards = stats.cardsFlipped || 0, decks = stats.decks ? Object.keys(stats.decks).length : 0;
+      var badges = Object.keys(st.badges || {}).length, best = stats.bestStreak || 0;
+      return Math.round(videos * 40 + topics * 150 + posts * 120 + correct * 10 + cards * 3 + decks * 60 + badges * 25 + best * 20);
+    }
+    function levelFor(pts) { var L = 1; while (L < MAX_LEVEL && pts >= levelThreshold(L + 1)) L++; return L; }
+    function levelInfo() {
+      var pts = pointsTotal(), L = levelFor(pts), atMax = L >= MAX_LEVEL;
+      var cur = levelThreshold(L), nxt = atMax ? cur : levelThreshold(L + 1), span = atMax ? 1 : (nxt - cur);
+      return { points: pts, level: L, name: levelName(L), atMax: atMax, next: atMax ? null : levelName(L + 1), nextAt: nxt, toNext: atMax ? 0 : Math.max(0, nxt - pts), pct: atMax ? 100 : Math.max(0, Math.min(100, Math.round((pts - cur) / span * 100))) };
+    }
+    function evaluateLevel() {
+      var st = PXStore.state; st.stats = st.stats || {};
+      st.stats.bestStreak = Math.max(st.stats.bestStreak || 0, (st.session && st.session.streak) || 0);
+      var L = levelFor(pointsTotal()), stored = st.level || 0;
+      if (!st.level) { st.level = L; PXStore.save(); }           // first run — set silently, no animation
+      else if (L > stored) { st.level = L; PXStore.save(); levelUp(L); }
+      refreshLevelBadge();
+    }
+    function refreshLevelBadge() {
+      var el = document.getElementById("levelBadge"); if (!el) return;
+      var L = PXStore.state.level || 1;
+      el.innerHTML = '<img src="' + levelIconSrc(L) + '" alt=""><span class="levelbadge__t"><b>Lv ' + L + '</b><span>' + levelName(L) + '</span></span>';
+    }
+    function pulseLevelBadge() { var el = document.getElementById("levelBadge"); if (!el || PX.reduced()) return; el.classList.remove("is-pulse"); void el.offsetWidth; el.classList.add("is-pulse"); }
+    function levelUp(L) {
+      var name = levelName(L);
+      var ov = document.createElement("div"); ov.className = "levelup"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Level up");
+      ov.innerHTML =
+        '<div class="levelup__card">' +
+          '<div class="levelup__icon" id="luIcon"><img src="' + levelIconSrc(L) + '" alt=""></div>' +
+          '<p class="data">level up</p>' +
+          '<h2>You’re now a ' + name + '</h2>' +
+          '<p class="reading muted">Level ' + L + (L < MAX_LEVEL ? ' · next up, the ' + levelName(L + 1) : ' · the summit') + '.</p>' +
+          '<div class="row"><button class="btn" data-close type="button">Continue</button></div>' +
+        '</div>';
+      document.body.appendChild(ov);
+      try { var au = new Audio("assets/audio/level-up.mp3"); au.volume = 0.85; au.play().catch(function () {}); } catch (e) {}
+      var done = false;
+      function fly() {
+        if (done) return; done = true;
+        var icon = document.getElementById("luIcon"), badge = document.getElementById("levelBadge");
+        if (icon && badge && !PX.reduced()) {
+          var bi = badge.querySelector("img") || badge;
+          var from = icon.getBoundingClientRect(), to = bi.getBoundingClientRect();
+          var dx = (to.left + to.width / 2) - (from.left + from.width / 2), dy = (to.top + to.height / 2) - (from.top + from.height / 2);
+          var scale = Math.max(0.15, to.width / from.width);
+          icon.style.position = "fixed"; icon.style.left = from.left + "px"; icon.style.top = from.top + "px"; icon.style.width = from.width + "px"; icon.style.height = from.height + "px"; icon.style.margin = "0"; icon.style.zIndex = "95";
+          document.body.appendChild(icon);
+          var card = ov.querySelector(".levelup__card"); card.style.transition = "opacity .3s"; card.style.opacity = "0"; ov.style.background = "transparent"; ov.style.pointerEvents = "none";
+          requestAnimationFrame(function () { icon.style.transition = "transform .78s cubic-bezier(.5,.02,.2,1)"; icon.style.transform = "translate(" + dx + "px," + dy + "px) scale(" + scale + ")"; });
+          var fin = function () { if (ov.parentNode) ov.remove(); if (icon.parentNode) icon.remove(); refreshLevelBadge(); pulseLevelBadge(); };
+          icon.addEventListener("transitionend", fin, { once: true });
+          setTimeout(fin, 1200);
+        } else { if (ov.parentNode) ov.remove(); refreshLevelBadge(); pulseLevelBadge(); }
+      }
+      ov.querySelector("[data-close]").addEventListener("click", fly);
+      setTimeout(fly, 2400);
     }
 
     // ---- Session-complete celebration (topic finished) — fires once per topic, not for badges ----
     function maybeCelebrate(id) {
+      if (document.querySelector(".levelup")) return;   // a level-up is the bigger moment; let it play alone
       var st = PXStore.state; st.celebrated = st.celebrated || {};
       if (topicDone(id) && !st.celebrated[id]) {
         st.celebrated[id] = Date.now(); PXStore.save();
@@ -548,7 +626,9 @@
       var changeBtn = document.createElement("button"); changeBtn.className = "btn btn--secondary btn--sm"; changeBtn.type = "button"; changeBtn.style.marginTop = "var(--s2)"; changeBtn.textContent = s.avatar ? "Change photo" : "Add photo";
       var avInput = fileInput(false, function (dataUrl) { PXAuth.saveProfile({ avatar: dataUrl }).then(function () { paintAvatar(avatar, PXAuth.session()); changeBtn.textContent = "Change photo"; refreshProfileButton(); if (PX.toast) PX.toast("Photo updated", { duration: 1800 }); }); });
       changeBtn.addEventListener("click", function () { avInput.click(); });
-      col.appendChild(changeBtn); col.appendChild(avInput);
+      var lvBtn = document.createElement("button"); lvBtn.className = "btn btn--ghost btn--sm"; lvBtn.type = "button"; lvBtn.style.marginTop = "var(--s2)"; lvBtn.style.marginLeft = "var(--s2)"; lvBtn.textContent = "Use level badge";
+      lvBtn.addEventListener("click", function () { PXAuth.saveProfile({ avatar: levelIconSrc(PXStore.state.level || 1) }).then(function () { paintAvatar(avatar, PXAuth.session()); changeBtn.textContent = "Change photo"; refreshProfileButton(); if (PX.toast) PX.toast("Level badge set as your photo", { duration: 1800 }); }); });
+      col.appendChild(changeBtn); col.appendChild(lvBtn); col.appendChild(avInput);
       head.appendChild(avatar); head.appendChild(col); v.appendChild(head);
 
       var card = document.createElement("div"); card.className = "card"; card.style.marginTop = "var(--s5)";
@@ -725,6 +805,50 @@
       next.addEventListener("click", function () { if (i < cards.length - 1) { i++; showBack = false; paint(); if (i === cards.length - 1) markDeck(); } });
       v.appendChild(card); v.appendChild(nav);
       paint(); focusView();
+    }
+
+    function renderLevels() {
+      evaluateBadges();   // refresh points/level
+      var v = view(); crumb(v, "levels");
+      var info = levelInfo();
+      var head = document.createElement("div");
+      head.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Your level</h1>';
+      v.appendChild(head);
+
+      var hero = document.createElement("div"); hero.className = "lvhero";
+      hero.innerHTML =
+        '<img class="lvhero__icon" src="' + levelIconSrc(info.level) + '" alt="' + escapeHtml(info.name) + '">' +
+        '<div class="lvhero__body"><p class="data">level ' + info.level + '</p><h2 style="margin:2px 0 0">' + escapeHtml(info.name) + '</h2>' +
+        '<p class="muted" style="margin:6px 0 0"><b>' + info.points + '</b> points</p></div>';
+      v.appendChild(hero);
+
+      var prog = document.createElement("div"); prog.className = "card"; prog.style.marginTop = "var(--s4)";
+      if (info.atMax) {
+        prog.innerHTML = '<p class="data">top level</p><p class="reading muted" style="margin-top:var(--s2)">You’ve reached the summit — <b>' + escapeHtml(info.name) + '</b>. Nothing left to climb.</p>';
+      } else {
+        prog.innerHTML =
+          '<div class="between"><span class="data">progress to ' + escapeHtml(info.next) + '</span><span class="data"><b>' + info.toNext + '</b> points to go</span></div>' +
+          '<div class="lvbar" style="margin-top:var(--s2)"><span class="lvbar__fill" style="width:' + info.pct + '%"></span></div>' +
+          '<div class="lvnext" style="margin-top:var(--s4)"><img src="' + levelIconSrc(info.level + 1) + '" alt=""><div><p class="data">up next</p><b>' + escapeHtml(info.next) + '</b></div></div>';
+      }
+      v.appendChild(prog);
+
+      var how = document.createElement("p"); how.className = "reading muted"; how.style.marginTop = "var(--s5)";
+      how.textContent = "Earn points by finishing videos, completing topics, keeping your streak going, reviewing flashcards, answering correctly, earning badges, and sharing projects.";
+      v.appendChild(how);
+
+      var lw = document.createElement("div"); lw.style.marginTop = "var(--s5)";
+      lw.innerHTML = '<h2 style="font-size:1.1rem;margin:0 0 var(--s2)">All levels</h2>';
+      var ladder = document.createElement("div"); ladder.className = "lvladder";
+      LEVEL_NAMES.forEach(function (nm, i) {
+        var L = i + 1, reached = L <= info.level;
+        var el = document.createElement("div"); el.className = "lvrow" + (reached ? " is-reached" : "") + (L === info.level ? " is-current" : "");
+        el.innerHTML = '<img src="' + levelIconSrc(L) + '" alt=""><span class="lvrow__n"><b>Lv ' + L + '</b> ' + escapeHtml(nm) + '</span>' +
+          (reached ? '<span class="data">reached</span>' : '<span class="data muted">' + levelThreshold(L) + ' pts</span>');
+        ladder.appendChild(el);
+      });
+      lw.appendChild(ladder); v.appendChild(lw);
+      focusView();
     }
 
     function renderBadges() {

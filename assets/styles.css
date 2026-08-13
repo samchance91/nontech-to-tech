@@ -431,6 +431,39 @@ body:not(.authed) .needs-auth { display: none !important; }
 @keyframes cbounce { 0% { transform: scale(0); } 60% { transform: scale(1.16); } 100% { transform: scale(1); } }
 @keyframes cfall { to { transform: translateY(110vh) rotate(720deg); } }
 
+/* ---- Levels ---- */
+.levelbadge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--r-pill); padding: 3px 12px 3px 3px; cursor: pointer; color: var(--ink); }
+.levelbadge:hover { border-color: var(--ink); }
+.levelbadge img { width: 32px; height: 32px; border-radius: 50%; flex: none; object-fit: cover; }
+.levelbadge__t { display: flex; flex-direction: column; line-height: 1.05; text-align: left; }
+.levelbadge__t b { font-family: var(--font-display); font-size: .82rem; }
+.levelbadge__t span { font-family: var(--font-data); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); }
+.levelbadge.is-pulse { animation: lvpulse .7s var(--ease); }
+@keyframes lvpulse { 0% { transform: scale(1); } 30% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@media (max-width: 560px) { .levelbadge__t { display: none; } .levelbadge { padding: 3px; } }
+
+.levelup { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: var(--s4); background: color-mix(in srgb, var(--ink) 55%, transparent); backdrop-filter: blur(3px); }
+.levelup__card { position: relative; width: 100%; max-width: 420px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-dialog); box-shadow: 0 24px 70px -20px rgba(0,0,0,.6); padding: var(--s6) var(--s5); text-align: center; animation: cpop .34s var(--ease) both; }
+.levelup__icon { width: 168px; height: 168px; margin: 0 auto var(--s3); animation: lvIn .6s var(--ease) both; }
+.levelup__icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 26px rgba(0,0,0,.3)); }
+.levelup__card h2 { font-family: var(--font-display); font-size: 1.7rem; margin: 6px 0 var(--s2); }
+.levelup__card .row { justify-content: center; margin-top: var(--s5); }
+@keyframes lvIn { 0% { transform: scale(.2) rotate(-12deg); opacity: 0; } 60% { transform: scale(1.12) rotate(4deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+
+.lvhero { display: flex; align-items: center; gap: var(--s4); border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface-2); padding: var(--s4); margin-top: var(--s4); }
+.lvhero__icon { width: 96px; height: 96px; flex: none; object-fit: contain; }
+.lvhero__body h2 { font-family: var(--font-display); }
+.lvbar { height: 10px; border-radius: 999px; background: var(--fog); overflow: hidden; }
+.lvbar__fill { display: block; height: 100%; background: var(--accent); }
+.lvnext { display: flex; align-items: center; gap: var(--s3); }
+.lvnext img { width: 46px; height: 46px; object-fit: contain; opacity: .9; }
+.lvladder { display: grid; gap: var(--s2); }
+.lvrow { display: flex; align-items: center; gap: var(--s3); border: 1px solid var(--line); border-radius: var(--r-ctl); background: var(--surface-2); padding: var(--s2) var(--s3); }
+.lvrow img { width: 42px; height: 42px; object-fit: contain; flex: none; }
+.lvrow:not(.is-reached) img { filter: grayscale(1) opacity(.45); }
+.lvrow__n { flex: 1; } .lvrow__n b { font-family: var(--font-display); }
+.lvrow.is-current { border-color: var(--ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .confetti { display: none; }
