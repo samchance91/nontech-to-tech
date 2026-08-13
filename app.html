@@ -47,6 +47,7 @@
   <script>
     var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
     var CONCEPTS = ["apis", "web", "data", "diagrams", "wireframes", "stories", "agile"];
+    var AVATARS = ["aerwyn", "ananya-iyer", "arjun", "armoured-minotaur", "boltron", "dev", "ember-paladin", "hana-mori", "kabir", "kael-ironwind", "lion-heraldy", "lucas-vale", "maya-okafor", "meera-khanna", "mira-dawnspear", "rook", "vexa", "zara-mirza"];
     var appWired = false;
 
     // ---- theme (sun/moon toggle) ----
@@ -626,13 +627,40 @@
       var avatar = document.createElement("div"); avatar.className = "avatar avatar--lg"; paintAvatar(avatar, s);
       var col = document.createElement("div");
       col.innerHTML = '<h1 class="t-h1" style="margin:0" id="pfTitle">' + escapeHtml(s.name || s.email.split("@")[0]) + '</h1><p class="data muted" style="margin-top:4px">' + escapeHtml(s.email) + '</p>';
-      var changeBtn = document.createElement("button"); changeBtn.className = "btn btn--secondary btn--sm"; changeBtn.type = "button"; changeBtn.style.marginTop = "var(--s2)"; changeBtn.textContent = s.avatar ? "Change photo" : "Add photo";
-      var avInput = fileInput(false, function (dataUrl) { PXAuth.saveProfile({ avatar: dataUrl }).then(function () { paintAvatar(avatar, PXAuth.session()); changeBtn.textContent = "Change photo"; refreshProfileButton(); if (PX.toast) PX.toast("Photo updated", { duration: 1800 }); }); });
+      function setAvatar(val, msg) {
+        PXAuth.saveProfile({ avatar: val || null }).then(function () {
+          var sess = PXAuth.session();
+          paintAvatar(avatar, sess);
+          changeBtn.textContent = sess.avatar ? "Change photo" : "Upload photo";
+          rmBtn.style.display = sess.avatar ? "" : "none";
+          refreshProfileButton();
+          if (grid) grid.querySelectorAll(".avpick__i").forEach(function (el) { el.classList.toggle("is-sel", el.getAttribute("data-src") === sess.avatar); });
+          if (PX.toast) PX.toast(msg, { duration: 1600 });
+        });
+      }
+      var actions = document.createElement("div"); actions.className = "row"; actions.style.cssText = "margin-top:var(--s2);flex-wrap:wrap";
+      var changeBtn = document.createElement("button"); changeBtn.className = "btn btn--secondary btn--sm"; changeBtn.type = "button"; changeBtn.textContent = s.avatar ? "Change photo" : "Upload photo";
+      var lvBtn = document.createElement("button"); lvBtn.className = "btn btn--ghost btn--sm"; lvBtn.type = "button"; lvBtn.textContent = "Use level badge";
+      var rmBtn = document.createElement("button"); rmBtn.className = "btn btn--ghost btn--sm"; rmBtn.type = "button"; rmBtn.textContent = "Remove photo"; rmBtn.style.display = s.avatar ? "" : "none";
+      var avInput = fileInput(false, function (dataUrl) { setAvatar(dataUrl, "Photo updated"); });
       changeBtn.addEventListener("click", function () { avInput.click(); });
-      var lvBtn = document.createElement("button"); lvBtn.className = "btn btn--ghost btn--sm"; lvBtn.type = "button"; lvBtn.style.marginTop = "var(--s2)"; lvBtn.style.marginLeft = "var(--s2)"; lvBtn.textContent = "Use level badge";
-      lvBtn.addEventListener("click", function () { PXAuth.saveProfile({ avatar: levelIconSrc(PXStore.state.level || 1) }).then(function () { paintAvatar(avatar, PXAuth.session()); changeBtn.textContent = "Change photo"; refreshProfileButton(); if (PX.toast) PX.toast("Level badge set as your photo", { duration: 1800 }); }); });
-      col.appendChild(changeBtn); col.appendChild(lvBtn); col.appendChild(avInput);
+      lvBtn.addEventListener("click", function () { setAvatar(levelIconSrc(PXStore.state.level || 1), "Level badge set as your photo"); });
+      rmBtn.addEventListener("click", function () { setAvatar(null, "Photo removed"); });
+      actions.appendChild(changeBtn); actions.appendChild(lvBtn); actions.appendChild(rmBtn); actions.appendChild(avInput);
+      col.appendChild(actions);
       head.appendChild(avatar); head.appendChild(col); v.appendChild(head);
+
+      // Choose-an-avatar picker
+      var pickCard = document.createElement("div"); pickCard.className = "card"; pickCard.style.marginTop = "var(--s4)";
+      pickCard.innerHTML = '<p class="data">choose an avatar</p><p class="reading muted" style="margin-top:4px">Pick a ready-made one — or upload your own or use your level badge above.</p>';
+      var grid = document.createElement("div"); grid.className = "avpick"; pickCard.appendChild(grid); v.appendChild(pickCard);
+      AVATARS.forEach(function (slug) {
+        var src = "assets/avatars/" + slug + ".png";
+        var b = document.createElement("button"); b.className = "avpick__i" + (s.avatar === src ? " is-sel" : ""); b.type = "button"; b.setAttribute("data-src", src); b.setAttribute("aria-label", "Choose avatar " + slug.replace(/-/g, " "));
+        b.innerHTML = '<img src="' + src + '" alt="" loading="lazy">';
+        b.addEventListener("click", function () { setAvatar(src, "Avatar updated"); });
+        grid.appendChild(b);
+      });
 
       var card = document.createElement("div"); card.className = "card"; card.style.marginTop = "var(--s5)";
       card.innerHTML = '<label class="field"><span class="field__l">Display name</span><input class="input" id="pfName" type="text" value="' + escapeHtml(s.name || "") + '" maxlength="60"></label>';
