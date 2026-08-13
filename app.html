@@ -330,6 +330,8 @@
       return newly;
     }
 
+    function evaluateProgress() { return evaluateBadges(); }   // badges → which also checks the level
+
     // ---- Levels — points-driven, escalating thresholds (Rabbit → Dragon) ----
     var LEVEL_NAMES = ["Rabbit", "Fox", "Wolf", "Lynx", "Black Panther", "Bear", "Lion", "Tiger", "Rhinoceros", "Woolly Mammoth", "Griffin", "Cerberus", "Kraken", "Phoenix", "Dragon"];
     var MAX_LEVEL = LEVEL_NAMES.length, L_BASE = 500, L_MULT = 1.4;   // gap grows ×1.4 each level (not surfaced in the UI)
@@ -342,10 +344,11 @@
       var videos = 0, correct = 0;
       Object.keys(cs).forEach(function (id) { var c = cs[id]; if (c.video && c.video.ended) videos += c.video.ended; if (c.firstTry) correct += c.firstTry.filter(function (x) { return x; }).length; });
       var topics = 0; CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
-      var posts = (st.posts || []).filter(function (p) { return PXAuth.mine(p); }).length;
+      var projects = (st.posts || []).filter(function (p) { return PXAuth.mine(p) && p.valid !== false; }).length;
       var cards = stats.cardsFlipped || 0, decks = stats.decks ? Object.keys(stats.decks).length : 0;
       var badges = Object.keys(st.badges || {}).length, best = stats.bestStreak || 0;
-      return Math.round(videos * 40 + topics * 150 + posts * 120 + correct * 10 + cards * 3 + decks * 60 + badges * 25 + best * 20);
+      var streakPts = best * 10 + Math.floor(best / 5) * 20;   // 10 a day, +20 at each 5-day run
+      return Math.round(projects * 300 + topics * 150 + videos * 40 + badges * 25 + correct * 10 + decks * 60 + cards * 3 + streakPts);
     }
     function levelFor(pts) { var L = 1; while (L < MAX_LEVEL && pts >= levelThreshold(L + 1)) L++; return L; }
     function levelInfo() {
@@ -705,30 +708,69 @@
       v.appendChild(wrap); focusView();
     }
 
+    // Every field here is required — a submission only counts (and earns points) when it’s complete.
+    var SC_REQS = [
+      { key: "title", label: "Title", ph: "The name of your project", ml: 120 },
+      { key: "problem", label: "The problem it solves", area: true, ph: "What need does it address?" },
+      { key: "built", label: "What you built", area: true, ph: "What does it actually do?" },
+      { key: "tech", label: "Technology used", ph: "e.g. Figma, React, Supabase, Zapier" },
+      { key: "who", label: "Who it’s for", ph: "The people who’d use it" },
+      { key: "learned", label: "What you learned", area: true, ph: "One thing this taught you" },
+      { key: "link", label: "A project link", ph: "https://… (at least one)", url: true }
+    ];
     function renderShowcase() {
       var v = view(); crumb(v, "showcase");
       var h = document.createElement("div");
-      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Share a project</h1><p class="reading muted">Show what you’re building or learning. Everyone signed in can see the wall.</p>';
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Share a project</h1><p class="reading muted">A submission counts once it’s complete — fill every field below. Complete projects earn the most points.</p>';
       v.appendChild(h);
+
       var form = document.createElement("form"); form.className = "sc-form"; form.setAttribute("novalidate", "");
-      form.innerHTML =
-        '<label class="field"><span class="field__l">Title</span><input class="input" id="scTitle" type="text" maxlength="120" placeholder="What is it?" required></label>' +
-        '<label class="field"><span class="field__l">A few words</span><textarea id="scBody" maxlength="600" placeholder="What did you make or learn?"></textarea></label>' +
-        '<label class="field"><span class="field__l">Link (optional)</span><input class="input" id="scLink" type="text" inputmode="url" placeholder="https://…"></label>' +
+      var checkHtml = '<p class="data">what a submission needs</p><div class="sc-check" id="scCheck"></div>';
+      var fieldsHtml = SC_REQS.map(function (r) {
+        var input = r.area
+          ? '<textarea id="sc-' + r.key + '" placeholder="' + r.ph + '"></textarea>'
+          : '<input class="input" id="sc-' + r.key + '" type="text"' + (r.url ? ' inputmode="url"' : '') + (r.ml ? ' maxlength="' + r.ml + '"' : '') + ' placeholder="' + r.ph + '">';
+        return '<label class="field"><span class="field__l">' + r.label + '</span>' + input + '</label>';
+      }).join("");
+      form.innerHTML = checkHtml + fieldsHtml +
         '<p class="auth-msg" id="scMsg" role="status"></p>' +
-        '<button class="btn" id="scBtn" type="submit" style="margin-top:var(--s3)">Share' + PX.icon("send", "btn__i") + '</button>';
+        '<button class="btn" id="scBtn" type="submit" style="margin-top:var(--s3)" disabled>Submit project' + PX.icon("send", "btn__i") + '</button>';
       v.appendChild(form);
       var list = document.createElement("div"); list.className = "sc-list"; v.appendChild(list);
 
+      function val(key) { var el = document.getElementById("sc-" + key); return el ? el.value.trim() : ""; }
+      function met(r) { var x = val(r.key); return r.url ? !!safeUrl(/^https?:\/\//i.test(x) ? x : "https://" + x) : x.length > 0; }
+      function refreshChecks() {
+        var all = true;
+        document.getElementById("scCheck").innerHTML = SC_REQS.map(function (r) {
+          var ok = met(r); if (!ok) all = false;
+          return '<span class="sc-check__i' + (ok ? " is-ok" : "") + '"><span class="sc-check__dot">' + (ok ? PX.icon("check") : "") + '</span>' + r.label + '</span>';
+        }).join("");
+        document.getElementById("scBtn").disabled = !all;
+        return all;
+      }
+      SC_REQS.forEach(function (r) { var el = document.getElementById("sc-" + r.key); if (el) el.addEventListener("input", refreshChecks); });
+      refreshChecks();
+
       function paint(posts) {
         list.innerHTML = "";
-        if (!posts || !posts.length) { list.innerHTML = '<div class="sc-empty">No posts yet — be the first to share something.</div>'; return; }
+        if (!posts || !posts.length) { list.innerHTML = '<div class="sc-empty">No projects yet — be the first to share one.</div>'; return; }
         posts.forEach(function (p) {
           var card = document.createElement("div"); card.className = "sc-post";
           var u = safeUrl(p.link);
-          var link = u ? '<a class="sc-post__link" href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer">Open link ↗</a>' : '';
+          var meta = "";
+          if (p.fields) {
+            meta = '<dl class="sc-meta">' +
+              (p.fields.problem ? '<dt>Problem</dt><dd>' + escapeHtml(p.fields.problem) + '</dd>' : '') +
+              (p.fields.built ? '<dt>What it does</dt><dd>' + escapeHtml(p.fields.built) + '</dd>' : '') +
+              (p.fields.tech ? '<dt>Tech</dt><dd>' + escapeHtml(p.fields.tech) + '</dd>' : '') +
+              (p.fields.who ? '<dt>For</dt><dd>' + escapeHtml(p.fields.who) + '</dd>' : '') +
+              (p.fields.learned ? '<dt>Learned</dt><dd>' + escapeHtml(p.fields.learned) + '</dd>' : '') +
+              '</dl>';
+          } else if (p.body) { meta = '<p class="muted" style="margin:0;white-space:pre-line">' + escapeHtml(p.body) + '</p>'; }
+          var link = u ? '<a class="sc-post__link" href="' + escapeHtml(u) + '" target="_blank" rel="noopener noreferrer">Open project ↗</a>' : '';
           card.innerHTML = '<div class="sc-post__top"><span class="data sc-post__by">' + escapeHtml(p.name || "Someone") + '</span></div>' +
-            '<h3>' + escapeHtml(p.title || "") + '</h3>' + (p.body ? '<p class="muted" style="margin:0">' + escapeHtml(p.body) + '</p>' : '') + link;
+            '<h3>' + escapeHtml(p.title || "") + '</h3>' + meta + link;
           if (PXAuth.mine(p)) {
             var rm = document.createElement("button"); rm.className = "btn btn--ghost btn--sm"; rm.type = "button"; rm.textContent = "Delete"; rm.style.marginTop = "var(--s2)";
             rm.addEventListener("click", function () { PXAuth.deletePost(p.id).then(load); });
@@ -742,16 +784,18 @@
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        var title = document.getElementById("scTitle").value.trim(), body = document.getElementById("scBody").value.trim(), link = document.getElementById("scLink").value.trim();
         var msg = document.getElementById("scMsg"), btn = document.getElementById("scBtn");
-        if (!title) { msg.textContent = "Add a title."; msg.className = "auth-msg is-err"; return; }
-        if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
-        btn.disabled = true; btn.textContent = "Sharing…"; msg.textContent = ""; msg.className = "auth-msg";
-        PXAuth.addPost({ title: title, body: body, link: link }).then(function (res) {
-          btn.disabled = false; btn.innerHTML = "Share" + PX.icon("send", "btn__i");
-          form.reset();
-          msg.textContent = res && res.synced === false ? "Shared on this device — it’ll sync when you’re online." : "Shared!"; msg.className = "auth-msg is-ok";
-          evaluateBadges();                       // "Shipped it"
+        if (!refreshChecks()) { msg.textContent = "Complete every field above to submit."; msg.className = "auth-msg is-err"; return; }
+        var f = {}; SC_REQS.forEach(function (r) { f[r.key] = val(r.key); });
+        var link = /^https?:\/\//i.test(f.link) ? f.link : "https://" + f.link;
+        var body = "Problem: " + f.problem + "\nWhat it does: " + f.built + "\nTech: " + f.tech + "\nFor: " + f.who + "\nLearned: " + f.learned;
+        var fields = { problem: f.problem, built: f.built, tech: f.tech, who: f.who, learned: f.learned };
+        btn.disabled = true; btn.textContent = "Submitting…"; msg.textContent = ""; msg.className = "auth-msg";
+        PXAuth.addPost({ title: f.title, body: body, link: link, kind: "project", fields: fields, valid: true }).then(function (res) {
+          form.reset(); refreshChecks();
+          btn.innerHTML = "Submit project" + PX.icon("send", "btn__i");
+          msg.textContent = res && res.synced === false ? "Submitted on this device — it’ll sync when you’re online." : "Project submitted! 🎉"; msg.className = "auth-msg is-ok";
+          evaluateProgress();                     // "Shipped it" badge + project points
           load();
         });
       });
@@ -833,8 +877,21 @@
       }
       v.appendChild(prog);
 
-      var how = document.createElement("p"); how.className = "reading muted"; how.style.marginTop = "var(--s5)";
-      how.textContent = "Earn points by finishing videos, completing topics, keeping your streak going, reviewing flashcards, answering correctly, earning badges, and sharing projects.";
+      var how = document.createElement("div"); how.className = "card"; how.style.marginTop = "var(--s5)";
+      var ptsRows = [
+        ["Submit a complete project", "300", "the most"],
+        ["Complete a topic", "150", ""],
+        ["Finish a flashcard deck", "60", ""],
+        ["Finish a video", "40", ""],
+        ["Earn a badge", "25", ""],
+        ["Answer correctly", "10", ""],
+        ["Daily streak", "10 / day", "the least"]
+      ];
+      how.innerHTML = '<p class="data">how points work</p>' +
+        '<p class="reading muted" style="margin:var(--s2) 0 var(--s3)">Rack these up to reach the next level. Streaks add a bonus at every 5-day run.</p>' +
+        '<dl class="pts">' + ptsRows.map(function (r) {
+          return '<div class="pts__row"><dt>' + r[0] + (r[2] ? ' <span class="data muted">(' + r[2] + ')</span>' : '') + '</dt><dd class="data">+' + r[1] + '</dd></div>';
+        }).join("") + '</dl>';
       v.appendChild(how);
 
       var lw = document.createElement("div"); lw.style.marginTop = "var(--s5)";

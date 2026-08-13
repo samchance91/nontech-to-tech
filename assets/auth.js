@@ -142,7 +142,7 @@
     addPost: function (post) {
       var a = A(); if (!a) return Promise.resolve({ error: "Not signed in." });
       var row = { user_id: a.userId, name: a.name || a.email, kind: post.kind || "project", title: post.title, body: post.body, link: post.link || null };
-      var local = Object.assign({ id: "local-" + Date.now(), created_at: new Date().toISOString(), _mine: true }, row);
+      var local = Object.assign({ id: "local-" + Date.now(), created_at: new Date().toISOString(), _mine: true, fields: post.fields || null, valid: !!post.valid }, row);
       S.state.posts = [local].concat(S.state.posts || []); S.save();   // optimistic
       if (a.token && a.userId) {
         return fetch(URL + "/rest/v1/posts", { method: "POST", headers: headers({ Authorization: "Bearer " + a.token, Prefer: "return=representation" }), body: JSON.stringify(row) })
