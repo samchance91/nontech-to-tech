@@ -8,7 +8,7 @@
      Background Sync (or an explicit flush) when connectivity returns.
    Bump CACHE to ship a new shell; old caches are cleared on activate.
    ============================================================ */
-var CACHE = "propelr-v10";
+var CACHE = "propelr-v11";
 var SHELL = [
   "./app.html",
   "./manifest.json",
@@ -59,8 +59,9 @@ self.addEventListener("activate", function (e) {
 });
 
 function isStatic(url) {
-  return /\.(css|js|woff2|png|svg|json|jpg|jpeg|webp|ico|mp3|m4a|ogg|wav)$/.test(url.pathname);
+  return /\.(woff2|png|svg|json|jpg|jpeg|webp|ico|mp3|m4a|ogg|wav)$/.test(url.pathname);
 }
+function isCode(url) { return /\.(css|js)$/.test(url.pathname); }   // keep styles/scripts current
 
 self.addEventListener("fetch", function (e) {
   var req = e.request;
@@ -83,7 +84,18 @@ self.addEventListener("fetch", function (e) {
     return;
   }
 
-  // Static assets: stale-while-revalidate.
+  // CSS/JS: network-first so a new deploy is picked up on the next load (cache is the offline fallback).
+  if (isCode(url)) {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.status === 200) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
+        return res;
+      }).catch(function () { return caches.match(req); })
+    );
+    return;
+  }
+
+  // Other static assets (fonts, images, audio): stale-while-revalidate.
   if (isStatic(url)) {
     e.respondWith(
       caches.open(CACHE).then(function (c) {

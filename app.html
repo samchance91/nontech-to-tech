@@ -744,7 +744,7 @@
         var all = true;
         document.getElementById("scCheck").innerHTML = SC_REQS.map(function (r) {
           var ok = met(r); if (!ok) all = false;
-          return '<span class="sc-check__i' + (ok ? " is-ok" : "") + '"><span class="sc-check__dot">' + (ok ? PX.icon("check") : "") + '</span>' + r.label + '</span>';
+          return '<div class="sc-check__i' + (ok ? " is-ok" : "") + '"><span class="sc-check__dot">' + (ok ? PX.icon("check") : "") + '</span>' + r.label + '</div>';
         }).join("");
         document.getElementById("scBtn").disabled = !all;
         return all;
