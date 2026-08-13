@@ -253,6 +253,49 @@
       return newly;
     }
 
+    // ---- Session-complete celebration (topic finished) — fires once per topic, not for badges ----
+    function maybeCelebrate(id) {
+      var st = PXStore.state; st.celebrated = st.celebrated || {};
+      if (topicDone(id) && !st.celebrated[id]) {
+        st.celebrated[id] = Date.now(); PXStore.save();
+        celebrate(PXContent.CONCEPTS[id].title);
+      }
+    }
+    var celebAudio = null;
+    function celebrate(title) {
+      var ov = document.createElement("div"); ov.className = "celebrate"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Session complete");
+      ov.innerHTML =
+        '<div class="confetti" aria-hidden="true"></div>' +
+        '<div class="celebrate__card">' +
+          '<span class="celebrate__badge" aria-hidden="true">' + PX.icon("check") + '</span>' +
+          '<p class="data">session complete</p>' +
+          '<h2>Nice work!</h2>' +
+          '<p class="reading muted">You’ve finished <b>' + escapeHtml(title) + '</b>. Its flashcards are unlocked.</p>' +
+          '<div class="row"><button class="btn" data-close type="button">Keep going</button>' +
+          '<a class="btn btn--secondary" data-close href="#/flashcards">Study the cards</a></div>' +
+        '</div>';
+      document.body.appendChild(ov);
+      if (!PX.reduced()) {
+        var cf = ov.querySelector(".confetti"), colors = ["var(--accent)", "#2C2C2C", "#FFFFFF", "#F5A623"];
+        for (var i = 0; i < 44; i++) {
+          var s = document.createElement("i");
+          s.style.left = Math.random() * 100 + "%";
+          s.style.background = colors[i % colors.length];
+          s.style.animationDuration = (1.6 + Math.random() * 1.4) + "s";
+          s.style.animationDelay = (Math.random() * 0.4) + "s";
+          s.style.transform = "translateY(0) rotate(" + (Math.random() * 360) + "deg)";
+          if (Math.random() < 0.5) s.style.borderRadius = "50%";
+          cf.appendChild(s);
+        }
+      }
+      try { celebAudio = new Audio("assets/audio/session-complete.mp3"); celebAudio.volume = 0.7; celebAudio.play().catch(function () {}); } catch (e) {}
+      function close() { if (celebAudio) { try { celebAudio.pause(); } catch (e) {} } if (ov.parentNode) ov.remove(); document.removeEventListener("keydown", onKey); }
+      function onKey(e) { if (e.key === "Escape") close(); }
+      ov.addEventListener("click", function (e) { if (e.target === ov || (e.target.closest && e.target.closest("[data-close]"))) close(); });
+      document.addEventListener("keydown", onKey);
+      var b = ov.querySelector("[data-close]"); if (b) setTimeout(function () { try { b.focus(); } catch (e) {} }, 80);
+    }
+
     function renderHome() {
       var v = view();
       var head = document.createElement("div");
@@ -310,7 +353,7 @@
       var alt = document.createElement("div"); alt.id = "altSlot"; v.appendChild(alt);
 
       var mount = document.createElement("div"); mount.style.marginTop = "var(--s4)"; v.appendChild(mount);
-      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { evaluateBadges(); } });
+      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { evaluateBadges(); maybeCelebrate(id); } });
 
       var foot = document.createElement("div"); foot.className = "section";
       var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to topics" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
