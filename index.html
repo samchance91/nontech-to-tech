@@ -567,28 +567,44 @@
       var r = document.getElementById("recall"); if (r) r.innerHTML = "";
       var host = document.getElementById("px-install"); if (host) host.innerHTML = "";
       var v = view();
-      var wrap = document.createElement("div"); wrap.className = "authwrap";
+      var point = function (ic, t, b) {
+        return '<li class="lpoint"><span class="lpoint__i" aria-hidden="true">' + (PX.icon ? PX.icon(ic) : "") + '</span>' +
+          '<span><span class="lpoint__t">' + t + '</span> <span class="lpoint__b">' + b + '</span></span></li>';
+      };
+      var wrap = document.createElement("div"); wrap.className = "lander";
       wrap.innerHTML =
-        '<div class="authcard">' +
-          '<p class="data authcard__eyebrow">Propelr · invite-only</p>' +
-          '<h1 class="authcard__title">Welcome back</h1>' +
-          '<p class="authcard__sub">Log in with the details you were given.</p>' +
-          '<form id="loginForm" novalidate>' +
-            '<label class="field"><span class="field__l">Email address</span><input class="input" id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" required></label>' +
-            '<label class="field"><span class="field__l">Password</span><input class="input" id="loginPw" type="password" autocomplete="current-password" placeholder="Your password" required></label>' +
-            '<p class="auth-err" id="loginErr" role="alert"></p>' +
-            '<button class="btn btn--lg btn--block" id="loginBtn" type="submit" style="margin-top:var(--s5)">Log in</button>' +
-          '</form>' +
-        '</div>' +
-        '<div class="authcard authcard--soft">' +
-          '<h2 class="authcard__subtitle">Don’t have an invite?</h2>' +
-          '<p class="authcard__sub">Propelr is invite-only. Leave your email and we’ll reach out when a place opens up.</p>' +
-          '<form id="inviteForm" class="invite-row" novalidate>' +
-            '<input class="input" id="inviteEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" aria-label="Your email address" required>' +
-            '<button class="btn btn--secondary" id="inviteBtn" type="submit">Send invite' + (PX.icon ? PX.icon("send", "btn__i") : "") + '</button>' +
-          '</form>' +
-          '<p class="auth-msg" id="inviteMsg" role="status"></p>' +
-        '</div>';
+        '<section class="lander__pitch">' +
+          '<p class="data lander__eyebrow">Propelr · invite-only</p>' +
+          '<h1 class="lander__title">Understand how tech <span class="lander__hl">really</span> works.</h1>' +
+          '<p class="lander__lead">Propelr turns the technical and intimidating into knowledge you can actually use — at your level, at your pace, in plain language. It’s built for the people who work alongside builders: product managers, founders and operators.</p>' +
+          '<ul class="lander__points">' +
+            point("spark", "Meets you at your level.", "A two-minute placement tunes every lesson to you.") +
+            point("check", "Learn by doing.", "Real hands-on mini-projects, not passive video-watching.") +
+            point("cards", "Made to stick.", "Flashcards resurface the key ideas so they stay learned.") +
+            point("trophy", "Momentum built in.", "Levels, streaks and 100+ badges keep you moving.") +
+          '</ul>' +
+        '</section>' +
+        '<section class="lander__auth">' +
+          '<div class="authcard">' +
+            '<h1 class="authcard__title">Welcome back</h1>' +
+            '<p class="authcard__sub">Log in with the details you were given.</p>' +
+            '<form id="loginForm" novalidate>' +
+              '<label class="field"><span class="field__l">Email address</span><input class="input" id="loginEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" required></label>' +
+              '<label class="field"><span class="field__l">Password</span><input class="input" id="loginPw" type="password" autocomplete="current-password" placeholder="Your password" required></label>' +
+              '<p class="auth-err" id="loginErr" role="alert"></p>' +
+              '<button class="btn btn--lg btn--block" id="loginBtn" type="submit" style="margin-top:var(--s5)">Log in</button>' +
+            '</form>' +
+          '</div>' +
+          '<div class="authcard authcard--soft">' +
+            '<h2 class="authcard__subtitle">Not invited yet?</h2>' +
+            '<p class="authcard__sub">We open spots in small batches. Leave your email and we’ll save you a place — you’ll hear from us the moment the next ones open.</p>' +
+            '<form id="inviteForm" class="invite-row" novalidate>' +
+              '<input class="input" id="inviteEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@work.com" aria-label="Your email address" required>' +
+              '<button class="btn btn--secondary" id="inviteBtn" type="submit">Request an invite' + (PX.icon ? PX.icon("send", "btn__i") : "") + '</button>' +
+            '</form>' +
+            '<p class="auth-msg" id="inviteMsg" role="status"></p>' +
+          '</div>' +
+        '</section>';
       v.appendChild(wrap);
 
       document.getElementById("loginForm").addEventListener("submit", function (e) {
@@ -611,7 +627,7 @@
             email.value = ""; email.disabled = true; btn.textContent = "Sent ✓";
           } else {
             msg.textContent = (res && res.error) || "Couldn’t send that."; msg.className = "auth-msg is-err";
-            btn.disabled = false; btn.innerHTML = "Send invite" + (PX.icon ? PX.icon("send", "btn__i") : "");
+            btn.disabled = false; btn.innerHTML = "Request an invite" + (PX.icon ? PX.icon("send", "btn__i") : "");
           }
         });
       });
