@@ -1,9 +1,9 @@
 {
-  "id": "./app.html",
+  "id": "/",
   "name": "Propelr — Tech for Non-Tech People",
   "short_name": "Propelr",
   "description": "Learn how software really works — adaptive, hands-on, at your level. Works offline.",
-  "start_url": "./app.html?source=pwa",
+  "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -20,7 +20,7 @@
     { "src": "assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Find my level", "short_name": "Calibrate", "url": "./app.html#/baseline" },
-    { "name": "My map", "short_name": "Map", "url": "./app.html#/" }
+    { "name": "Find my level", "short_name": "Calibrate", "url": "./#/baseline" },
+    { "name": "My map", "short_name": "Map", "url": "./#/" }
   ]
 }

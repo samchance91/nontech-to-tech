@@ -8,9 +8,10 @@
      Background Sync (or an explicit flush) when connectivity returns.
    Bump CACHE to ship a new shell; old caches are cleared on activate.
    ============================================================ */
-var CACHE = "propelr-v12";
+var CACHE = "propelr-v13";
 var SHELL = [
-  "./app.html",
+  "./",
+  "./index.html",
   "./manifest.json",
   "./assets/styles.css",
   "./assets/app.js",
@@ -78,7 +79,7 @@ self.addEventListener("fetch", function (e) {
         var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
       }).catch(function () {
-        return caches.match(req).then(function (m) { return m || caches.match("./app.html"); });
+        return caches.match(req).then(function (m) { return m || caches.match("./") || caches.match("./index.html"); });
       })
     );
     return;

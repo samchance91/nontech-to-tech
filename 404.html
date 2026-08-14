@@ -24,11 +24,11 @@
         var p = location.pathname.replace(/^\/+/, "");   // e.g. "levels" or "fc/apis"
         if (p && p.indexOf(".") === -1) h = "#/" + p;    // treat a clean path as an in-app route
       }
-      location.replace("/app.html" + h);
+      location.replace("/" + h);
     })();
   </script>
 </head>
 <body>
-  <p>Taking you to Propelr… <a href="/app.html">Continue</a></p>
+  <p>Taking you to Propelr… <a href="/">Continue</a></p>
 </body>
 </html>
