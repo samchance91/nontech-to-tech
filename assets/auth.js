@@ -57,9 +57,11 @@
     requestInvite: function (email) {
       email = norm(email);
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Promise.resolve({ error: "Enter a valid email address." });
+      // Send only the email; the DB fills requested_at/id from its own defaults,
+      // so this can't fail on a schema that omits an optional column.
       return fetch(URL + "/rest/v1/invite_requests", {
         method: "POST", headers: headers({ Prefer: "return=minimal" }),
-        body: JSON.stringify({ email: email, requested_at: new Date().toISOString() })
+        body: JSON.stringify({ email: email })
       }).then(function (r) {
         if (r.ok || r.status === 201 || r.status === 409) return { ok: true };   // 409 = already requested, still fine
         return { error: "Couldn’t send your request just now. Please try again shortly." };

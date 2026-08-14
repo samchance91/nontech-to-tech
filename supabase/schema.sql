@@ -109,6 +109,10 @@ drop policy if exists "anyone can request an invite" on public.invite_requests;
 drop policy if exists "admin reads invite requests"  on public.invite_requests;
 create policy "anyone can request an invite" on public.invite_requests for insert with check (true);
 create policy "admin reads invite requests"  on public.invite_requests for select using (public.is_admin());
+-- Table-level privileges (RLS still gates the rows). Logged-out visitors use the
+-- anon role, so they must be allowed to INSERT; only signed-in admins read the list.
+grant insert on public.invite_requests to anon, authenticated;
+grant select on public.invite_requests to authenticated;
 
 -- ============================================================
 -- FINALLY: make yourself an admin. Replace the email, then run:
