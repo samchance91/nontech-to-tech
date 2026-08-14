@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Propelr — Tech for Non-Tech People",
+  "name": "Propelr — real skills, learned your way",
   "short_name": "Propelr",
-  "description": "Learn how software really works — adaptive, hands-on, at your level. Works offline.",
+  "description": "Build the skills that actually help at work and in life — taught the way you learn. Adaptive, hands-on, at your level.",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
