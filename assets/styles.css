@@ -483,6 +483,27 @@ body:not(.authed) .needs-auth { display: none !important; }
 .lvrow__n { flex: 1; } .lvrow__n b { font-family: var(--font-display); }
 .lvrow.is-current { border-color: var(--ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
 
+/* ---- first-run landing (how Propelr teaches) ---- */
+.welcome { max-width: 960px; margin: 0 auto; }
+.welcome__hero { text-align: center; padding: var(--s4) 0 var(--s2); }
+.welcome__eyebrow { color: var(--ink-2); }
+.welcome__title { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; line-height: 1.08;
+  font-size: clamp(2rem, 5.5vw, 3.25rem); margin: var(--s2) 0 0; }
+.welcome__hl { color: var(--on-accent); background: var(--accent); padding: 0 .18em; border-radius: 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.welcome__lede { font-size: 1.125rem; color: var(--ink-2); margin: var(--s3) auto 0; }
+.wgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); margin-top: var(--s6); }
+.wcard { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); }
+.wcard__i { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+  border-radius: var(--r-ctl); background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--ink); }
+.wcard__i svg { width: 22px; height: 22px; }
+.wcard__t { font-size: 1.0625rem; font-weight: 600; margin: var(--s3) 0 var(--s1); }
+.wcard__b { color: var(--ink-2); font-size: .95rem; }
+.welcome__note { margin-top: var(--s5); border-left: 3px solid var(--accent);
+  background: var(--fog); border-radius: 0 var(--r-ctl) var(--r-ctl) 0; padding: var(--s3) var(--s4); }
+.welcome__cta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s3); margin: var(--s6) 0 var(--s4); }
+@media (max-width: 800px) { .wgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .wgrid { grid-template-columns: 1fr; } .welcome__cta .btn { width: 100%; } }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .confetti { display: none; }

@@ -91,9 +91,11 @@
       buildMenu();
       evaluateBadges();                           // catch streak / placement / topic badges from prior sessions
       if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
-      // First thing after login: if you haven't taken the placement test, go straight to it.
-      // Returning learners land back where they were.
-      var target = !PXStore.state.baseline ? "#/baseline"
+      // First thing after login: brand-new learners meet a short "what Propelr is"
+      // landing, then the placement test. Returning learners land back where they were.
+      var st = PXStore.state;
+      var target = (!st.seenWelcome && !st.baseline) ? "#/welcome"
+        : !st.baseline ? "#/baseline"
         : (location.hash && location.hash !== "#/login" ? location.hash : "#/");
       if (location.hash !== target) location.hash = target; else route();
     }
@@ -203,6 +205,7 @@
       var m = h.match(/^#\/c\/(\w+)/);
       var fc = h.match(/^#\/fc\/(\w+)/);
       if (h === "#/profile") return renderProfile();
+      if (h === "#/welcome") return renderWelcome();
       if (h === "#/baseline") return renderBaseline();
       if (h === "#/roadmap") return renderRoadmap();
       if (h === "#/how") return renderHow();
@@ -478,6 +481,46 @@
       var foot = document.createElement("p"); foot.className = "reading muted"; foot.style.marginTop = "var(--s6)";
       foot.innerHTML = 'Want to reset your starting level? <a href="#/baseline">Retake the 2-minute placement</a>.';
       v.appendChild(foot);
+      focusView();
+    }
+
+    // First-run landing: what Propelr is and, more importantly, *how* it teaches.
+    // Kept subject-agnostic on purpose — the method is the point, so new tracks
+    // can be added later without rewriting this.
+    function renderWelcome() {
+      var v = view();
+      var s = PXAuth.session();
+      var first = s ? String(s.name || s.email || "").split(/[\s@]+/)[0] : "";
+      var pillars = [
+        ["spark", "Starts where you are", "A two-minute placement reads your level, then every lesson tunes itself — easing off or pushing harder as you go."],
+        ["check", "Learn by doing", "Short reads, real examples, then a hands-on mini-project. You build understanding instead of just watching it go by."],
+        ["cards", "Made to stick", "Bite-size flashcards bring the key ideas back at just the right moment, so what you learn actually stays learned."],
+        ["book", "Plain language", "No jargon walls. Big ideas explained the way a sharp friend would — clearly, and only as deep as you need."],
+        ["trophy", "Momentum you can feel", "Levels, streaks and 100+ badges turn steady effort into progress you can see and want to keep going."],
+        ["map", "Grows with you", "Today it’s how modern tech really works. New tracks arrive over time — and your progress carries across all of them."]
+      ];
+      var cards = pillars.map(function (p) {
+        return '<div class="wcard"><span class="wcard__i" aria-hidden="true">' + PX.icon(p[0]) + '</span>' +
+          '<h3 class="wcard__t">' + p[1] + '</h3><p class="wcard__b reading">' + p[2] + '</p></div>';
+      }).join("");
+      var wrap = document.createElement("div"); wrap.className = "welcome";
+      wrap.innerHTML =
+        '<div class="welcome__hero">' +
+          '<p class="data welcome__eyebrow">' + (first ? "Welcome, " + escapeHtml(first) : "Welcome to Propelr") + '</p>' +
+          '<h1 class="welcome__title">Learning that adapts to <span class="welcome__hl">you</span>.</h1>' +
+          '<p class="welcome__lede reading">Propelr turns the things that feel technical and out of reach into knowledge you can actually use — at your level, at your pace, in plain language. Here’s how it works.</p>' +
+        '</div>' +
+        '<div class="wgrid">' + cards + '</div>' +
+        '<div class="welcome__note">' +
+          '<p class="data">your first track</p>' +
+          '<p class="reading" style="margin:var(--s1) 0 0">How modern software really works — for the people who work <em>alongside</em> builders: product managers, founders, operators, and the plain curious. More tracks are on the way, and the way Propelr teaches stays the same.</p>' +
+        '</div>' +
+        '<div class="welcome__cta">' +
+          '<a class="btn btn--lg" href="#/baseline">Find my level' + (PX.icon ? PX.icon("arrowR", "btn__i") : "") + '</a>' +
+          '<a class="btn btn--ghost btn--lg" href="#/">Explore first</a>' +
+        '</div>';
+      v.appendChild(wrap);
+      var st = PXStore.state; if (!st.seenWelcome) { st.seenWelcome = true; PXStore.save(); }
       focusView();
     }
 
