@@ -146,11 +146,19 @@
       var btn = document.getElementById("menuBtn");
       btn.innerHTML = PX.icon("menu") + "Menu" + PX.icon("chevron");
       var panel = document.getElementById("menuPanel");
-      var html = MENU.map(function (it) {
-        if (it[1] === null) return '<p class="menu__label">' + it[0] + '</p>';
-        return '<a class="menu__item" role="menuitem" href="' + it[0] + '">' + PX.icon(it[1]) +
-          '<span><b>' + it[2] + '</b>' + (it[3] ? '<span class="menu__sub">' + it[3] + '</span>' : '') + '</span></a>';
-      }).join("");
+      var html = "", groupOpen = false;
+      MENU.forEach(function (it) {
+        if (it[1] === null) {           // a section header opens a new, individually-toggleable group
+          if (groupOpen) html += '</div>';
+          html += '<div class="menu__group" id="menuGroup-' + it[0].toLowerCase().replace(/[^a-z0-9]+/g, "-") + '">';
+          groupOpen = true;
+          html += '<p class="menu__label">' + it[0] + '</p>';
+        } else {
+          html += '<a class="menu__item" role="menuitem" href="' + it[0] + '">' + PX.icon(it[1]) +
+            '<span><b>' + it[2] + '</b>' + (it[3] ? '<span class="menu__sub">' + it[3] + '</span>' : '') + '</span></a>';
+        }
+      });
+      if (groupOpen) html += '</div>';
       html += '<div class="menu__row"><span class="menu__k">Level</span><select id="menuTier" class="vspeed__sel" aria-label="Your level"></select></div>';
       html += '<hr class="menu__sep"><button class="menu__item" role="menuitem" id="menuLogout" type="button">' + PX.icon("logout") + '<span><b>Log out</b></span></button>';
       panel.innerHTML = html;
@@ -165,6 +173,9 @@
     function openMenu() {
       menuOpen = true;
       var panel = document.getElementById("menuPanel"), btn = document.getElementById("menuBtn");
+      // The track-scoped group only makes sense once a pathway is selected.
+      var trackGroup = document.getElementById("menuGroup-this-track");
+      if (trackGroup) trackGroup.hidden = !PXStore.state.track;
       panel.hidden = false;
       // On the mobile full-width sheet, sit just below the (possibly wrapped) app bar.
       if (window.matchMedia("(max-width: 520px)").matches) panel.style.top = (btn.getBoundingClientRect().bottom + 8) + "px";
