@@ -127,17 +127,18 @@
     // ---- Menu dropdown ----
     var menuBuilt = false, menuOpen = false;
     var MENU = [
-      ["Explore", null, null, null],
-      ["#/", "map", "All tracks", "The whole platform"],
-      ["#/roadmap", "book", "Track roadmap", "Where you are in this track"],
-      ["#/how", "book", "How Propelr works", "A one-minute guide"],
+      ["This track", null, null, null],
+      ["#/roadmap", "map", "Track roadmap", "Where you are in this track"],
       ["#/flashcards", "cards", "Flashcards", "Quick recall per topic"],
+      ["#/baseline", "refresh", "Retake placement", "Recalibrate your level"],
+      ["Explore", null, null, null],
+      ["#/", "book", "All tracks", "The whole platform"],
+      ["#/how", "spark", "How Propelr works", "A one-minute guide"],
       ["#/showcase", "share", "Share a project", "Post to the Showcase"],
       ["You", null, null, null],
       ["#/levels", "trophy", "Levels", "Your rank & points"],
       ["#/badges", "award", "Badges", "What you’ve earned"],
-      ["#/profile", "user", "My profile", null],
-      ["#/baseline", "refresh", "Retake placement", null]
+      ["#/profile", "user", "My profile", null]
     ];
     function buildMenu() {
       if (menuBuilt) { syncMenuTier(); return; }
