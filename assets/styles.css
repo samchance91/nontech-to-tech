@@ -526,6 +526,27 @@ body:not(.authed) .needs-auth { display: none !important; }
 @media (max-width: 800px) { .wgrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px) { .wgrid { grid-template-columns: 1fr; } .welcome__cta .btn { width: 100%; } }
 
+/* ---- Tracks catalog (the platform layer) ---- */
+.tracks { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s4); margin-top: var(--s5); }
+.trackcard { display: flex; flex-direction: column; gap: var(--s2); text-decoration: none; color: var(--ink);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s5);
+  box-shadow: var(--shadow); transition: transform var(--fast) var(--ease), border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease); }
+a.trackcard:hover { transform: translateY(-2px); border-color: var(--ink); }
+a.trackcard:hover .trackcard__title { color: var(--ink); }
+.trackcard__top { display: flex; align-items: center; justify-content: space-between; }
+.trackcard__eyebrow { color: var(--ink-2); }
+.trackcard__lock { display: inline-flex; color: var(--ink-2); }
+.trackcard__lock svg { width: 18px; height: 18px; }
+.trackcard__title { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; letter-spacing: -.02em; margin: var(--s1) 0 0; line-height: 1.15; }
+.trackcard__tag { font-weight: 600; color: var(--ink); margin: 0; }
+.trackcard__blurb { font-size: .95rem; margin: 0; flex: 1; }
+.trackcard__meta { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s3); }
+.trackcard__meta .concept-card__bar { flex: 1; }
+.trackcard__status { margin-top: var(--s3); color: var(--ink-2); }
+.trackcard.is-soon { opacity: .72; }
+.trackcard.is-soon .trackcard__title { color: var(--ink-2); }
+@media (max-width: 640px) { .tracks { grid-template-columns: 1fr; } }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .confetti { display: none; }

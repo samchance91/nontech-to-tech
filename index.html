@@ -47,7 +47,22 @@
   <script src="assets/pwa.js"></script>
   <script>
     var TIER_KEYS = ["novice", "beginner", "intermediate", "advanced"];
-    var CONCEPTS = ["apis", "web", "data", "diagrams", "wireframes", "stories", "agile"];
+    // ---- Tracks (the platform layer) ----
+    var TRACKS = (window.PXContent && PXContent.TRACKS) || [];
+    function trackById(id) { for (var i = 0; i < TRACKS.length; i++) if (TRACKS[i].id === id) return TRACKS[i]; return null; }
+    function trackConcepts(id) { var t = trackById(id); return (t && t.concepts) ? t.concepts : []; }
+    function liveTracks() { return TRACKS.filter(function (t) { return t.status === "live" && trackConcepts(t.id).length; }); }
+    // Union of every track's concepts — used for global counts, badges and route checks.
+    var ALL_CONCEPTS = (function () { var seen = {}, out = []; TRACKS.forEach(function (t) { (t.concepts || []).forEach(function (c) { if (!seen[c]) { seen[c] = 1; out.push(c); } }); }); return out; })();
+    function curTrackId() { return PXStore.state.track || (liveTracks()[0] && liveTracks()[0].id) || null; }
+    function trackDone(id) { var cs = trackConcepts(id); return cs.length > 0 && cs.every(topicDone); }
+    function tracksCompleteCount() { return liveTracks().filter(function (t) { return trackDone(t.id); }).length; }
+    function hasAnyCalibration() { var t = PXStore.state.tracks || {}; return !!PXStore.state.baseline || Object.keys(t).some(function (k) { return t[k] && t[k].baseline; }); }
+    // One-time migration: fold a legacy single-course placement into the Tech track.
+    function migrateTracks() {
+      var st = PXStore.state; st.tracks = st.tracks || {};
+      if (st.baseline && !st.tracks.tnt) { st.tracks.tnt = { baseline: st.baseline, tier: st.tier || "beginner", tierOverridden: !!st.tierOverridden }; PXStore.save(); }
+    }
     var AVATARS = ["aerwyn", "ananya-iyer", "arjun", "armoured-minotaur", "boltron", "dev", "ember-paladin", "hana-mori", "kabir", "kael-ironwind", "lion-heraldy", "lucas-vale", "maya-okafor", "meera-khanna", "mira-dawnspear", "rook", "vexa", "zara-mirza"];
     var appWired = false;
 
@@ -88,14 +103,14 @@
       refreshProfileButton();
       PXPWA.init();
       Adapt.startSession();                       // streak + long-gap recall check
+      migrateTracks();                            // fold any legacy placement into the Tech track
       buildMenu();
       evaluateBadges();                           // catch streak / placement / topic badges from prior sessions
       if (!appWired) { Adapt.on(onDirective); window.addEventListener("hashchange", route); appWired = true; }
       // First thing after login: brand-new learners meet a short "what Propelr is"
-      // landing, then the placement test. Returning learners land back where they were.
+      // landing, then the Tracks catalog. Returning learners land back where they were.
       var st = PXStore.state;
-      var target = (!st.seenWelcome && !st.baseline) ? "#/welcome"
-        : !st.baseline ? "#/baseline"
+      var target = (!st.seenWelcome && !hasAnyCalibration()) ? "#/welcome"
         : (location.hash && location.hash !== "#/login" ? location.hash : "#/");
       if (location.hash !== target) location.hash = target; else route();
     }
@@ -113,7 +128,8 @@
     var menuBuilt = false, menuOpen = false;
     var MENU = [
       ["Explore", null, null, null],
-      ["#/roadmap", "map", "Roadmap", "The whole path, and how far you are"],
+      ["#/", "map", "All tracks", "The whole platform"],
+      ["#/roadmap", "book", "Track roadmap", "Where you are in this track"],
       ["#/how", "book", "How Propelr works", "A one-minute guide"],
       ["#/flashcards", "cards", "Flashcards", "Quick recall per topic"],
       ["#/showcase", "share", "Share a project", "Post to the Showcase"],
@@ -167,7 +183,12 @@
       return d;
     }
     function onDirective(d) {
-      if (d.type === "tierChanged") { syncMenuTier(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 }); }
+      if (d.type === "tierChanged") {
+        // Persist the level against the track you're currently in.
+        var tid = curTrackId(), trks = PXStore.state.tracks;
+        if (tid && trks && trks[tid]) { trks[tid].tier = d.tier; trks[tid].tierOverridden = !!d.overridden; PXStore.save(); }
+        syncMenuTier(); if (PX.toast) PX.toast("Level: " + Adapt.LABEL[d.tier] + (d.overridden ? " (you set this)" : " (stepped up)"), { duration: 2200 });
+      }
       if (d.type === "recallCheck") {
         var cst = PXStore.state; cst.stats = cst.stats || {}; if (!cst.stats.comeback) { cst.stats.comeback = true; PXStore.save(); } evaluateBadges();
         var r = document.getElementById("recall"); if (!r) return;
@@ -204,18 +225,20 @@
       var h = location.hash || "#/";
       var m = h.match(/^#\/c\/(\w+)/);
       var fc = h.match(/^#\/fc\/(\w+)/);
+      var mt = h.match(/^#\/t\/([\w-]+)(?:\/(baseline))?$/);
       if (h === "#/profile") return renderProfile();
       if (h === "#/welcome") return renderWelcome();
-      if (h === "#/baseline") return renderBaseline();
+      if (h === "#/baseline") return renderBaseline(curTrackId());
       if (h === "#/roadmap") return renderRoadmap();
       if (h === "#/how") return renderHow();
       if (h === "#/showcase") return renderShowcase();
       if (h === "#/levels") return renderLevels();
       if (h === "#/badges") return renderBadges();
       if (h === "#/flashcards") return renderFlashcards();
-      if (fc && CONCEPTS.indexOf(fc[1]) >= 0) return renderFlashcardsFor(fc[1]);
-      if (m && CONCEPTS.indexOf(m[1]) >= 0) return renderConcept(m[1]);
-      return renderHome();
+      if (mt) { return mt[2] === "baseline" ? renderBaseline(mt[1]) : enterTrack(mt[1]); }
+      if (fc && PXContent.CONCEPTS[fc[1]]) return renderFlashcardsFor(fc[1]);
+      if (m && PXContent.CONCEPTS[m[1]]) return renderConcept(m[1]);
+      return renderCatalog();
     }
     function view() { var v = document.getElementById("view"); v.innerHTML = ""; return v; }
     function focusView() { var v = document.getElementById("view"); try { v.focus({ preventScroll: true }); } catch (e) {} }
@@ -237,6 +260,7 @@
     // ---- Badges — a perpetual, category-based system (100+ and growing) ----
     var BADGE_CATS = [
       { key: "levels", label: "Getting started", icon: "spark" },
+      { key: "tracks", label: "Tracks", icon: "map" },
       { key: "videos", label: "Videos", icon: "book" },
       { key: "topics", label: "Topics", icon: "check" },
       { key: "cards", label: "Flashcards", icon: "cards" },
@@ -265,7 +289,9 @@
       series("videos", "videos", [[1, "Pressed play", "small"], [3, "Getting into it", "small"], [5, "Regular viewer", "small"], [10, "Ten under the belt", "small"], [15, "Screen time", "small"], [25, "Binge learner", "big"], [40, "Film buff", "big"], [60, "Marathon watcher", "big"], [80, "Screening room", "big"], [100, "Century of videos", "big"]], function (n) { return n + " videos finished"; });
       // Topics
       series("topics", "topics", [[1, "Topic cleared", "small"], [2, "Two down", "small"], [3, "Foundations", "small"], [5, "Well rounded", "big"], [7, "Full sweep", "big"], [10, "Ten topics", "big"], [15, "Encyclopedic", "big"], [20, "Scholar", "big"]], function (n) { return n + " topics completed"; });
-      CONCEPTS.forEach(function (id) { B.push({ id: "topic_" + id, cat: "topics", tier: "small", name: PXContent.CONCEPTS[id].title, desc: "Completed “" + PXContent.CONCEPTS[id].area + "”", check: (function (cid) { return function () { return topicDone(cid); }; })(id) }); });
+      ALL_CONCEPTS.forEach(function (id) { B.push({ id: "topic_" + id, cat: "topics", tier: "small", name: PXContent.CONCEPTS[id].title, desc: "Completed “" + PXContent.CONCEPTS[id].area + "”", check: (function (cid) { return function () { return topicDone(cid); }; })(id) }); });
+      // Tracks — completing a whole offering (perpetual; a big achievement)
+      series("tracksDone", "tracks", [[1, "First track done", "big"], [2, "Two tracks", "big"], [3, "Three tracks", "big"], [5, "Five tracks", "big"], [8, "Eight tracks", "big"], [12, "Twelve tracks", "big"]], function (n) { return n + " tracks completed"; });
       // Flashcards
       series("cards", "cards", [[10, "Flipper", "small"], [25, "Card sharp", "small"], [50, "Fifty cards", "small"], [100, "Century of cards", "big"], [200, "Card master", "big"], [350, "Recall pro", "big"], [500, "Memory bank", "big"], [750, "Near-total recall", "big"], [1000, "Thousand cards", "big"]], function (n) { return n + " cards reviewed"; });
       series("decks", "cards", [[1, "First deck", "small"], [3, "Three decks", "small"], [5, "Five decks", "big"], [7, "Deck sweep", "big"], [10, "Deck master", "big"]], function (n) { return n + " decks completed"; });
@@ -302,14 +328,14 @@
         hints += (c.hintsTotal || 0);
         rewatches += (c.seekBacks || 0);
       });
-      CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
+      ALL_CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
       var stats = st.stats || {};
       var posts = (st.posts || []).filter(function (p) { return PXAuth.mine(p); }).length;
       var visits = 0; try { visits = parseInt(localStorage.getItem("px_visits") || "0", 10); } catch (e) {}
       var now = new Date(), hr = now.getHours(), day = now.getDay();
       var tierRank = TIER_KEYS.indexOf(Adapt.tier()); if (tierRank < 0) tierRank = 1;
       return {
-        placed: !!st.baseline, videos: videos, topics: topics, streak: (st.session && st.session.streak) || 0,
+        placed: hasAnyCalibration(), videos: videos, topics: topics, tracksDone: tracksCompleteCount(), streak: (st.session && st.session.streak) || 0,
         cleanBest: cleanBest, posts: posts, cards: stats.cardsFlipped || 0, decks: stats.decks ? Object.keys(stats.decks).length : 0,
         correct: correct, hints: hints, rewatches: rewatches, visits: visits, comeback: !!stats.comeback,
         earnedCount: Object.keys(st.badges || {}).length, tierRank: tierRank,
@@ -348,12 +374,13 @@
       var st = PXStore.state, cs = st.concepts || {}, stats = st.stats || {};
       var videos = 0, correct = 0;
       Object.keys(cs).forEach(function (id) { var c = cs[id]; if (c.video && c.video.ended) videos += c.video.ended; if (c.firstTry) correct += c.firstTry.filter(function (x) { return x; }).length; });
-      var topics = 0; CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
+      var topics = 0; ALL_CONCEPTS.forEach(function (id) { if (topicDone(id)) topics++; });
       var projects = (st.posts || []).filter(function (p) { return PXAuth.mine(p) && p.valid !== false; }).length;
       var cards = stats.cardsFlipped || 0, decks = stats.decks ? Object.keys(stats.decks).length : 0;
       var badges = Object.keys(st.badges || {}).length, best = stats.bestStreak || 0;
       var streakPts = best * 10 + Math.floor(best / 5) * 20;   // 10 a day, +20 at each 5-day run
-      return Math.round(projects * 300 + topics * 150 + videos * 40 + badges * 25 + correct * 10 + decks * 60 + cards * 3 + streakPts);
+      var trackPts = tracksCompleteCount() * 500;              // finishing a whole track is the biggest single reward
+      return Math.round(trackPts + projects * 300 + topics * 150 + videos * 40 + badges * 25 + correct * 10 + decks * 60 + cards * 3 + streakPts);
     }
     function levelFor(pts) { var L = 1; while (L < MAX_LEVEL && pts >= levelThreshold(L + 1)) L++; return L; }
     function levelInfo() {
@@ -419,18 +446,39 @@
         celebrate(PXContent.CONCEPTS[id].title);
       }
     }
+    function celebrateTrack(title) {
+      celebrate(title, {
+        icon: "trophy", eyebrow: "track complete", heading: "Track complete! 🎉",
+        body: "You finished the whole <b>" + escapeHtml(title) + "</b> track — that’s a big one, and worth <b>500</b> points. New tracks are waiting.",
+        link: "#/", linkLabel: "See all tracks"
+      });
+    }
+    // Fires once when a whole track is finished. Returns true if it took the moment
+    // (so the per-topic pop-up is skipped); defers to a level-up if one is already showing.
+    function maybeCelebrateTrack() {
+      var st = PXStore.state; st.tracksCompleted = st.tracksCompleted || {}; st.celebrated = st.celebrated || {};
+      var hit = null;
+      liveTracks().forEach(function (t) { if (!hit && trackDone(t.id) && !st.tracksCompleted[t.id]) hit = t; });
+      if (!hit) return false;
+      st.tracksCompleted[hit.id] = Date.now();
+      trackConcepts(hit.id).forEach(function (cid) { st.celebrated[cid] = st.celebrated[cid] || Date.now(); });   // suppress the topic pop-up
+      PXStore.save();
+      if (!document.querySelector(".levelup")) celebrateTrack(hit.title);
+      return true;
+    }
     var celebAudio = null;
-    function celebrate(title) {
-      var ov = document.createElement("div"); ov.className = "celebrate"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", "Session complete");
+    function celebrate(title, opts) {
+      opts = opts || {};
+      var ov = document.createElement("div"); ov.className = "celebrate"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true"); ov.setAttribute("aria-label", opts.eyebrow || "Session complete");
       ov.innerHTML =
         '<div class="confetti" aria-hidden="true"></div>' +
         '<div class="celebrate__card">' +
-          '<span class="celebrate__badge" aria-hidden="true">' + PX.icon("check") + '</span>' +
-          '<p class="data">session complete</p>' +
-          '<h2>Nice work!</h2>' +
-          '<p class="reading muted">You’ve finished <b>' + escapeHtml(title) + '</b>. Its flashcards are unlocked.</p>' +
+          '<span class="celebrate__badge" aria-hidden="true">' + PX.icon(opts.icon || "check") + '</span>' +
+          '<p class="data">' + (opts.eyebrow || "session complete") + '</p>' +
+          '<h2>' + (opts.heading || "Nice work!") + '</h2>' +
+          '<p class="reading muted">' + (opts.body || ("You’ve finished <b>" + escapeHtml(title) + "</b>. Its flashcards are unlocked.")) + '</p>' +
           '<div class="row"><button class="btn" data-close type="button">Keep going</button>' +
-          '<a class="btn btn--secondary" data-close href="#/flashcards">Study the cards</a></div>' +
+          '<a class="btn btn--secondary" data-close href="' + (opts.link || "#/flashcards") + '">' + (opts.linkLabel || "Study the cards") + '</a></div>' +
         '</div>';
       document.body.appendChild(ov);
       if (!PX.reduced()) {
@@ -454,32 +502,83 @@
       var b = ov.querySelector("[data-close]"); if (b) setTimeout(function () { try { b.focus(); } catch (e) {} }, 80);
     }
 
-    function renderHome() {
+    // ---- Platform layer: the Tracks catalog (home, #/) ----
+    function renderCatalog() {
       var v = view();
-      var head = document.createElement("div");
-      head.className = "stack";
+      PXStore.state.track = null;   // we're above any single track now
+      var head = document.createElement("div"); head.className = "stack";
       head.innerHTML =
-        '<p class="data">your topics</p>' +
-        '<h1 class="t-h1" style="margin:4px 0 0">Pick a topic to learn</h1>' +
-        '<p class="reading muted" style="margin-top:var(--s2)">You’re set to <b>' + Adapt.tierLabel() + '</b> — every lesson adjusts to that. Tap a topic to begin.</p>';
+        '<p class="data">your tracks</p>' +
+        '<h1 class="t-h1" style="margin:4px 0 0">Choose a track</h1>' +
+        '<p class="reading muted" style="margin-top:var(--s2)">Each track is a self-contained path of skills. Pick one to calibrate and begin — your points, levels and badges carry across all of them.</p>';
+      v.appendChild(head);
+
+      var grid = document.createElement("div"); grid.className = "tracks";
+      TRACKS.forEach(function (t) {
+        var cs = trackConcepts(t.id), total = cs.length;
+        var live = t.status === "live" && total;
+        var done = cs.filter(topicDone).length, pct = total ? Math.round(done / total * 100) : 0;
+        var cal = PXStore.state.tracks && PXStore.state.tracks[t.id] && PXStore.state.tracks[t.id].baseline;
+        var status = !live ? "Coming soon" : (done === total ? "Complete" : cal ? (done + " / " + total + " topics") : "Start");
+        var eyebrow = !live ? "soon" : (done === total ? "done" : cal ? "in progress" : "new");
+        var el = document.createElement(live ? "a" : "div");
+        el.className = "trackcard" + (live ? "" : " is-soon");
+        if (live) el.href = "#/t/" + t.id;
+        el.innerHTML =
+          '<div class="trackcard__top"><span class="data trackcard__eyebrow">' + eyebrow + '</span>' +
+            (live ? '' : '<span class="trackcard__lock" aria-hidden="true">' + PX.icon("lock") + '</span>') + '</div>' +
+          '<h2 class="trackcard__title">' + escapeHtml(t.title) + '</h2>' +
+          '<p class="trackcard__tag">' + escapeHtml(t.tagline || "") + '</p>' +
+          '<p class="trackcard__blurb muted">' + escapeHtml(t.blurb || "") + '</p>' +
+          (live
+            ? '<div class="trackcard__meta"><span class="concept-card__bar"><span class="concept-card__fill" style="--p:' + pct + '%"></span></span><span class="data">' + status + '</span></div>'
+            : '<p class="data trackcard__status">' + status + '</p>');
+        grid.appendChild(el);
+      });
+      v.appendChild(grid);
+      focusView();
+    }
+
+    // Enter a live track: gate on its own calibration, load its level, then show topics.
+    function enterTrack(id) {
+      var t = trackById(id);
+      if (!t || t.status !== "live" || !trackConcepts(id).length) { location.hash = "#/"; return; }
+      var st = PXStore.state; st.tracks = st.tracks || {}; st.track = id;
+      var tr = st.tracks[id];
+      if (!tr || !tr.baseline) { location.hash = "#/t/" + id + "/baseline"; return; }
+      // Load this track's saved level into the engine (silent — no directive/toast).
+      st.tier = tr.tier || "beginner"; st.tierOverridden = !!tr.tierOverridden; PXStore.save();
+      syncMenuTier();
+      renderTrack(id);
+    }
+
+    // ---- Inside a track: its topic grid (was the old home) ----
+    function renderTrack(id) {
+      var t = trackById(id); if (!t) return renderCatalog();
+      var v = view();
+      crumb(v, t.title, "#/", "All tracks");
+      var head = document.createElement("div"); head.className = "stack"; head.style.marginTop = "var(--s3)";
+      head.innerHTML =
+        '<h1 class="t-h1" style="margin:4px 0 0">' + escapeHtml(t.title) + '</h1>' +
+        '<p class="reading muted" style="margin-top:var(--s2)">You’re set to <b>' + Adapt.tierLabel() + '</b> for this track — every lesson adjusts to that. Tap a topic to begin.</p>';
       v.appendChild(head);
 
       var grid = document.createElement("div"); grid.className = "conceptgrid";
-      CONCEPTS.forEach(function (id) {
-        var c = PXContent.CONCEPTS[id]; var pc = topicPct(id);
+      trackConcepts(id).forEach(function (cid) {
+        var c = PXContent.CONCEPTS[cid]; var pc = topicPct(cid);
         var b = document.createElement("button"); b.className = "concept-card"; b.type = "button";
         b.innerHTML =
           '<p class="data concept-card__area">' + c.area + '</p>' +
           '<h3 style="margin:0">' + c.title + '</h3>' +
           '<div class="concept-card__meta"><span class="concept-card__bar"><span class="concept-card__fill" style="--p:' + pc + '%"></span></span>' +
           '<span class="data">' + (pc === 100 ? "done" : pc ? pc + "%" : "start") + '</span></div>';
-        b.addEventListener("click", function () { location.hash = "#/c/" + id; });
+        b.addEventListener("click", function () { location.hash = "#/c/" + cid; });
         grid.appendChild(b);
       });
       v.appendChild(grid);
 
       var foot = document.createElement("p"); foot.className = "reading muted"; foot.style.marginTop = "var(--s6)";
-      foot.innerHTML = 'Want to reset your starting level? <a href="#/baseline">Retake the 2-minute placement</a>.';
+      foot.innerHTML = 'Want to reset your level for this track? <a href="#/t/' + id + '/baseline">Retake the 2-minute placement</a>.';
       v.appendChild(foot);
       focusView();
     }
@@ -516,25 +615,34 @@
           '<p class="reading" style="margin:var(--s1) 0 0">You’re starting with how modern tech really works — one skill that pays off in plenty of jobs and decisions. It’s the first track of many; more are on the way across the skills that matter at work and in life, and the way Propelr teaches stays the same.</p>' +
         '</div>' +
         '<div class="welcome__cta">' +
-          '<a class="btn btn--lg" href="#/baseline">Find my level' + (PX.icon ? PX.icon("arrowR", "btn__i") : "") + '</a>' +
-          '<a class="btn btn--ghost btn--lg" href="#/">Explore first</a>' +
+          '<a class="btn btn--lg" href="#/">Choose your track' + (PX.icon ? PX.icon("arrowR", "btn__i") : "") + '</a>' +
         '</div>';
       v.appendChild(wrap);
       var st = PXStore.state; if (!st.seenWelcome) { st.seenWelcome = true; PXStore.save(); }
       focusView();
     }
 
-    function renderBaseline() {
+    // Per-track calibration. Each track gets its own placement + level.
+    function renderBaseline(id) {
+      var t = trackById(id); if (!t || t.status !== "live" || !trackConcepts(id).length) { location.hash = "#/"; return; }
       var v = view();
-      var mount = document.createElement("div"); v.appendChild(mount);   // the baseline renders its own intro — no extra heading
+      crumb(v, "calibration", "#/", "All tracks");
+      var intro = document.createElement("p"); intro.className = "reading muted"; intro.style.margin = "var(--s3) 0 0";
+      intro.innerHTML = "A quick placement for <b>" + escapeHtml(t.title) + "</b> — it sets your starting level for this track only.";
+      v.appendChild(intro);
+      var mount = document.createElement("div"); v.appendChild(mount);   // the baseline renders its own intro
       PX.Baseline(mount, { onDone: function (tier) {
-        // bridge baseline result into the live store + engine
-        PXStore.state.baseline = { tier: tier.key, at: Date.now() };
-        Adapt.setTier(tier.key, { overridden: false });
+        var st = PXStore.state; st.tracks = st.tracks || {};
+        st.tracks[id] = st.tracks[id] || {};
+        st.tracks[id].baseline = { tier: tier.key, at: Date.now() };
+        st.tracks[id].tier = tier.key; st.tracks[id].tierOverridden = false;
+        st.track = id;
+        st.baseline = st.baseline || { tier: tier.key, at: Date.now() };   // global "placed" marker for badges
+        Adapt.setTier(tier.key, { overridden: false });                    // load into engine (emits → stored per track)
         PXStore.save();
         syncMenuTier();
         evaluateBadges();                         // "First steps" for finishing placement
-        location.hash = "#/";
+        location.hash = "#/t/" + id;
       } });
       focusView();
     }
@@ -542,8 +650,9 @@
     function renderConcept(id) {
       var v = view();
       var c = PXContent.CONCEPTS[id];
+      var backHref = "#/t/" + curTrackId();
       var bar = document.createElement("div"); bar.className = "between";
-      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="#/">← Topics</a><span class="data">' + c.area + '</span>';
+      bar.innerHTML = '<a class="btn btn--ghost btn--sm" href="' + backHref + '">← Topics</a><span class="data">' + c.area + '</span>';
       v.appendChild(bar);
       var h = document.createElement("h1"); h.className = "t-h1"; h.style.margin = "var(--s3) 0 var(--s2)"; h.textContent = c.title; v.appendChild(h);
 
@@ -551,10 +660,10 @@
       var alt = document.createElement("div"); alt.id = "altSlot"; v.appendChild(alt);
 
       var mount = document.createElement("div"); mount.style.marginTop = "var(--s4)"; v.appendChild(mount);
-      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { evaluateBadges(); maybeCelebrate(id); } });
+      PXLesson.render(mount, id, tierIdx(), { onSignal: function () { evaluateBadges(); if (!maybeCelebrateTrack()) maybeCelebrate(id); } });
 
       var foot = document.createElement("div"); foot.className = "section";
-      var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = "#/"; back.innerHTML = "Back to topics" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
+      var back = document.createElement("a"); back.className = "btn btn--secondary"; back.href = backHref; back.innerHTML = "Back to topics" + (PX.icon ? PX.icon("arrowR", "btn__i") : "");
       foot.appendChild(back); v.appendChild(foot);
       focusView();
     }
@@ -753,28 +862,26 @@
     function safeUrl(u) { u = String(u || ""); return /^https?:\/\//i.test(u) ? u : ""; }
 
     function renderRoadmap() {
-      var v = view(); crumb(v, "roadmap");
+      var tid = curTrackId(), t = trackById(tid), cs = trackConcepts(tid);
+      var v = view(); crumb(v, "roadmap", "#/t/" + tid, (t && t.title) || "Track");
       var h = document.createElement("div");
-      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Your roadmap</h1>' +
-        '<p class="reading muted">Three foundations to start. Each lesson meets you at your level (right now: <b>' + Adapt.tierLabel() + '</b>) — a short video, a quick check, and something to apply. Finish a topic to unlock its flashcards.</p>';
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">' + escapeHtml((t && t.title) || "Your") + ' roadmap</h1>' +
+        '<p class="reading muted">Each lesson meets you at your level (right now: <b>' + Adapt.tierLabel() + '</b>) — a short video, a quick check, and something to apply. Finish a topic to unlock its flashcards.</p>';
       v.appendChild(h);
       var OUT = { apis: "Explain what an API is and read a simple call.", web: "Trace what happens when a page loads, and read status codes.", data: "Read a table and know when two tables join." };
       var wrap = document.createElement("div"); wrap.className = "rmap";
-      CONCEPTS.forEach(function (id, i) {
+      cs.forEach(function (id, i) {
         var c = PXContent.CONCEPTS[id]; var pc = topicPct(id); var done = topicDone(id);
         var row = document.createElement("a"); row.className = "rmap__row" + (done ? " is-done" : ""); row.href = "#/c/" + id; row.style.textDecoration = "none"; row.style.color = "var(--ink)";
         row.innerHTML = '<span class="rmap__n">' + (done ? PX.icon("check") : (i + 1)) + '</span>' +
           '<span style="flex:1"><span class="data concept-card__area">' + c.area + '</span>' +
           '<h3 style="margin:2px 0 4px">' + c.title + '</h3>' +
-          '<p class="muted" style="margin:0">You’ll be able to: ' + OUT[id] + '</p>' +
+          (OUT[id] ? '<p class="muted" style="margin:0">You’ll be able to: ' + OUT[id] + '</p>' : '') +
           '<span class="rmap__bar"><span class="rmap__fill" style="width:' + pc + '%"></span></span></span>' +
           '<span class="data">' + (done ? "done" : pc ? pc + "%" : "start") + '</span>';
         wrap.appendChild(row);
       });
       v.appendChild(wrap);
-      var more = document.createElement("p"); more.className = "reading muted"; more.style.marginTop = "var(--s5)";
-      more.textContent = "More topics — auth & security, deploys, Git, the AI layer — join the path as these foundations land.";
-      v.appendChild(more);
       focusView();
     }
 
@@ -896,7 +1003,7 @@
       h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Flashcards</h1><p class="reading muted">Quick recall for each topic. A topic’s cards unlock once you’ve finished that topic.</p>';
       v.appendChild(h);
       var grid = document.createElement("div"); grid.className = "fc-grid";
-      CONCEPTS.forEach(function (id) {
+      ALL_CONCEPTS.forEach(function (id) {
         var c = PXContent.CONCEPTS[id]; var cards = PXContent.FLASHCARDS[id] || []; var unlocked = topicDone(id);
         var el = document.createElement("div"); el.className = "fc-topic" + (unlocked ? "" : " is-locked");
         el.innerHTML = '<span class="data concept-card__area">' + c.area + '</span><h3 style="margin:0">' + c.title + '</h3><p class="muted" style="margin:0">' + cards.length + ' cards</p>';
@@ -967,7 +1074,8 @@
 
       var how = document.createElement("div"); how.className = "card"; how.style.marginTop = "var(--s5)";
       var ptsRows = [
-        ["Submit a complete project", "300", "the most"],
+        ["Complete a track", "500", "the most"],
+        ["Submit a complete project", "300", ""],
         ["Complete a topic", "150", ""],
         ["Finish a flashcard deck", "60", ""],
         ["Finish a video", "40", ""],

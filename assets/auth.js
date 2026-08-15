@@ -110,7 +110,7 @@
     // The learning state only — never the auth tokens or on-device photos.
     _cloudState: function () {
       var st = S.state;
-      return { v: st.v, baseline: st.baseline, tier: st.tier, tierOverridden: st.tierOverridden, concepts: st.concepts, session: st.session, updatedAt: st.updatedAt };
+      return { v: st.v, baseline: st.baseline, tier: st.tier, tierOverridden: st.tierOverridden, tracks: st.tracks, track: st.track, tracksCompleted: st.tracksCompleted, concepts: st.concepts, session: st.session, updatedAt: st.updatedAt };
     },
     pullProgress: function () {
       var a = A(); if (!a || !a.token || !a.userId) return Promise.resolve();
@@ -119,7 +119,7 @@
         .then(function (rows) {
           var data = rows && rows[0] && rows[0].data;
           if (data && typeof data === "object") {
-            ["baseline", "tier", "tierOverridden", "concepts", "session"].forEach(function (k) { if (data[k] != null) S.state[k] = data[k]; });
+            ["baseline", "tier", "tierOverridden", "tracks", "track", "tracksCompleted", "concepts", "session"].forEach(function (k) { if (data[k] != null) S.state[k] = data[k]; });
             _syncing = true; S.save(); _syncing = false;   // persist locally without re-triggering a push
           }
         }).catch(function () { /* offline / unreachable — local state stands */ });

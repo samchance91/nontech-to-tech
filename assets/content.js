@@ -223,5 +223,35 @@
     ]
   };
 
-  global.PXContent = { CONCEPTS: CONCEPTS, plan: plan, ORDER: ORDER, SCAFFOLD: SCAFFOLD, FLASHCARDS: FLASHCARDS };
+  // ---- Tracks (offerings) — the platform layer above the content ----
+  // "Tech for Non-Tech" is the first live track; it references the concept IDs
+  // above. Future tracks are added here as data — a "live" one lists its own
+  // concept IDs, a "soon" one just needs a title/tagline/blurb to appear as a
+  // Coming-soon card. Nothing else in the app needs to change to add a track.
+  var TRACKS = [
+    {
+      id: "tnt", status: "live",
+      title: "Tech for Non-Tech",
+      tagline: "How modern software really works",
+      blurb: "APIs, data, the web, Agile and more — enough to work confidently with any tech team.",
+      concepts: ["apis", "web", "data", "diagrams", "wireframes", "stories", "agile"]
+    },
+    { id: "firstprinciples", status: "soon", title: "First-Principles Thinking",
+      tagline: "Break any problem down to what’s actually true",
+      blurb: "Stop copying other people’s answers. Learn to strip a problem to its basics and reason your own way up — explained in plain language." },
+    { id: "creativity", status: "soon", title: "Applied Creativity",
+      tagline: "Come up with better ideas, on demand",
+      blurb: "Practical ways to get unstuck, connect unrelated ideas, and turn a blank page into something worth building." },
+    { id: "ai", status: "soon", title: "Applied AI",
+      tagline: "Actually use AI to get real work done",
+      blurb: "Go from “I’ve heard of it” to using AI tools with confidence — good prompts, simple workflows, and knowing what to trust." },
+    { id: "writing", status: "soon", title: "Professional Written Communication",
+      tagline: "Write so people get it the first time",
+      blurb: "Emails, docs and messages that are clear, short, and land well — at work and beyond." },
+    { id: "pressure", status: "soon", title: "How to Deal with Pressure",
+      tagline: "Stay clear-headed when it counts",
+      blurb: "Simple, practical ways to handle stress, deadlines and high-stakes moments without burning out." }
+  ];
+
+  global.PXContent = { CONCEPTS: CONCEPTS, plan: plan, ORDER: ORDER, SCAFFOLD: SCAFFOLD, FLASHCARDS: FLASHCARDS, TRACKS: TRACKS };
 })(window);
