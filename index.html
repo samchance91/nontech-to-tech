@@ -563,7 +563,13 @@
         '<p class="reading muted" style="margin-top:var(--s2)">You’re set to <b>' + Adapt.tierLabel() + '</b> for this track — every lesson adjusts to that. Tap a topic to begin.</p>';
       v.appendChild(head);
 
-      var grid = document.createElement("div"); grid.className = "conceptgrid";
+      var acts = document.createElement("div"); acts.className = "row"; acts.style.marginTop = "var(--s3)";
+      acts.innerHTML =
+        '<a class="btn btn--secondary btn--sm" href="#/flashcards">' + PX.icon("cards", "btn__i") + 'Flashcards</a>' +
+        '<a class="btn btn--ghost btn--sm" href="#/roadmap">' + PX.icon("map", "btn__i") + 'Roadmap</a>';
+      v.appendChild(acts);
+
+      var grid = document.createElement("div"); grid.className = "conceptgrid"; grid.style.marginTop = "var(--s4)";
       trackConcepts(id).forEach(function (cid) {
         var c = PXContent.CONCEPTS[cid]; var pc = topicPct(cid);
         var b = document.createElement("button"); b.className = "concept-card"; b.type = "button";
@@ -998,13 +1004,21 @@
     }
 
     function renderFlashcards() {
-      var v = view(); crumb(v, "flashcards");
+      var tid = curTrackId(), t = trackById(tid), cs = trackConcepts(tid);
+      var v = view(); crumb(v, "flashcards", "#/t/" + tid, (t && t.title) || "Track");
       var h = document.createElement("div");
-      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">Flashcards</h1><p class="reading muted">Quick recall for each topic. A topic’s cards unlock once you’ve finished that topic.</p>';
+      h.innerHTML = '<h1 class="t-h1" style="margin:var(--s3) 0 var(--s2)">' + escapeHtml((t && t.title) || "") + ' flashcards</h1><p class="reading muted">Quick recall for each topic in this track. A topic’s cards unlock once you’ve finished it.</p>';
       v.appendChild(h);
+      var withCards = cs.filter(function (id) { return (PXContent.FLASHCARDS[id] || []).length; });
+      if (!withCards.length) {
+        var empty = document.createElement("p"); empty.className = "reading muted"; empty.style.marginTop = "var(--s4)";
+        empty.textContent = "This track doesn’t have flashcards yet — check back as it grows.";
+        v.appendChild(empty); focusView(); return;
+      }
       var grid = document.createElement("div"); grid.className = "fc-grid";
-      ALL_CONCEPTS.forEach(function (id) {
+      cs.forEach(function (id) {
         var c = PXContent.CONCEPTS[id]; var cards = PXContent.FLASHCARDS[id] || []; var unlocked = topicDone(id);
+        if (!cards.length) return;
         var el = document.createElement("div"); el.className = "fc-topic" + (unlocked ? "" : " is-locked");
         el.innerHTML = '<span class="data concept-card__area">' + c.area + '</span><h3 style="margin:0">' + c.title + '</h3><p class="muted" style="margin:0">' + cards.length + ' cards</p>';
         if (unlocked) { var go = document.createElement("a"); go.className = "btn btn--sm"; go.href = "#/fc/" + id; go.style.marginTop = "var(--s2)"; go.textContent = "Study"; el.appendChild(go); }
