@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "weights": { "B": 0.25, "R": 0.25, "C": 0.30, "P": 0.20 },
+  "p_weight_cap": 0.25,
+  "threshold": 55,
+  "route_penalty": 10,
+  "max_alternatives": 2,
+  "max_route_courses": 3,
+  "background_scores": { "full": 100, "partial": 60, "none": 20 },
+  "goal_scores": { "primary": 100, "secondary": 60 },
+  "riasec_map": { "investigative": "analytical", "conventional": "analytical", "artistic": "creative", "enterprising": "communication", "realistic": "technical", "social": "people" },
+  "attention_max_diff": 1,
+  "retake_days": 30,
+  "timeout_ms": 5000
+}

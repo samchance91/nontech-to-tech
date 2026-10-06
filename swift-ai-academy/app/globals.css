@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Swift AI Academy · Royal Blue, Deep Navy, Gold. shadcn/ui token names. */
+:root {
+  --radius: 0.625rem;
+  --background: #f6f8fc;
+  --foreground: #0b1b3f;           /* Deep Navy */
+  --card: #ffffff;
+  --card-foreground: #0b1b3f;
+  --primary: #2152d9;              /* Royal Blue (AA on white) */
+  --primary-foreground: #ffffff;
+  --secondary: #e8eefc;
+  --secondary-foreground: #0b1b3f;
+  --accent: #f2b705;               /* Gold — highlights only, never text on white */
+  --accent-foreground: #0b1b3f;
+  --muted: #eef1f7;
+  --muted-foreground: #4a5878;
+  --destructive: #c62828;
+  --border: #d5dcea;
+  --input: #d5dcea;
+  --ring: #2152d9;
+  --navy: #0b1b3f;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-navy: var(--navy);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+}
+
+* { border-color: var(--border); }
+body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }

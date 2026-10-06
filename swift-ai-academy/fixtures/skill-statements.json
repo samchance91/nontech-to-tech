@@ -1,0 +1,9 @@
+{
+  "prompt_writing": ["Not yet", "I can ask an AI chatbot a simple question", "I can write a prompt that gets a useful first draft", "I can chain prompts into a repeatable workflow"],
+  "data_literacy": ["Not yet", "I can read a chart", "I can build a chart in a spreadsheet", "I can analyse a dataset and explain findings"],
+  "spreadsheet": ["Not yet", "I can enter and sort data in a sheet", "I can use formulas like SUM and VLOOKUP", "I can build a pivot table or dashboard"],
+  "python_basics": ["Not yet", "I can run a Python script someone gave me", "I can write a short script with loops and functions", "I can build a small program that reads and writes files"],
+  "written_comm": ["Not yet", "I can write a short, clear message", "I can write a clear email that gets a reply", "I can write a report or proposal others act on"],
+  "spoken_comm": ["Not yet", "I can introduce myself in a meeting", "I can explain an idea clearly in a short meeting", "I can present to a group and handle questions"],
+  "bot_design": ["Not yet", "I can sketch the steps of a simple chatbot conversation", "I can build a working chatbot in a no-code tool", "I can design, test and improve a chatbot with real users"]
+}

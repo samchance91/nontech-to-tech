@@ -1,0 +1,12 @@
+[
+  {
+    "course_id": "GAF", "title": "Google AI Foundations (platform test course)", "level": 1, "internal_only": true,
+    "meta": {
+      "prerequisites": { "skills": [], "courses": [] },
+      "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+      "learning_outcomes": [{ "skill_tag": "prompt_writing", "level_after": 1, "statement": "Try a generative AI tool safely" }],
+      "career_outcomes": ["ai_ops_associate"],
+      "domain": null, "difficulty": null, "orientation_tags": [], "related_courses": [], "est_hours": 2
+    }
+  }
+]

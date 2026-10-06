@@ -1,0 +1,174 @@
+{
+  "_note": "Engine fixture. E2 (worked examples) runs against this file, not live data. Authored so PRD section 9 Learner A and Learner B reproduce, including Learner B: AI Builder fit 94 (B 100, R 100, C 100, P 70).",
+  "courses": [
+    {
+      "course_id": "AAI-L1", "title": "Applied AI Level 1", "level": 1, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "prompt_writing", "level_after": 2, "statement": "Write prompts that get useful first drafts from AI tools" },
+          { "skill_tag": "data_literacy", "level_after": 1, "statement": "Read AI-made charts and summaries with a critical eye" }
+        ],
+        "career_outcomes": ["ai_ops_associate", "bot_developer_lowcode"],
+        "domain": "ai_data", "difficulty": "foundation", "orientation_tags": ["analytical", "technical"],
+        "related_courses": ["AIRP-1"], "est_hours": 12
+      }
+    },
+    {
+      "course_id": "AAI-L2", "title": "Applied AI Level 2", "level": 2, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [{ "skill_tag": "prompt_writing", "min_level": 2 }, { "skill_tag": "data_literacy", "min_level": 2 }], "courses": [] },
+        "eligible_qualifications": { "levels": ["diploma_iti", "ug_in_progress", "ug_complete", "pg", "working"], "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "prompt_writing", "level_after": 3, "statement": "Use AI tools to prototype" },
+          { "skill_tag": "python_basics", "level_after": 1, "statement": "Run and adapt simple Python snippets inside AI tools" },
+          { "skill_tag": "bot_design", "level_after": 1, "statement": "Map a simple conversation flow" }
+        ],
+        "career_outcomes": ["bot_developer_lowcode", "ai_ops_associate"],
+        "domain": "ai_data", "difficulty": "intermediate", "orientation_tags": ["technical", "creative"],
+        "related_courses": ["SCBB"], "est_hours": 14
+      }
+    },
+    {
+      "course_id": "SCBB", "title": "Smart Chatbot Builder", "level": 3, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [{ "skill_tag": "prompt_writing", "min_level": 2 }, { "skill_tag": "bot_design", "min_level": 1 }], "courses": [] },
+        "eligible_qualifications": { "levels": ["diploma_iti", "ug_in_progress", "ug_complete", "pg", "working"], "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "bot_design", "level_after": 2, "statement": "Design a working chatbot flow" },
+          { "skill_tag": "bot_design", "level_after": 3, "statement": "Test a chatbot with real users and improve it" }
+        ],
+        "career_outcomes": ["bot_developer_lowcode"],
+        "domain": "lowcode_bots", "difficulty": "intermediate", "orientation_tags": ["creative", "people"],
+        "related_courses": [], "est_hours": 16
+      }
+    },
+    {
+      "course_id": "DATA-101", "title": "Data Literacy Essentials", "level": 1, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "data_literacy", "level_after": 2, "statement": "Build a chart in a spreadsheet and say what it shows" },
+          { "skill_tag": "spreadsheet", "level_after": 2, "statement": "Clean and organise data in a spreadsheet" }
+        ],
+        "career_outcomes": ["data_assistant", "ai_ops_associate"],
+        "domain": "ai_data", "difficulty": "foundation", "orientation_tags": ["analytical"],
+        "related_courses": ["AIRP-2"], "est_hours": 10
+      }
+    },
+    {
+      "course_id": "AIRP-1", "title": "AI at Work", "level": 2, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [{ "skill_tag": "prompt_writing", "min_level": 2 }], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "prompt_writing", "level_after": 3, "statement": "Use AI assistants to draft, summarise and plan everyday work" },
+          { "skill_tag": "written_comm", "level_after": 2, "statement": "Turn AI drafts into clear workplace writing" }
+        ],
+        "career_outcomes": ["ai_ops_associate", "customer_success_executive"],
+        "domain": "business", "difficulty": "intermediate", "orientation_tags": ["analytical", "communication"],
+        "related_courses": ["AAI-L1"], "est_hours": 10
+      }
+    },
+    {
+      "course_id": "AIRP-2", "title": "AI for Operations", "level": 2, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [{ "skill_tag": "data_literacy", "min_level": 1 }], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "data_literacy", "level_after": 2, "statement": "Track team work with simple AI-assisted reports" },
+          { "skill_tag": "spreadsheet", "level_after": 2, "statement": "Automate routine spreadsheet tasks with AI" }
+        ],
+        "career_outcomes": ["ai_ops_associate", "data_assistant"],
+        "domain": "business", "difficulty": "intermediate", "orientation_tags": ["analytical", "people"],
+        "related_courses": ["DATA-101"], "est_hours": 12
+      }
+    },
+    {
+      "course_id": "WC-101", "title": "Business Writing with AI", "level": 1, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "written_comm", "level_after": 2, "statement": "Write clear emails and messages with AI support" },
+          { "skill_tag": "prompt_writing", "level_after": 2, "statement": "Ask AI for a first draft and make it your own" }
+        ],
+        "career_outcomes": ["customer_success_executive", "ai_ops_associate"],
+        "domain": "communication", "difficulty": "foundation", "orientation_tags": ["communication", "creative"],
+        "related_courses": ["AIRP-1"], "est_hours": 8
+      }
+    },
+    {
+      "course_id": "WC-102", "title": "Speaking with Confidence", "level": 1, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "spoken_comm", "level_after": 2, "statement": "Explain an idea clearly in a short meeting" }
+        ],
+        "career_outcomes": ["customer_success_executive"],
+        "domain": "communication", "difficulty": "foundation", "orientation_tags": ["communication", "people"],
+        "related_courses": [], "est_hours": 8
+      }
+    },
+    {
+      "course_id": "WC-103", "title": "Customer Conversations with AI", "level": 2, "internal_only": false,
+      "meta": {
+        "prerequisites": { "skills": [{ "skill_tag": "written_comm", "min_level": 2 }, { "skill_tag": "spoken_comm", "min_level": 1 }], "courses": [] },
+        "eligible_qualifications": { "levels": "any", "disciplines": "any" },
+        "learning_outcomes": [
+          { "skill_tag": "spoken_comm", "level_after": 3, "statement": "Handle a customer conversation from question to resolution" },
+          { "skill_tag": "written_comm", "level_after": 3, "statement": "Write customer replies that are clear and kind" }
+        ],
+        "career_outcomes": ["customer_success_executive"],
+        "domain": "communication", "difficulty": "intermediate", "orientation_tags": ["people", "communication"],
+        "related_courses": ["WC-101"], "est_hours": 10
+      }
+    }
+  ],
+  "pathways": [
+    {
+      "pathway_id": "pw_ai_builder", "name": "AI Builder",
+      "courses": [
+        { "course_id": "AAI-L1", "required": true },
+        { "course_id": "AAI-L2", "required": true },
+        { "course_id": "SCBB", "required": true }
+      ],
+      "meta": {
+        "career_outcomes": ["bot_developer_lowcode"],
+        "target_learner": { "learner_types": ["college", "on_the_job"], "levels": ["diploma_iti", "ug_in_progress", "ug_complete", "pg", "working"], "disciplines": ["engineering_it", "science"] },
+        "foundation_route": ["DATA-101"], "is_default": false,
+        "tagline": "Build working AI tools and chatbots."
+      }
+    },
+    {
+      "pathway_id": "pw_ai_ready", "name": "AI-Ready Professional",
+      "courses": [
+        { "course_id": "AIRP-1", "required": true },
+        { "course_id": "AIRP-2", "required": true }
+      ],
+      "meta": {
+        "career_outcomes": ["ai_ops_associate", "customer_success_executive", "data_assistant"],
+        "target_learner": { "learner_types": ["college", "on_the_job"], "levels": "any", "disciplines": "any" },
+        "foundation_route": ["AAI-L1"], "is_default": false,
+        "tagline": "Broader AI skills for any role."
+      }
+    },
+    {
+      "pathway_id": "pw_workplace_comm", "name": "Workplace Communication",
+      "courses": [
+        { "course_id": "WC-101", "required": true },
+        { "course_id": "WC-102", "required": true },
+        { "course_id": "WC-103", "required": true }
+      ],
+      "meta": {
+        "career_outcomes": ["customer_success_executive"],
+        "target_learner": { "learner_types": ["college", "on_the_job"], "levels": "any", "disciplines": ["arts_humanities", "commerce", "science", "management", "vocational", "other"] },
+        "foundation_route": [], "is_default": true,
+        "tagline": "Write and speak clearly at work, with AI as your helper."
+      }
+    }
+  ]
+}

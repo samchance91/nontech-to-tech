@@ -1,0 +1,1055 @@
+{
+ "_note": "Placeholder items. The owner will replace them. Original wording, not copied from O*NET/IPIP; psychometric review pending.",
+ "learner_details": [
+  {
+   "item_id": "A_qualification",
+   "block": "A",
+   "type": "select",
+   "prompt": "What is your highest qualification so far?",
+   "options": {
+    "taxonomy": "qualification_level"
+   },
+   "scoring_key": {
+    "attribute": "qualification_level"
+   },
+   "prefill": "qualification_level",
+   "part": "learner_details",
+   "position": 1,
+   "status": "active"
+  },
+  {
+   "item_id": "A_discipline",
+   "block": "A",
+   "type": "select",
+   "prompt": "What did you study (degree, stream or discipline)?",
+   "options": {
+    "taxonomy": "discipline"
+   },
+   "scoring_key": {
+    "attribute": "discipline"
+   },
+   "prefill": "discipline",
+   "part": "learner_details",
+   "position": 2,
+   "status": "active"
+  },
+  {
+   "item_id": "A_year",
+   "block": "A",
+   "type": "select",
+   "prompt": "Which year are you in?",
+   "options": {
+    "choices": [
+     [
+      "y1",
+      "First year"
+     ],
+     [
+      "y2",
+      "Second year"
+     ],
+     [
+      "y3",
+      "Third year"
+     ],
+     [
+      "final",
+      "Final year"
+     ],
+     [
+      "done",
+      "Finished studying"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "attribute": "year_or_stage"
+   },
+   "show_if": {
+    "learner_type": [
+     "college"
+    ]
+   },
+   "prefill": "year_or_stage",
+   "part": "learner_details",
+   "position": 3,
+   "status": "active"
+  },
+  {
+   "item_id": "B_learner_type",
+   "block": "B",
+   "type": "select",
+   "prompt": "Which describes you best right now?",
+   "options": {
+    "taxonomy": "learner_type"
+   },
+   "scoring_key": {
+    "attribute": "learner_type"
+   },
+   "prefill": "learner_type",
+   "part": "learner_details",
+   "position": 4,
+   "status": "active"
+  },
+  {
+   "item_id": "B_work_college",
+   "block": "B",
+   "type": "select",
+   "prompt": "Are you doing any work alongside your studies?",
+   "options": {
+    "choices": [
+     [
+      "none",
+      "Not yet"
+     ],
+     [
+      "internship",
+      "An internship"
+     ],
+     [
+      "apprenticeship",
+      "An apprenticeship"
+     ],
+     [
+      "part_time",
+      "Part-time work"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "attribute": "work_status"
+   },
+   "show_if": {
+    "learner_type": [
+     "college"
+    ]
+   },
+   "part": "learner_details",
+   "position": 5,
+   "status": "active"
+  },
+  {
+   "item_id": "B_role",
+   "block": "B",
+   "type": "select",
+   "prompt": "What kind of work do you do?",
+   "options": {
+    "choices": [
+     [
+      "operations",
+      "Operations or admin"
+     ],
+     [
+      "sales",
+      "Sales"
+     ],
+     [
+      "support",
+      "Customer support"
+     ],
+     [
+      "technical",
+      "Technical or IT"
+     ],
+     [
+      "other",
+      "Something else"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "attribute": "work_role"
+   },
+   "show_if": {
+    "learner_type": [
+     "on_the_job"
+    ]
+   },
+   "part": "learner_details",
+   "position": 6,
+   "status": "active"
+  },
+  {
+   "item_id": "B_stage",
+   "block": "B",
+   "type": "select",
+   "prompt": "Where are you in your career?",
+   "options": {
+    "taxonomy": "career_stage"
+   },
+   "scoring_key": {
+    "attribute": "career_stage"
+   },
+   "part": "learner_details",
+   "position": 7,
+   "status": "active"
+  },
+  {
+   "item_id": "C_tools",
+   "block": "C",
+   "type": "multi_select",
+   "prompt": "Which of these have you used? Pick all that apply.",
+   "options": {
+    "choices": [
+     [
+      "spreadsheet_app",
+      "A spreadsheet app (Excel, Google Sheets)"
+     ],
+     [
+      "ai_chat",
+      "An AI chatbot (ChatGPT, Gemini)"
+     ],
+     [
+      "slides",
+      "A slides app"
+     ],
+     [
+      "code_editor",
+      "A code editor"
+     ],
+     [
+      "no_code",
+      "A no-code app builder"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "attribute": "tools_used"
+   },
+   "part": "learner_details",
+   "position": 8,
+   "status": "active"
+  },
+  {
+   "item_id": "C_skill",
+   "block": "C",
+   "type": "can_do",
+   "prompt": "Pick the statement that is most true for you.",
+   "options": {
+    "source": "skill_statement",
+    "generated_per": "live_catalogue_skill_tag"
+   },
+   "scoring_key": {
+    "attribute": "skill_levels"
+   },
+   "part": "learner_details",
+   "position": 9,
+   "status": "active"
+  },
+  {
+   "item_id": "D_objective",
+   "block": "D",
+   "type": "select",
+   "prompt": "What do you most want from this learning?",
+   "options": {
+    "taxonomy": "learning_objective"
+   },
+   "scoring_key": {
+    "attribute": "learning_objective"
+   },
+   "part": "learner_details",
+   "position": 10,
+   "status": "active"
+  },
+  {
+   "item_id": "D_goal_1",
+   "block": "D",
+   "type": "select",
+   "prompt": "Which role would you most like to build toward?",
+   "options": {
+    "taxonomy": "career_outcome"
+   },
+   "scoring_key": {
+    "attribute": "career_goals",
+    "index": 0
+   },
+   "part": "learner_details",
+   "position": 11,
+   "status": "active"
+  },
+  {
+   "item_id": "D_goal_2",
+   "block": "D",
+   "type": "select",
+   "prompt": "Any second role you are curious about? (optional)",
+   "options": {
+    "taxonomy": "career_outcome",
+    "optional": true
+   },
+   "scoring_key": {
+    "attribute": "career_goals",
+    "index": 1
+   },
+   "part": "learner_details",
+   "position": 12,
+   "status": "active"
+  },
+  {
+   "item_id": "E_hours",
+   "block": "E",
+   "type": "select",
+   "prompt": "How much time can you give each week?",
+   "options": {
+    "taxonomy": "hours_band"
+   },
+   "scoring_key": {
+    "attribute": "constraints.hours_band"
+   },
+   "part": "learner_details",
+   "position": 13,
+   "status": "active"
+  },
+  {
+   "item_id": "E_device",
+   "block": "E",
+   "type": "select",
+   "prompt": "What will you mostly learn on?",
+   "options": {
+    "taxonomy": "device"
+   },
+   "scoring_key": {
+    "attribute": "constraints.device"
+   },
+   "part": "learner_details",
+   "position": 14,
+   "status": "active"
+  },
+  {
+   "item_id": "E_language",
+   "block": "E",
+   "type": "select",
+   "prompt": "Which language do you prefer to learn in?",
+   "options": {
+    "taxonomy": "language"
+   },
+   "scoring_key": {
+    "attribute": "constraints.language"
+   },
+   "part": "learner_details",
+   "position": 15,
+   "status": "active"
+  }
+ ],
+ "psychometric": [
+  {
+   "item_id": "R01",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Setting up and fixing a team's laptops and devices?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "realistic"
+   },
+   "part": "psychometric",
+   "position": 1,
+   "status": "active"
+  },
+  {
+   "item_id": "R02",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Assembling equipment by following a diagram?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "realistic"
+   },
+   "part": "psychometric",
+   "position": 2,
+   "status": "active"
+  },
+  {
+   "item_id": "R03",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Working out why a report's numbers don't add up?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "investigative"
+   },
+   "part": "psychometric",
+   "position": 3,
+   "status": "active"
+  },
+  {
+   "item_id": "R04",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Testing which of two ideas works better?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "investigative"
+   },
+   "part": "psychometric",
+   "position": 4,
+   "status": "active"
+  },
+  {
+   "item_id": "R05",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Designing a poster or a short video?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "artistic"
+   },
+   "part": "psychometric",
+   "position": 5,
+   "status": "active"
+  },
+  {
+   "item_id": "R06",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Writing a story or a script?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "artistic"
+   },
+   "part": "psychometric",
+   "position": 6,
+   "status": "active"
+  },
+  {
+   "item_id": "R07",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Helping a new colleague settle in?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "social"
+   },
+   "part": "psychometric",
+   "position": 7,
+   "status": "active"
+  },
+  {
+   "item_id": "R08",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Explaining something to someone until they get it?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "social"
+   },
+   "part": "psychometric",
+   "position": 8,
+   "status": "active"
+  },
+  {
+   "item_id": "R09",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Convincing a group to try your plan?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "enterprising"
+   },
+   "part": "psychometric",
+   "position": 9,
+   "status": "active"
+  },
+  {
+   "item_id": "AC1",
+   "block": "attention",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Working out why a report's numbers don't add up?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "repeat_of": "R03"
+   },
+   "part": "psychometric",
+   "position": 10,
+   "status": "active"
+  },
+  {
+   "item_id": "R10",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Leading a small project to a deadline?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "enterprising"
+   },
+   "part": "psychometric",
+   "position": 11,
+   "status": "active"
+  },
+  {
+   "item_id": "R11",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Keeping records neat and up to date?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "conventional"
+   },
+   "part": "psychometric",
+   "position": 12,
+   "status": "active"
+  },
+  {
+   "item_id": "R12",
+   "block": "riasec",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Following a checklist so nothing is missed?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "riasec": "conventional"
+   },
+   "part": "psychometric",
+   "position": 13,
+   "status": "active"
+  },
+  {
+   "item_id": "O01",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "Your team's weekly report has an error just before it's due. You...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "check the numbers line by line"
+     ],
+     [
+      "creative",
+      "redesign the report so errors are easier to spot"
+     ],
+     [
+      "communication",
+      "tell everyone affected straight away"
+     ],
+     [
+      "technical",
+      "fix the formula or tool that caused it"
+     ],
+     [
+      "people",
+      "ask who is stuck and help them"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 14,
+   "status": "active"
+  },
+  {
+   "item_id": "O02",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "A new tool arrives at work. You first...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "read how it works and test it"
+     ],
+     [
+      "creative",
+      "imagine new uses for it"
+     ],
+     [
+      "communication",
+      "explain it to your team"
+     ],
+     [
+      "technical",
+      "set it up and try every setting"
+     ],
+     [
+      "people",
+      "help colleagues get comfortable with it"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 15,
+   "status": "active"
+  },
+  {
+   "item_id": "O03",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "In a group project you usually...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "research and analyse"
+     ],
+     [
+      "creative",
+      "come up with fresh ideas"
+     ],
+     [
+      "communication",
+      "present and write it up"
+     ],
+     [
+      "technical",
+      "build the working part"
+     ],
+     [
+      "people",
+      "keep the team together"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 16,
+   "status": "active"
+  },
+  {
+   "item_id": "O04",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "A customer is unhappy. You...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "find the root cause in the data"
+     ],
+     [
+      "creative",
+      "suggest a creative fix"
+     ],
+     [
+      "communication",
+      "talk it through calmly"
+     ],
+     [
+      "technical",
+      "fix the technical problem"
+     ],
+     [
+      "people",
+      "make sure they feel heard"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 17,
+   "status": "active"
+  },
+  {
+   "item_id": "O05",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "You have a free afternoon to learn something. You pick...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "a puzzle or data challenge"
+     ],
+     [
+      "creative",
+      "drawing, music or writing"
+     ],
+     [
+      "communication",
+      "a public-speaking class"
+     ],
+     [
+      "technical",
+      "taking apart a gadget or coding"
+     ],
+     [
+      "people",
+      "volunteering"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 18,
+   "status": "active"
+  },
+  {
+   "item_id": "O06",
+   "block": "orientation",
+   "type": "scenario",
+   "prompt": "Friends come to you for...",
+   "options": {
+    "choices": [
+     [
+      "analytical",
+      "working things out logically"
+     ],
+     [
+      "creative",
+      "original ideas"
+     ],
+     [
+      "communication",
+      "the right words to say"
+     ],
+     [
+      "technical",
+      "fixing their phone or laptop"
+     ],
+     [
+      "people",
+      "a listening ear"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "orientation_by_option": true
+   },
+   "part": "psychometric",
+   "position": 19,
+   "status": "active"
+  },
+  {
+   "item_id": "AC2",
+   "block": "attention",
+   "type": "likert5",
+   "prompt": "How much would you enjoy: Helping a new colleague settle in?",
+   "options": {
+    "choices": [
+     [
+      "1",
+      "Not at all"
+     ],
+     [
+      "2",
+      "A little"
+     ],
+     [
+      "3",
+      "Somewhat"
+     ],
+     [
+      "4",
+      "Quite a lot"
+     ],
+     [
+      "5",
+      "Very much"
+     ]
+    ]
+   },
+   "scoring_key": {
+    "repeat_of": "R07"
+   },
+   "part": "psychometric",
+   "position": 20,
+   "status": "active"
+  }
+ ]
+}

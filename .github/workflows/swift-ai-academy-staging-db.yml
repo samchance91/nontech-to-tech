@@ -1,0 +1,43 @@
+name: Swift AI Academy · migrate and seed staging
+
+# Manual: Actions tab > this workflow > Run workflow. Applies supabase/migrations to the staging
+# Supabase project, then runs the idempotent seed.
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Run npm run seed after migrating"
+        type: boolean
+        default: true
+
+defaults:
+  run:
+    working-directory: swift-ai-academy
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Apply migrations
+        run: supabase db push --db-url "${{ secrets.STAGING_DATABASE_URL }}" --include-all --yes
+      - uses: actions/setup-node@v4
+        if: ${{ inputs.seed }}
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: swift-ai-academy/package-lock.json
+      - if: ${{ inputs.seed }}
+        run: npm ci
+      - name: Seed
+        if: ${{ inputs.seed }}
+        run: npm run seed
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SUPABASE_SERVICE_ROLE_KEY }}
+          SEED_BACK_OFFICE_PASSWORD: ${{ secrets.STAGING_BACK_OFFICE_PASSWORD }}

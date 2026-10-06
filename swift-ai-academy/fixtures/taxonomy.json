@@ -1,0 +1,16 @@
+{
+  "qualification_level": [["class_12","Class 12"],["diploma_iti","Diploma / ITI"],["ug_in_progress","UG in progress"],["ug_complete","UG complete"],["pg","PG"],["working","Working"]],
+  "discipline": [["arts_humanities","Arts / Humanities"],["commerce","Commerce"],["science","Science"],["engineering_it","Engineering / IT"],["management","Management"],["vocational","Vocational"],["other","Other"]],
+  "skill_tag": [["prompt_writing","prompt writing"],["data_literacy","data skills"],["spreadsheet","spreadsheets"],["python_basics","Python basics"],["written_comm","written communication"],["spoken_comm","spoken communication"],["bot_design","chatbot design"]],
+  "domain": [["ai_data","AI and data"],["communication","Communication"],["lowcode_bots","Low-code / bots"],["business","Business"]],
+  "orientation": [["analytical","Analytical"],["creative","Creative"],["communication","Communication"],["technical","Technical"],["people","People"]],
+  "career_outcome": [["ai_ops_associate","AI-enabled operations associate"],["customer_success_executive","Customer success executive"],["bot_developer_lowcode","Bot developer (low-code)"],["data_assistant","Data assistant"]],
+  "difficulty": [["foundation","Foundation"],["intermediate","Intermediate"],["advanced","Advanced"]],
+  "learner_type": [["college","College student"],["on_the_job","Working (employed or apprentice)"]],
+  "career_stage": [["student","Student"],["fresher","Starting out"],["early_career","Early career (1-3 years)"],["mid_career","Mid career (3+ years)"]],
+  "hours_band": [["lt_3","Under 3 hours a week"],["h3_5","3-5 hours a week"],["h6_10","6-10 hours a week"],["gt_10","More than 10 hours a week"]],
+  "device": [["mobile","Mostly my phone"],["laptop","A laptop or desktop"],["shared","A shared computer"]],
+  "language": [["en","English"],["hi","Hindi"]],
+  "learning_objective": [["start_career","Start my career"],["grow_role","Grow in my current role"],["switch_field","Move into a new field"],["build_skill","Build a specific skill"]],
+  "riasec": [["realistic","building and fixing things"],["investigative","investigating and solving problems"],["artistic","creating and expressing ideas"],["social","helping and working with people"],["enterprising","persuading and leading"],["conventional","organising information"]]
+}
